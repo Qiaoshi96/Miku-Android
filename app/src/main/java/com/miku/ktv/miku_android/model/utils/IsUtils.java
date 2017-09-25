@@ -45,8 +45,12 @@ public class IsUtils {
     }
 
     //吐司
-    public static void Tos(Context context, String s){
+    public static void showShort(Context context, String s){
         Toast.makeText(context,s, Toast.LENGTH_SHORT).show();
+    }
+
+    public static void showLong(Context context, String s){
+        Toast.makeText(context,s, Toast.LENGTH_LONG).show();
     }
 
     public static boolean IsSex(String sex){

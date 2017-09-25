@@ -2,12 +2,13 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_check_code"
+    android:id="@+id/activity_login_check"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.miku.ktv.miku_android.view.activity.CheckCodeActivity">
+    tools:context="com.miku.ktv.miku_android.view.activity.LoginCheckActivity">
 
     <LinearLayout
+        android:id="@+id/LC_Back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -58,7 +59,7 @@
         >
 
         <EditText
-            android:id="@+id/Edit1"
+            android:id="@+id/LC_Edit1"
             android:layout_width="wrap_content"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -69,7 +70,7 @@
             android:gravity="center"
             />
         <EditText
-            android:id="@+id/Edit2"
+            android:id="@+id/LC_Edit2"
             android:layout_width="wrap_content"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -80,7 +81,7 @@
             android:gravity="center"
             />
         <EditText
-            android:id="@+id/Edit3"
+            android:id="@+id/LC_Edit3"
             android:layout_width="wrap_content"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -91,7 +92,7 @@
             android:gravity="center"
             />
         <EditText
-            android:id="@+id/Edit4"
+            android:id="@+id/LC_Edit4"
             android:layout_width="wrap_content"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -102,7 +103,7 @@
             android:gravity="center"
             />
         <EditText
-            android:id="@+id/Edit5"
+            android:id="@+id/LC_Edit5"
             android:layout_width="wrap_content"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -113,7 +114,7 @@
             android:gravity="center"
             />
         <EditText
-            android:id="@+id/Edit6"
+            android:id="@+id/LC_Edit6"
             android:layout_width="wrap_content"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -127,7 +128,7 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/sendAgain"
+        android:id="@+id/LC_sendAgain"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="重新发送验证码"

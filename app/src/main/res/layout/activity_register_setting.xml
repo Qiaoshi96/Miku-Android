@@ -5,8 +5,30 @@
     android:id="@+id/activity_register"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.miku.ktv.miku_android.view.activity.RegisterActivity">
+    tools:context="com.miku.ktv.miku_android.view.activity.RegisterSettingActivity">
 
+    <LinearLayout
+        android:id="@+id/RS_Back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@mipmap/back"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="12dp"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="返回"
+            android:textSize="17sp"
+            android:layout_marginTop="11dp"
+            />
+    </LinearLayout>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -16,6 +38,7 @@
         android:gravity="center"
         >
         <LinearLayout
+            android:id="@+id/RS_LinearLayout_Head"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -47,6 +70,7 @@
         </LinearLayout>
 
         <EditText
+            android:id="@+id/RS_EditText_Nick"
             android:layout_width="170dp"
             android:layout_height="wrap_content"
             android:hint="请输入昵称"
@@ -56,17 +80,20 @@
             />
 
         <RadioGroup
+            android:id="@+id/RS_RadioGroup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="13dp"
             >
             <TextView
+                android:id="@+id/RS_TextView_Man"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="男"
                 />
             <RadioButton
+                android:id="@+id/RS_RadioButton_Man"
                 android:layout_width="15dp"
                 android:layout_height="15dp"
                 android:layout_marginLeft="3dp"
@@ -74,12 +101,14 @@
                 android:button="@null"
                 />
             <TextView
+                android:id="@+id/RS_TextView_WoMan"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="女"
                 android:layout_marginLeft="30dp"
                 />
             <RadioButton
+                android:id="@+id/RS_RadioButton_WoMan"
                 android:layout_width="15dp"
                 android:layout_height="15dp"
                 android:layout_marginLeft="3dp"
@@ -89,6 +118,7 @@
 
         </RadioGroup>
         <TextView
+            android:id="@+id/RS_TextView_Register"
             android:layout_width="150dp"
             android:layout_height="40dp"
             android:text="注册"

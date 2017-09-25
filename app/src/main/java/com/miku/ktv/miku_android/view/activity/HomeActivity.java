@@ -78,12 +78,12 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onClick(View v) {
                 if (TextUtils.isEmpty(dialog_editText.getText().toString())){
-                    IsUtils.Tos(HomeActivity.this,"请输入房间名");
+                    IsUtils.showShort(HomeActivity.this,"请输入房间名");
                 }else {
                     editor.putString("roomname",dialog_editText.getText().toString());
                     editor.commit();
                     startActivity(new Intent(HomeActivity.this,KTVActivity.class));
-                    IsUtils.Tos(HomeActivity.this,"创建房间成功");
+                    IsUtils.showShort(HomeActivity.this,"创建房间成功");
                 }
 
             }
