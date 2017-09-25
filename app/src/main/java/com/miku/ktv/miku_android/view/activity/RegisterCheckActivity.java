@@ -40,7 +40,7 @@ public class RegisterCheckActivity extends AppCompatActivity implements IRegiste
         setContentView(R.layout.activity_register_check);
 
         sp = getSharedPreferences("config", MODE_PRIVATE);
-
+        //
         initView();
         initListener();
         bindPresenter();
