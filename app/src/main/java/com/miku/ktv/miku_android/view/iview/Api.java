@@ -7,8 +7,8 @@ import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.QueryMap;
-import retrofit2.http.Url;
 
 /**
  * Created by 焦帆 on 2017/9/22.
@@ -16,11 +16,11 @@ import retrofit2.http.Url;
 
 public interface Api {
 
-    @GET()
-    Observable<String> get(@Url String url, @QueryMap Map<String, String> map);
+    @GET("verify/{sign}")
+    Observable<String> get(@Path("sign") String sign, @QueryMap Map<String, String> map);
 
     @FormUrlEncoded
-    @POST()
-    Observable<String> post(@Url String url, @FieldMap Map<String, String> map);
+    @POST("verify/{sign}")
+    Observable<String> post(@Path("sign") String sign, @FieldMap Map<String, String> map);
 
 }

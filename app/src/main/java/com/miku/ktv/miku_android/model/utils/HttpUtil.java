@@ -25,18 +25,18 @@ public class HttpUtil {
             .build();
 
     //get封装
-    public static void get(String url, Map<String, String> map, Consumer<String> onNext, Consumer<Throwable> onError) {
+    public static void get(String sign, Map<String, String> map, Consumer<String> onNext, Consumer<Throwable> onError) {
         Api api = retrofit.create(Api.class);
-        Observable<String> observable = api.get(url,map);
+        Observable<String> observable = api.get(sign,map);
         observable.observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(onNext, onError);
     }
 
     //post封装
-    public static void post(String url, Map<String, String> map,Consumer<String> onNext, Consumer<Throwable> onError) {
+    public static void post(String sign, Map<String, String> map,Consumer<String> onNext, Consumer<Throwable> onError) {
         Api api = retrofit.create(Api.class);
-        Observable<String> observable = api.post(url,map);
+        Observable<String> observable = api.post(sign,map);
         observable.observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(onNext, onError);
