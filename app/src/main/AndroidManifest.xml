@@ -30,6 +30,7 @@
         </activity>
         <activity android:name=".view.activity.KTVActivity">
         </activity>
+        <activity android:name=".view.activity.SuggestionsActivity"/>
     </application>
 
 </manifest>
