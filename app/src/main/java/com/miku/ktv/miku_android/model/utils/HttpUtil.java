@@ -41,4 +41,12 @@ public class HttpUtil {
                 .subscribeOn(Schedulers.io())
                 .subscribe(onNext, onError);
     }
+    //post封装
+    public static void postInfo(String sign, Map<String, String> map,Consumer<String> onNext, Consumer<Throwable> onError) {
+        Api api = retrofit.create(Api.class);
+        Observable<String> observable = api.postInfo(sign,map);
+        observable.observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(onNext, onError);
+    }
 }

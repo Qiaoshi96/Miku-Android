@@ -41,4 +41,6 @@ dependencies {
     //okhttp
     compile 'com.squareup.okhttp3:okhttp:3.4.1'
     compile 'com.squareup.okhttp3:logging-interceptor:3.4.1'
+    //圆角的图片
+    compile 'de.hdodenhof:circleimageview:2.1.0'
 }

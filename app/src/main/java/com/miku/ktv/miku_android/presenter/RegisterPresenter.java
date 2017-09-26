@@ -33,6 +33,7 @@ public class RegisterPresenter extends BasePresenter<IBaseView> {
         }, new Consumer<Throwable>() {
             @Override
             public void accept(Throwable throwable) throws Exception {
+                getIBaseView().onError(throwable);
                 Log.e(TAG, "get-throwable:  "+throwable.toString());
             }
         });
@@ -52,6 +53,7 @@ public class RegisterPresenter extends BasePresenter<IBaseView> {
         }, new Consumer<Throwable>() {
             @Override
             public void accept(Throwable throwable) throws Exception {
+                getIBaseView().onError(throwable);
                 Log.e(TAG, "post-throwable:  "+throwable.toString());
             }
         });

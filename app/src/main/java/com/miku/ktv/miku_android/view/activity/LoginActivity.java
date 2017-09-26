@@ -25,7 +25,6 @@ import java.util.HashMap;
 public class LoginActivity extends AppCompatActivity implements IRegisterView<RegisterBean>,TextWatcher,View.OnClickListener {
 
     public static final String TAG="LoginActivity";
-
     private TextView login_textView_send;
     private EditText login_editText_phone;
     private RegisterPresenter presenter;

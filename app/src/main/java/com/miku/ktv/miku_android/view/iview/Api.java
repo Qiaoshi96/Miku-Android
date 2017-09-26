@@ -23,4 +23,8 @@ public interface Api {
     @POST("verify/{sign}")
     Observable<String> post(@Path("sign") String sign, @FieldMap Map<String, String> map);
 
+    @FormUrlEncoded
+    @POST("register/{sign}")
+    Observable<String> postInfo(@Path("sign") String sign, @FieldMap Map<String, String> map);
+
 }

@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="35dp"
+        android:layout_marginTop="50dp"
         android:gravity="center"
         >
         <LinearLayout
@@ -51,13 +51,13 @@
                 android:background="@drawable/shape_register_head"
                 android:gravity="center"
                 >
-                <ImageView
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
+                <com.miku.ktv.miku_android.view.custom.CircleImage
+                    android:id="@+id/RS_ImageView_Head"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
                     android:src="@mipmap/mine_titlebar_normal"
                     />
             </LinearLayout>
-
 
             <TextView
                 android:layout_width="wrap_content"
@@ -97,6 +97,7 @@
                 android:layout_width="15dp"
                 android:layout_height="15dp"
                 android:layout_marginLeft="3dp"
+                android:layout_marginTop="1dp"
                 android:background="@drawable/selector_register_checkbox"
                 android:button="@null"
                 />
@@ -112,6 +113,7 @@
                 android:layout_width="15dp"
                 android:layout_height="15dp"
                 android:layout_marginLeft="3dp"
+                android:layout_marginTop="1dp"
                 android:background="@drawable/selector_register_checkbox"
                 android:button="@null"
                 />

@@ -3,6 +3,7 @@ package com.miku.ktv.miku_android.view.activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -33,6 +34,9 @@ public class RegisterCodeActivity extends AppCompatActivity implements IRegister
     private TextView register_textView_phoneError;
     private TextView register_textView_send;
     private RegisterPresenter presenter;
+    private TextView dialogPhone;
+    private TextView dialogCancel;
+    private TextView dialogJustLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +82,37 @@ public class RegisterCodeActivity extends AppCompatActivity implements IRegister
             Toast.makeText(this,"验证码发送成功",Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, RegisterCheckActivity.class));
             Log.d(TAG, "onSuccess: "+registerBean.getMsg());
+        }else if(registerBean.getStatus()==4 &&registerBean.getMsg().equals("该用户已注册")){
+            IsUtils.showShort(this,"该用户已注册");
+            jumpDialog();
         }
+    }
+
+    private void jumpDialog() {
+        View dialogView=View.inflate(RegisterCodeActivity.this, R.layout.rc_dialog,null);
+
+        dialogPhone = (TextView) dialogView.findViewById(R.id.RC_Dialog_TV_phone);
+        dialogPhone.setText(register_editText_phone.getText().toString());
+
+        dialogCancel = (TextView) dialogView.findViewById(R.id.RC_Dialog_TV_Cancel);
+        dialogJustLogin = (TextView) dialogView.findViewById(R.id.RC_Dialog_TV_JustLogin);
+
+        final AlertDialog builder=new AlertDialog.Builder(RegisterCodeActivity.this).create();
+        builder.setView(dialogView);
+        builder.show();
+
+        dialogCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                builder.dismiss();
+            }
+        });
+        dialogJustLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(RegisterCodeActivity.this,LoginActivity.class));
+            }
+        });
     }
 
     @Override
@@ -88,6 +122,7 @@ public class RegisterCodeActivity extends AppCompatActivity implements IRegister
             Log.d(TAG, "onError: "+registerBean.getMsg());
         }
     }
+
 
     private void bindPresenter() {
         presenter = new RegisterPresenter();

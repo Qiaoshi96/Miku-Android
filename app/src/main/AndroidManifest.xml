@@ -3,6 +3,11 @@
           package="com.miku.ktv.miku_android">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- 往SDCard写入数据权限 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!--请求访问使用照相设备-->
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:name=".model.utils.MyApp"
@@ -11,25 +16,30 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".view.activity.HomeActivity">
+        <activity android:name=".view.activity.RegisterSettingActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".view.activity.RegisterActivity">
-        </activity>
+
         <activity
             android:name=".view.activity.LoginActivity"
             android:windowSoftInputMode="adjustResize|stateHidden"/>
         <activity
-            android:name=".view.activity.CheckCodeActivity"
+            android:name=".view.activity.LoginCheckActivity"
             android:windowSoftInputMode="adjustResize|stateHidden"/>
-        <activity android:name=".view.activity.MainActivity">
-        </activity>
-        <activity android:name=".view.activity.KTVActivity">
-        </activity>
+        <activity
+            android:name=".view.activity.RegisterCodeActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden"/>
+        <activity
+            android:name=".view.activity.RegisterCheckActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden"/>
+        <activity android:name=".view.activity.MainActivity"/>
+
+        <activity android:name=".view.activity.HomeActivity"/>
+        <activity android:name=".view.activity.KTVActivity"/>
         <activity android:name=".view.activity.SuggestionsActivity"/>
     </application>
 
