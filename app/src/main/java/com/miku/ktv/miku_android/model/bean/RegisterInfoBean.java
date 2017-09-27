@@ -7,7 +7,7 @@ package com.miku.ktv.miku_android.model.bean;
 public class RegisterInfoBean {
 
     /**
-     * body : {"phone":"17600772137","headline":"","sex":0,"nick":"123456","token":"2jOCdYb6xt4fnB3hgXco58TqfZvoGuJkARdvjpPamnkygEN7wryqh9UDlixlcweQ","create_time":1506416469,"avatar":null,"chat":true,"fullname":425035,"id":154}
+     * body :  {"phone":"17600772137","headline":"","sex":0,"nick":"123456","token":"2jOCdYb6xt4fnB3hgXco58TqfZvoGuJkARdvjpPamnkygEN7wryqh9UDlixlcweQ","create_time":1506416469,"avatar":null,"chat":true,"fullname":425035,"id":154}
      * status : 1
      * msg : success
      */
