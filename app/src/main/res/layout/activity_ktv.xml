@@ -103,25 +103,25 @@
             android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="0dp">
-            <View
+            <FrameLayout
                 android:background="#6098f4"
                 android:id="@+id/v1"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
-            <View
+            <FrameLayout
                 android:background="#01f20d"
                 android:id="@+id/v2"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
-            <View
+            <FrameLayout
                 android:background="#385f9f"
                 android:id="@+id/v3"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
-            <View
+            <FrameLayout
                 android:background="#e322c9"
                 android:id="@+id/v4"
                 android:layout_width="0dp"
@@ -133,25 +133,25 @@
             android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="0dp">
-            <View
+            <FrameLayout
                 android:id="@+id/v5"
                 android:background="#b74416"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
-            <View
+            <FrameLayout
                 android:id="@+id/v6"
                 android:background="#df9d0e"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
-            <View
+            <FrameLayout
                 android:id="@+id/v7"
                 android:background="#5a18de7c"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
-            <View
+            <FrameLayout
                 android:id="@+id/v8"
                 android:background="#60caed"
                 android:layout_width="0dp"
@@ -163,25 +163,25 @@
             android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="0dp">
-            <View
+            <FrameLayout
                 android:id="@+id/v9"
                 android:background="#a3842177"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
-            <View
+            <FrameLayout
                 android:id="@+id/v10"
                 android:background="#aee293e1"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
-            <View
+            <FrameLayout
                 android:id="@+id/v11"
                 android:background="#c3d7dd23"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
-            <View
+            <FrameLayout
                 android:id="@+id/v12"
                 android:background="#e34922"
                 android:layout_width="0dp"
