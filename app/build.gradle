@@ -43,4 +43,10 @@ dependencies {
     compile 'com.squareup.okhttp3:logging-interceptor:3.4.1'
     //圆角的图片
     compile 'de.hdodenhof:circleimageview:2.1.0'
+
+    compile fileTree(dir: 'libs', include: '*.jar')
+    // 基础模块
+    compile 'com.netease.nimlib:basesdk:4.2.0'
+    // 音视频模块(版本号必须和基础模块一样)
+    compile 'com.netease.nimlib:avchat:4.2.0'
 }
