@@ -37,4 +37,23 @@ public class RegisterInfoPresenter extends BasePresenter<IBaseView> {
             }
         });
     }
+
+    //post
+    public <T> void getRoom(Map<String, String> map, final Class<T> cla){
+        final String sign = "?timestamp="+ Constant.getTime()+"&sign="+ Constant.getSign();
+        HttpUtil.getRoom(sign, map, new Consumer<String>() {
+            @Override
+            public void accept(String s) throws Exception {
+                Log.e(TAG, "getRoom   "+s);
+                T t =Constant.GsonToBean(s, cla);
+                getIBaseView().onSuccess(t);
+            }
+        }, new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                getIBaseView().onError(throwable);
+                Log.e(TAG, "getRoom-throwable:  "+throwable.toString());
+            }
+        });
+    }
 }

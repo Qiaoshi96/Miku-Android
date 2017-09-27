@@ -11,6 +11,7 @@ import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -28,6 +29,7 @@ import com.miku.ktv.miku_android.view.iview.IRegisterInfoView;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 public class RegisterSettingActivity extends AppCompatActivity implements IRegisterInfoView<RegisterInfoBean>, View.OnClickListener {
 
@@ -79,9 +81,6 @@ public class RegisterSettingActivity extends AppCompatActivity implements IRegis
                     sexName=rs_textView_woMan.getText().toString();
                 }
 
-//                Integer转换成String
-//                Integer it = new Integer(10);
-//                String str = it.toString();
                 try {
                     it = Integer.parseInt(sexName);
                 } catch (NumberFormatException e) {
@@ -106,18 +105,23 @@ public class RegisterSettingActivity extends AppCompatActivity implements IRegis
                         .equals(getResources().getDrawable(R.mipmap.mine_titlebar_normal)
                                 .getConstantState())){
                     IsUtils.showShort(this,"请设置图片~");
-                }else if (TextUtils.isEmpty(rs_editText_nick.getText().toString())){
-                    IsUtils.showShort(this,"请输入昵称~");
-                }else if (rs_radioButton_man.isChecked() ==false && rs_radioButton_woMan.isChecked()==false){
-                    IsUtils.showShort(this,"请选择性别~");
+                }else {
+                    if (TextUtils.isEmpty(rs_editText_nick.getText().toString())){
+                        IsUtils.showShort(this,"请输入昵称~");
+                    }else {
+                        if (rs_radioButton_man.isChecked() ==false && rs_radioButton_woMan.isChecked()==false){
+                            IsUtils.showShort(this,"请选择性别~");
+                        }else {
+
+                            HashMap<String,String> map=new HashMap<>();
+                            map.put("phone",sp.getString("phoneEdit","null"));
+                            map.put("nick",rs_editText_nick.getText().toString());
+                            map.put("sex",it+"");
+                            infoPresenter.postInfo(map,RegisterInfoBean.class);
+
+                        }
+                    }
                 }
-
-
-//                HashMap<String,String> map=new HashMap<>();
-//                map.put("phone",sp.getString("phoneEdit","null"));
-//                map.put("nick",rs_editText_nick.getText().toString());
-//                map.put("sex",it+"");
-//                infoPresenter.postInfo(map,RegisterInfoBean.class);
                 break;
             //设置头像
             case R.id.RS_LinearLayout_Head:
@@ -155,12 +159,21 @@ public class RegisterSettingActivity extends AppCompatActivity implements IRegis
 
     @Override
     public void onSuccess(RegisterInfoBean registerInfoBean) {
-
+        if (registerInfoBean.getStatus()==1){
+            edit.putString("tokenKey",registerInfoBean.getBody().getToken());
+            edit.commit();
+            IsUtils.showShort(this,"注册成功");
+            startActivity(new Intent(this,HomeActivity.class));
+            finish();
+        }
     }
 
     @Override
     public void onError(RegisterInfoBean registerInfoBean) {
-
+        if (registerInfoBean.getStatus()!=1){
+            IsUtils.showShort(this,"注册失败");
+            Log.e(TAG,"onError  "+registerInfoBean.getMsg());
+        }
     }
 
     private void setDialog() {

@@ -49,4 +49,13 @@ public class HttpUtil {
                 .subscribeOn(Schedulers.io())
                 .subscribe(onNext, onError);
     }
+
+    //get封装
+    public static void getRoom(String sign, Map<String, String> map,Consumer<String> onNext, Consumer<Throwable> onError) {
+        Api api = retrofit.create(Api.class);
+        Observable<String> observable = api.getRoom(sign,map);
+        observable.observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(onNext, onError);
+    }
 }
