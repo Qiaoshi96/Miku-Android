@@ -52,6 +52,9 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.Home_ImageView_Add:
                 createRoom();
                 break;
+            case R.id.Home_ImageView_Menu:
+                startActivity(new Intent(this,PersonalActivity.class));
+                break;
 
             default:
                 break;
@@ -111,7 +114,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         String[] from = {"text"};
         int[] to = {R.id.Item_Home_TextView_Num };
         simp_ada = new SimpleAdapter(this, arr_data, R.layout.item_home_listview,from,to);
-
         // 加载适配器
         home_lv.setAdapter(simp_ada);
     }

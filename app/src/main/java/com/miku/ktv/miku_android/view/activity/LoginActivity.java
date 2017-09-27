@@ -12,26 +12,25 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.miku.ktv.miku_android.R;
-import com.miku.ktv.miku_android.model.bean.RegisterBean;
+import com.miku.ktv.miku_android.model.bean.LoginCodeBean;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
-import com.miku.ktv.miku_android.presenter.RegisterPresenter;
+import com.miku.ktv.miku_android.presenter.LoginCodePresenter;
 import com.miku.ktv.miku_android.view.iview.IRegisterView;
 
 import java.util.HashMap;
 
-public class LoginActivity extends AppCompatActivity implements IRegisterView<RegisterBean>,TextWatcher,View.OnClickListener {
+public class LoginActivity extends AppCompatActivity implements IRegisterView<LoginCodeBean>,TextWatcher,View.OnClickListener {
 
     public static final String TAG="LoginActivity";
     private TextView login_textView_send;
     private EditText login_editText_phone;
-    private RegisterPresenter presenter;
     private SharedPreferences sp;
     private SharedPreferences.Editor edit;
     private TextView login_textView_phoneError;
     private LinearLayout login_linearLayout_back;
+    private LoginCodePresenter loginCodePresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,8 +45,8 @@ public class LoginActivity extends AppCompatActivity implements IRegisterView<Re
     }
 
     private void bindPresenter() {
-        presenter = new RegisterPresenter();
-        presenter.attach(this);
+        loginCodePresenter = new LoginCodePresenter();
+        loginCodePresenter.attach(this);
     }
 
     private void initListener() {
@@ -76,7 +75,7 @@ public class LoginActivity extends AppCompatActivity implements IRegisterView<Re
                     if (IsUtils.validatePhoneNumber(login_editText_phone.getText().toString())){
                         HashMap<String,String> map=new HashMap<>();
                         map.put("phone",login_editText_phone.getText().toString());
-                        presenter.post(map, RegisterBean.class);
+                        loginCodePresenter.getSms_login(map, LoginCodeBean.class);
                     }else {
                         login_textView_phoneError.setVisibility(View.VISIBLE);
                     }
@@ -89,21 +88,24 @@ public class LoginActivity extends AppCompatActivity implements IRegisterView<Re
     }
 
     @Override
-    public void onSuccess(RegisterBean registerBean) {
-        if (registerBean.getStatus()==1){
-            edit.putString("phoneEdit",login_editText_phone.getText().toString());
-            edit.commit();
-            Toast.makeText(this,"验证码发送成功",Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(this, LoginCheckActivity.class));
-            Log.d(TAG, "onSuccess: "+registerBean.getMsg());
+    public void onSuccess(LoginCodeBean loginCodeBean) {
+        if (loginCodeBean.getStatus()==7 && loginCodeBean.getMsg().equals("user not exist")){
+            IsUtils.showShort(this,"该手机号还没注册过");
+        }else {
+           if (loginCodeBean.getStatus()==1){
+               edit.putString("loginPhoneEdit",login_editText_phone.getText().toString());
+               edit.commit();
+               IsUtils.showShort(this,"验证码发送成功");
+               startActivity(new Intent(this,LoginCheckActivity.class));
+           }
         }
     }
 
     @Override
-    public void onError(RegisterBean registerBean) {
-        if (registerBean.getStatus()!=1){
-            Toast.makeText(this,"验证码发送失败",Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "onError: "+registerBean.getMsg());
+    public void onError(LoginCodeBean loginCodeBean) {
+        if (loginCodeBean.getStatus()!=1){
+            IsUtils.showShort(this,"验证码发送失败");
+            Log.e(TAG, "onError: "+loginCodeBean.getMsg());
         }
     }
 

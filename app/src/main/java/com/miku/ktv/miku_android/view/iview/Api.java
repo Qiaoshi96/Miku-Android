@@ -27,6 +27,13 @@ public interface Api {
     @POST("register/{sign}")
     Observable<String> postInfo(@Path("sign") String sign, @FieldMap Map<String, String> map);
 
+    @GET("sms_login/{sign}")
+    Observable<String> getSms_login(@Path("sign") String sign, @QueryMap Map<String, String> map);
+
+    @FormUrlEncoded
+    @POST("sms_login/{sign}")
+    Observable<String> postSms_login(@Path("sign") String sign, @FieldMap Map<String, String> map);
+
 
     @GET("room/<room_id>/{sign}")
     Observable<String> getRoom(@Path("sign") String sign, @QueryMap Map<String, String> map);

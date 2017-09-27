@@ -120,6 +120,7 @@ public class RegisterCheckActivity extends AppCompatActivity implements IRegiste
                 finish();
                 break;
             case R.id.RC_sendAgain:
+                /////////////////////////////////////////////////////
                 HashMap<String, String> map = new HashMap<>();
                 map.put("phone", sp.getString("phoneEdit", "null"));
                 presenter.post(map, CheckBean.class);

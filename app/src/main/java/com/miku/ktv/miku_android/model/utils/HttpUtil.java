@@ -41,10 +41,28 @@ public class HttpUtil {
                 .subscribeOn(Schedulers.io())
                 .subscribe(onNext, onError);
     }
-    //post封装
+    //postInfo
     public static void postInfo(String sign, Map<String, String> map,Consumer<String> onNext, Consumer<Throwable> onError) {
         Api api = retrofit.create(Api.class);
         Observable<String> observable = api.postInfo(sign,map);
+        observable.observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(onNext, onError);
+    }
+
+    //getSms_login
+    public static void getSms_login(String sign, Map<String, String> map,Consumer<String> onNext, Consumer<Throwable> onError) {
+        Api api = retrofit.create(Api.class);
+        Observable<String> observable = api.getSms_login(sign,map);
+        observable.observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(onNext, onError);
+    }
+
+    //postSms_login
+    public static void postSms_login(String sign, Map<String, String> map,Consumer<String> onNext, Consumer<Throwable> onError) {
+        Api api = retrofit.create(Api.class);
+        Observable<String> observable = api.postSms_login(sign,map);
         observable.observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(onNext, onError);
