@@ -115,42 +115,48 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
+
             <FrameLayout
-                android:background="#385f9f"
                 android:id="@+id/v3"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1.01"
+                android:background="#385f9f"/>
+
             <FrameLayout
-                android:background="#e322c9"
                 android:id="@+id/v4"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:background="#e322c9"/>
         </LinearLayout>
         <LinearLayout
             android:orientation="horizontal"
             android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="0dp">
+
             <FrameLayout
                 android:id="@+id/v5"
-                android:background="#b74416"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:background="#b74416"/>
+
             <FrameLayout
                 android:id="@+id/v6"
                 android:background="#df9d0e"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
+
             <FrameLayout
                 android:id="@+id/v7"
-                android:background="#5a18de7c"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:background="#5a18de7c"/>
+
             <FrameLayout
                 android:id="@+id/v8"
                 android:background="#60caed"
@@ -169,18 +175,21 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
+
             <FrameLayout
                 android:id="@+id/v10"
-                android:background="#aee293e1"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:background="#aee293e1"/>
+
             <FrameLayout
                 android:id="@+id/v11"
-                android:background="#c3d7dd23"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:background="#c3d7dd23"/>
+
             <FrameLayout
                 android:id="@+id/v12"
                 android:background="#e34922"

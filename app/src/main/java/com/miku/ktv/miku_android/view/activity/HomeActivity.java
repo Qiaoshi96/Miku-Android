@@ -85,6 +85,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 }else {
                     editor.putString("roomname",dialog_editText.getText().toString());
                     editor.commit();
+                    //创建房间
                     startActivity(new Intent(HomeActivity.this,KTVActivity.class));
                     IsUtils.showShort(HomeActivity.this,"创建房间成功");
                 }

@@ -10,6 +10,10 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        ndk {
+            //设置支持的SO库架构
+            abiFilters "armeabi-v7a", "x86","arm64-v8a","x86_64"
+        }
     }
     buildTypes {
         release {
@@ -22,6 +26,7 @@ android {
 }
 
 dependencies {
+
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
@@ -46,7 +51,7 @@ dependencies {
 
     compile fileTree(dir: 'libs', include: '*.jar')
     // 基础模块
-    compile 'com.netease.nimlib:basesdk:4.2.0'
+    compile 'com.netease.nimlib:basesdk:4.1.0'
     // 音视频模块(版本号必须和基础模块一样)
-    compile 'com.netease.nimlib:avchat:4.2.0'
+    compile 'com.netease.nimlib:avchat:4.1.0'
 }
