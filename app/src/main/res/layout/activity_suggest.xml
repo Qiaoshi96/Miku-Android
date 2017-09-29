@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_suggest"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.miku.ktv.miku_android.view.activity.SuggestActivity">
+
+    <RelativeLayout
+        android:id="@+id/Suggest_RelativeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:background="@color/background"
+        >
+        <ImageView
+            android:id="@+id/Suggest_ImageView_Back"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@mipmap/back_white"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="35dp"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="意见反馈"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="35dp"
+            />
+        <TextView
+            android:id="@+id/Suggest_TextView_Submit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="提交"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="35dp"
+            />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_below="@id/Suggest_RelativeLayout"
+
+        >
+        <EditText
+            android:id="@+id/Suggest_EditText_FeedBack"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:hint="反馈"
+            android:gravity="top"
+            android:layout_marginTop="5dp"
+            android:padding="5dp"
+            android:background="@color/white"
+            />
+
+        <EditText
+            android:id="@+id/Suggest_EditText_QQorWechat"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:hint="您的联系方式"
+            android:textSize="17sp"
+            android:layout_marginTop="5dp"
+            android:padding="5dp"
+            android:background="@color/white"
+            />
+
+    </LinearLayout>
+
+</RelativeLayout>

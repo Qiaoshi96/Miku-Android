@@ -2,25 +2,35 @@ package com.miku.ktv.miku_android.view.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.miku.ktv.miku_android.R;
+import com.miku.ktv.miku_android.model.bean.RoomsBean;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
+import com.miku.ktv.miku_android.presenter.CreateRoomPresenter;
+import com.miku.ktv.miku_android.view.adapter.RoomsAdapter;
+import com.miku.ktv.miku_android.view.iview.IRoomsView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
-public class HomeActivity extends AppCompatActivity implements View.OnClickListener {
+import static com.miku.ktv.miku_android.model.utils.Constant.gson;
+
+public class HomeActivity extends AppCompatActivity implements IRoomsView<RoomsBean>,View.OnClickListener {
+    public static final String TAG="HomeActivity";
 
     private ListView home_lv;
     private ImageView home_imageView_menu;
@@ -30,20 +40,37 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private SharedPreferences sp;
     private SharedPreferences.Editor editor;
     private EditText dialog_editText;
-    private ArrayList<Map<String, Object>> arr_data;
-    private SimpleAdapter simp_ada;
+    private CreateRoomPresenter roomPresenter;
+    private List<RoomsBean.BodyBean.RoomListBean> list=new ArrayList<>();
+    private RoomsAdapter roomsAdapter;
+    private RoomsBean roomsBean1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
+        initState();
         sp = getSharedPreferences("config",MODE_PRIVATE);
+        binPresenter();
         editor = sp.edit();
-
         initView();
-        initData();
         initListener();
+
+    }
+
+    private void binPresenter() {
+        roomPresenter = new CreateRoomPresenter();
+        roomPresenter.attach(this);
+    }
+
+    private void initState() {
+        if (Build.VERSION.SDK_INT >= 21) {
+            View decorView = getWindow().getDecorView();
+            int option = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+            decorView.setSystemUiVisibility(option);
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+        }
     }
 
     @Override
@@ -85,13 +112,35 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 }else {
                     editor.putString("roomname",dialog_editText.getText().toString());
                     editor.commit();
-                    startActivity(new Intent(HomeActivity.this,KTVActivity.class));
+
+                    builder.dismiss();
                     IsUtils.showShort(HomeActivity.this,"创建房间成功");
                 }
-
             }
         });
     }
+
+    @Override
+    public void onSuccess(RoomsBean roomsBean) {
+        if (roomsBean.getStatus()==1){
+            IsUtils.showShort(this,"请求房间列表成功");
+
+            String roomsJson = gson.toJson(roomsBean);
+            roomsBean1 = gson.fromJson(roomsJson, RoomsBean.class);
+            list=roomsBean1.getBody().getRoom_list();
+
+            initData();
+            Log.e(TAG,"onSuccess: "+roomsBean.getMsg());
+        }
+    }
+
+    @Override
+    public void onError(RoomsBean roomsBean) {
+        if (roomsBean.getStatus()!=1){
+            Log.e(TAG,"onError: "+roomsBean.getMsg());
+        }
+    }
+
 
     private void initListener() {
         home_imageView_menu.setOnClickListener(this);
@@ -99,30 +148,30 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initData() {
-        //每一行数据就是一个Map，指定由Map组成的List，
-        arr_data = new ArrayList<>();
-        // 新增数据
-        for (int i = 0; i < 5; i++) {
-            Map map = new HashMap<>();
-            //map放入两个键值对，键名与from对应，
-            map.put("text", ""+i);
-            //往list添加数据
-            arr_data.add(map);
-        }
+        roomsAdapter = new RoomsAdapter(HomeActivity.this,list);
+        home_lv.setAdapter(roomsAdapter);
 
-        // 新建适配器 ，绑定数据
-        String[] from = {"text"};
-        int[] to = {R.id.Item_Home_TextView_Num };
-        simp_ada = new SimpleAdapter(this, arr_data, R.layout.item_home_listview,from,to);
-        // 加载适配器
-        home_lv.setAdapter(simp_ada);
+        home_lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                startActivity(new Intent(HomeActivity.this,KTVActivity.class));
+            }
+        });
     }
 
     private void initView() {
         home_lv = (ListView) findViewById(R.id.Home_lv);
         home_imageView_menu = (ImageView) findViewById(R.id.Home_ImageView_Menu);
         home_imageView_add = (ImageView) findViewById(R.id.Home_ImageView_Add);
-
+        Thread thread=new Thread(new Runnable() {
+            @Override
+            public void run() {
+                HashMap<String,String> map=new HashMap<>();
+                map.put("token",sp.getString("tokenKey","null"));
+                map.put("page","1");
+                roomPresenter.getRooms(map,RoomsBean.class);
+            }
+        });
+        thread.start();
     }
-
 }

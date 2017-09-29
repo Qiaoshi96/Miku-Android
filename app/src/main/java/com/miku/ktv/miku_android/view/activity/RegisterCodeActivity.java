@@ -88,6 +88,7 @@ public class RegisterCodeActivity extends AppCompatActivity implements IRegister
         }
     }
 
+
     private void jumpDialog() {
         View dialogView=View.inflate(RegisterCodeActivity.this, R.layout.rc_dialog,null);
 

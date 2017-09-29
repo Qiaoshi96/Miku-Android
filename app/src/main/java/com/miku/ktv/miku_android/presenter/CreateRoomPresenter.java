@@ -12,20 +12,19 @@ import java.util.Map;
 import io.reactivex.functions.Consumer;
 
 /**
- * Created by 焦帆 on 2017/9/26.
+ * Created by 焦帆 on 2017/9/28.
  */
 
-public class RegisterInfoPresenter extends BasePresenter<IBaseView> {
+public class CreateRoomPresenter extends BasePresenter<IBaseView> {
+    public static final String TAG="CreateRoomPresenter";
 
-    public static final String TAG="RegisterInfoPresenter";
-
-    //post
-    public <T> void postInfo(Map<String, String> map, final Class<T> cla){
+    //get请求
+    public <T> void getRooms(Map<String, String> map, final Class<T> cla){
         final String sign = "?timestamp="+ Constant.getTime()+"&sign="+ Constant.getSign();
-        HttpUtil.postInfo(sign, map, new Consumer<String>() {
+        HttpUtil.getRooms(sign, map, new Consumer<String>() {
             @Override
             public void accept(String s) throws Exception {
-                Log.e(TAG, "postInfo   "+s);
+                Log.e(TAG, "getRooms   "+s);
                 T t =Constant.GsonToBean(s, cla);
                 getIBaseView().onSuccess(t);
             }
@@ -33,7 +32,7 @@ public class RegisterInfoPresenter extends BasePresenter<IBaseView> {
             @Override
             public void accept(Throwable throwable) throws Exception {
                 getIBaseView().onError(throwable);
-                Log.e(TAG, "postInfo-throwable:  "+throwable.toString());
+                Log.e(TAG, "getRooms-throwable:  "+throwable.toString());
             }
         });
     }

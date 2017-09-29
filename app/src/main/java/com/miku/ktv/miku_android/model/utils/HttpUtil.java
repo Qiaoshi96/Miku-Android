@@ -69,9 +69,9 @@ public class HttpUtil {
     }
 
     //get封装
-    public static void getRoom(String sign, Map<String, String> map,Consumer<String> onNext, Consumer<Throwable> onError) {
+    public static void getRooms(String sign, Map<String, String> map,Consumer<String> onNext, Consumer<Throwable> onError) {
         Api api = retrofit.create(Api.class);
-        Observable<String> observable = api.getRoom(sign,map);
+        Observable<String> observable = api.getRooms(sign,map);
         observable.observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(onNext, onError);

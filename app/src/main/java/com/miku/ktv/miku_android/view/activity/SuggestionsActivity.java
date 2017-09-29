@@ -1,11 +1,7 @@
 package com.miku.ktv.miku_android.view.activity;
 
-import android.support.v7.app.AppCompatActivity;
-
 /**
- * Created by dell on 2017/9/25.
+ * Created by 焦帆 on 2017/9/28.
  */
-
-public class SuggestionsActivity extends AppCompatActivity {
-
+public class SuggestionsActivity {
 }

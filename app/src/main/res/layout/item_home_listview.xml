@@ -5,11 +5,37 @@
     android:layout_height="match_parent">
 
     <ImageView
+        android:id="@+id/Item_Home_ImageView_Head"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@mipmap/bg9"
         android:scaleType="fitXY"
         />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:padding="25dp"
+        >
+
+        <TextView
+            android:id="@+id/Item_Home_TextView_Nick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="谁谁谁"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="的房间"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            />
+
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"

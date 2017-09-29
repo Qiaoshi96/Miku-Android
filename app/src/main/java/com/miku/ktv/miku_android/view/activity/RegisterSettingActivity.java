@@ -4,6 +4,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -27,6 +29,7 @@ import com.miku.ktv.miku_android.presenter.RegisterInfoPresenter;
 import com.miku.ktv.miku_android.view.custom.CircleImage;
 import com.miku.ktv.miku_android.view.iview.IRegisterInfoView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -53,6 +56,8 @@ public class RegisterSettingActivity extends AppCompatActivity implements IRegis
     private String sexName;
     private RegisterInfoPresenter infoPresenter;
     private int it;
+    private SharedPreferences base64SP;
+    private SharedPreferences.Editor base64Edit;
 
 
     @Override
@@ -138,13 +143,14 @@ public class RegisterSettingActivity extends AppCompatActivity implements IRegis
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
-                case PICTURE_FROM_CAMERA:
+                case PICTURE_FROM_CAMERA://相机
                     //对图片进行压缩
                     ZipImageUtil.zipImage(Uri.fromFile(file).getPath());
                     //将图片设置到ImageView中
                     rs_imageView_head.setImageURI(Uri.fromFile(file));
+
                     break;
-                case PICTURE_FROM_GALLERY:
+                case PICTURE_FROM_GALLERY://相册
                     //通过返回的data数据，获取图片的路径信息，但是这个路径是Uri的
                     Uri uri = data.getData();
                     //进行压缩，首先要将Uri地址转换为真实路径
@@ -152,6 +158,7 @@ public class RegisterSettingActivity extends AppCompatActivity implements IRegis
                     //压缩图片
                     ZipImageUtil.zipImage(file.getAbsolutePath());
                     rs_imageView_head.setImageURI(Uri.fromFile(file));
+
                     break;
             }
         }
@@ -163,7 +170,14 @@ public class RegisterSettingActivity extends AppCompatActivity implements IRegis
             edit.putString("tokenKey",registerInfoBean.getBody().getToken());
             edit.commit();
             IsUtils.showShort(this,"注册成功");
-            startActivity(new Intent(this,HomeActivity.class));
+            Log.e(TAG,"onSuccess:"+registerInfoBean.getBody().getToken());
+
+            Intent intent=new Intent(this,HomeActivity.class);
+            //Intent传递图片
+            byte[] bitmapByte = intentImage();
+            intent.putExtra("bitmap", bitmapByte);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
             finish();
         }
     }
@@ -174,6 +188,13 @@ public class RegisterSettingActivity extends AppCompatActivity implements IRegis
             IsUtils.showShort(this,"注册失败");
             Log.e(TAG,"onError  "+registerInfoBean.getMsg());
         }
+    }
+
+    private byte[] intentImage() {
+        Bitmap bmp=((BitmapDrawable)rs_imageView_head.getDrawable()).getBitmap();
+        ByteArrayOutputStream baos=new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        return baos.toByteArray();
     }
 
     private void setDialog() {

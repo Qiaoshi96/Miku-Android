@@ -154,7 +154,10 @@ public class LoginCheckActivity extends AppCompatActivity implements IRegisterVi
     public void onSuccess(LoginCheckBean loginCheckBean) {
         if (loginCheckBean.getStatus() == 1) {
             Toast.makeText(this, "验证码验证成功", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(this, HomeActivity.class));
+            Intent intent=new Intent(this, HomeActivity.class);
+            //关闭之前所有Activity
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
             Log.d(TAG, "onSuccess: " + loginCheckBean.getMsg());
         }else {
             Toast.makeText(this, "验证码验证失败", Toast.LENGTH_SHORT).show();

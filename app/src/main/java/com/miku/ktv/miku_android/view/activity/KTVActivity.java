@@ -144,23 +144,16 @@ public class KTVActivity extends AppCompatActivity  implements View.OnClickListe
                 dialog.dismiss();
                 Intent intent = new Intent(KTVActivity.this,SuggestionsActivity.class);
                 startActivity(intent);
-
             }
 
         });
 
         builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-
             @Override
-
             public void onClick(DialogInterface dialog, int which) {
-
                 dialog.dismiss();
-
             }
-
         });
-
         builder.create().show();
 
     }
