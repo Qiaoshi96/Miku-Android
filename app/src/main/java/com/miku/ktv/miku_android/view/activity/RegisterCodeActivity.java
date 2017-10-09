@@ -19,11 +19,12 @@ import com.miku.ktv.miku_android.R;
 import com.miku.ktv.miku_android.model.bean.RegisterBean;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
 import com.miku.ktv.miku_android.presenter.RegisterPresenter;
-import com.miku.ktv.miku_android.view.iview.IRegisterView;
+import com.miku.ktv.miku_android.view.iview.IRegisterCheckView;
 
 import java.util.HashMap;
 
-public class RegisterCodeActivity extends AppCompatActivity implements IRegisterView<RegisterBean>,TextWatcher,View.OnClickListener{
+//public class RegisterCodeActivity extends AppCompatActivity implements IRegisterView<RegisterBean>,TextWatcher,View.OnClickListener{
+public class RegisterCodeActivity extends AppCompatActivity implements IRegisterCheckView<Object, RegisterBean>,TextWatcher,View.OnClickListener{
 
     public static final String TAG="RegisterCodeActivity";
 
@@ -33,6 +34,7 @@ public class RegisterCodeActivity extends AppCompatActivity implements IRegister
     private LinearLayout register_linearLayout_back;
     private TextView register_textView_phoneError;
     private TextView register_textView_send;
+    private TextView register_textView_web;
     private RegisterPresenter presenter;
     private TextView dialogPhone;
     private TextView dialogCancel;
@@ -56,6 +58,9 @@ public class RegisterCodeActivity extends AppCompatActivity implements IRegister
             case R.id.Register_LinearLayout_Back:
                 finish();
                 break;
+            case R.id.Register_TextView_Web:
+                startActivity(new Intent(this,WebActivity.class));
+                break;
             case R.id.Register_TextView_Send:
                 if(TextUtils.isEmpty(register_editText_phone.getText().toString())){
                     IsUtils.showShort(this,"请输入手机号");
@@ -75,7 +80,8 @@ public class RegisterCodeActivity extends AppCompatActivity implements IRegister
     }
 
     @Override
-    public void onSuccess(RegisterBean registerBean) {
+//    public void onSuccess(RegisterBean registerBean) {
+    public void onSendVetifyCodeSuccess(RegisterBean registerBean) {
         if (registerBean.getStatus()==1){
             edit.putString("phoneEdit",register_editText_phone.getText().toString());
             edit.commit();
@@ -87,7 +93,6 @@ public class RegisterCodeActivity extends AppCompatActivity implements IRegister
             jumpDialog();
         }
     }
-
 
     private void jumpDialog() {
         View dialogView=View.inflate(RegisterCodeActivity.this, R.layout.rc_dialog,null);
@@ -116,14 +121,19 @@ public class RegisterCodeActivity extends AppCompatActivity implements IRegister
         });
     }
 
-    @Override
-    public void onError(RegisterBean registerBean) {
-        if (registerBean.getStatus()!=1){
-            Toast.makeText(this,"验证码发送失败",Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "onError: "+registerBean.getMsg());
-        }
-    }
+//    @Override
+////    public void onError(RegisterBean registerBean) {
+//    public void onSendVetifyCodeError(RegisterBean registerBean) {
+//        if (registerBean.getStatus()!=1){
+//            Toast.makeText(this,"验证码发送失败",Toast.LENGTH_SHORT).show();
+//            Log.d(TAG, "onError: "+registerBean.getMsg());
+//        }
+//    }
 
+    @Override
+    public void onSendVetifyCodeError(Throwable throwable) {
+        throwable.printStackTrace();
+    }
 
     private void bindPresenter() {
         presenter = new RegisterPresenter();
@@ -133,6 +143,7 @@ public class RegisterCodeActivity extends AppCompatActivity implements IRegister
     private void initListener() {
         register_linearLayout_back.setOnClickListener(this);
         register_textView_send.setOnClickListener(this);
+        register_textView_web.setOnClickListener(this);
         register_editText_phone.addTextChangedListener(this);
     }
 
@@ -141,6 +152,7 @@ public class RegisterCodeActivity extends AppCompatActivity implements IRegister
         register_linearLayout_back = (LinearLayout) findViewById(R.id.Register_LinearLayout_Back);
         register_textView_phoneError = (TextView) findViewById(R.id.Register_TextView_PhoneError);
         register_textView_send = (TextView) findViewById(R.id.Register_TextView_Send);
+        register_textView_web = (TextView) findViewById(R.id.Register_TextView_Web);
     }
 
     @Override
@@ -158,5 +170,15 @@ public class RegisterCodeActivity extends AppCompatActivity implements IRegister
         if (TextUtils.isEmpty(register_editText_phone.getText().toString())){
             register_textView_phoneError.setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    public void onSuccess(Object o) {
+
+    }
+
+    @Override
+    public void onError(Object o) {
+
     }
 }

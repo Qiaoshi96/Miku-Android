@@ -3,6 +3,8 @@ package com.miku.ktv.miku_android.view.iview;
 import java.util.Map;
 
 import io.reactivex.Observable;
+import okhttp3.RequestBody;
+import retrofit2.http.Body;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -36,5 +38,15 @@ public interface Api {
     //获取全部房间列表
     @GET("rooms/{sign}")
     Observable<String> getRooms(@Path("sign") String sign, @QueryMap Map<String, String> map);
+
+    //上传头像
+//    @FormUrlEncoded
+    @POST("avatar/{sign}")
+    Observable<String> postAvatar(@Path("sign") String sign, @Body RequestBody Body);
+
+    //修改个人信息：昵称
+    @FormUrlEncoded
+    @POST("info/{sign}")
+    Observable<String> postNick(@Path("sign") String sign, @FieldMap Map<String, String> map);
 
 }

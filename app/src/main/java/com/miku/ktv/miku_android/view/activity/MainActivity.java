@@ -1,6 +1,7 @@
 package com.miku.ktv.miku_android.view.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -15,15 +16,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static final String TAG="MainActivity";
     private LinearLayout main_linearLayout_phone,main_linearLayout_wechat,main_linearLayout_qq;
     private TextView main_textView_login;
+    private SharedPreferences sp;
+    private SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        sp = getSharedPreferences("config",MODE_PRIVATE);
+        editor = sp.edit();
         //得到sign
         Constant.getSign();
-        initView();
-        initListener();
+//        if (sp.getString("LoginToken","null")!=null){
+//            startActivity(new Intent(this,HomeActivity.class));
+//            finish();
+//        }else {
+            initView();
+            initListener();
+//        }
     }
 
     @Override

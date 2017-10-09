@@ -4,8 +4,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -22,6 +20,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.miku.ktv.miku_android.R;
+import com.miku.ktv.miku_android.model.bean.AvatarBean;
 import com.miku.ktv.miku_android.model.bean.RegisterInfoBean;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
 import com.miku.ktv.miku_android.model.utils.ZipImageUtil;
@@ -29,7 +28,6 @@ import com.miku.ktv.miku_android.presenter.RegisterInfoPresenter;
 import com.miku.ktv.miku_android.view.custom.CircleImage;
 import com.miku.ktv.miku_android.view.iview.IRegisterInfoView;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -56,8 +54,6 @@ public class RegisterSettingActivity extends AppCompatActivity implements IRegis
     private String sexName;
     private RegisterInfoPresenter infoPresenter;
     private int it;
-    private SharedPreferences base64SP;
-    private SharedPreferences.Editor base64Edit;
 
 
     @Override
@@ -155,6 +151,7 @@ public class RegisterSettingActivity extends AppCompatActivity implements IRegis
                     Uri uri = data.getData();
                     //进行压缩，首先要将Uri地址转换为真实路径
                     File file = getFilePath(uri);
+                    this.file = file;
                     //压缩图片
                     ZipImageUtil.zipImage(file.getAbsolutePath());
                     rs_imageView_head.setImageURI(Uri.fromFile(file));
@@ -170,15 +167,10 @@ public class RegisterSettingActivity extends AppCompatActivity implements IRegis
             edit.putString("tokenKey",registerInfoBean.getBody().getToken());
             edit.commit();
             IsUtils.showShort(this,"注册成功");
-            Log.e(TAG,"onSuccess:"+registerInfoBean.getBody().getToken());
-
-            Intent intent=new Intent(this,HomeActivity.class);
-            //Intent传递图片
-            byte[] bitmapByte = intentImage();
-            intent.putExtra("bitmap", bitmapByte);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            finish();
+            //头像上传服务器
+            if(file!=null){
+                infoPresenter.postAvatar(registerInfoBean.getBody().getToken(), file, AvatarBean.class);
+            }
         }
     }
 
@@ -188,13 +180,6 @@ public class RegisterSettingActivity extends AppCompatActivity implements IRegis
             IsUtils.showShort(this,"注册失败");
             Log.e(TAG,"onError  "+registerInfoBean.getMsg());
         }
-    }
-
-    private byte[] intentImage() {
-        Bitmap bmp=((BitmapDrawable)rs_imageView_head.getDrawable()).getBitmap();
-        ByteArrayOutputStream baos=new ByteArrayOutputStream();
-        bmp.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        return baos.toByteArray();
     }
 
     private void setDialog() {
@@ -278,5 +263,24 @@ public class RegisterSettingActivity extends AppCompatActivity implements IRegis
         rs_linearLayout_head.setOnClickListener(this);
         rs_textView_register.setOnClickListener(this);
 
+    }
+
+    @Override
+    public void onAvatarSuccess(AvatarBean bean) {
+        Log.e(TAG,"onAvatarSuccess:"+bean.getBody().getAvatar());
+        IsUtils.showShort(this,"上传成功");
+//        edit.putString("nick",bean.getBody().getNick());
+//        edit.putString("id",bean.getBody().getFullname());
+//        edit.putString("avatar",bean.getBody().getAvatar());
+//        edit.commit();
+        Intent intent=new Intent(this,HomeActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    public void onAvatarError(Throwable t) {
+        Log.e(TAG,"onAvatarError:"+t.toString());
     }
 }

@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -17,11 +16,11 @@ import com.miku.ktv.miku_android.R;
 import com.miku.ktv.miku_android.model.bean.LoginCodeBean;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
 import com.miku.ktv.miku_android.presenter.LoginCodePresenter;
-import com.miku.ktv.miku_android.view.iview.IRegisterView;
+import com.miku.ktv.miku_android.view.iview.IRegisterCheckView;
 
 import java.util.HashMap;
 
-public class LoginActivity extends AppCompatActivity implements IRegisterView<LoginCodeBean>,TextWatcher,View.OnClickListener {
+public class LoginActivity extends AppCompatActivity implements IRegisterCheckView<Object,LoginCodeBean>,TextWatcher,View.OnClickListener {
 
     public static final String TAG="LoginActivity";
     private TextView login_textView_send;
@@ -88,7 +87,7 @@ public class LoginActivity extends AppCompatActivity implements IRegisterView<Lo
     }
 
     @Override
-    public void onSuccess(LoginCodeBean loginCodeBean) {
+    public void onSendVetifyCodeSuccess(LoginCodeBean loginCodeBean) {
         if (loginCodeBean.getStatus()==7 && loginCodeBean.getMsg().equals("user not exist")){
             IsUtils.showShort(this,"该手机号还没注册过");
         }else {
@@ -102,11 +101,9 @@ public class LoginActivity extends AppCompatActivity implements IRegisterView<Lo
     }
 
     @Override
-    public void onError(LoginCodeBean loginCodeBean) {
-        if (loginCodeBean.getStatus()!=1){
-            IsUtils.showShort(this,"验证码发送失败");
-            Log.e(TAG, "onError: "+loginCodeBean.getMsg());
-        }
+    public void onSendVetifyCodeError(Throwable throwable) {
+        throwable.printStackTrace();
+
     }
 
     @Override
@@ -124,5 +121,16 @@ public class LoginActivity extends AppCompatActivity implements IRegisterView<Lo
         if (TextUtils.isEmpty(login_editText_phone.getText().toString())){
             login_textView_phoneError.setVisibility(View.GONE);
         }
+    }
+
+
+    @Override
+    public void onSuccess(Object o) {
+
+    }
+
+    @Override
+    public void onError(Object o) {
+
     }
 }

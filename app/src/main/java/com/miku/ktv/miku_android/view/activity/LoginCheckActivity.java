@@ -16,13 +16,14 @@ import android.widget.Toast;
 
 import com.miku.ktv.miku_android.R;
 import com.miku.ktv.miku_android.model.bean.LoginCheckBean;
+import com.miku.ktv.miku_android.model.bean.RegisterBean;
 import com.miku.ktv.miku_android.model.utils.CountDownTimerUtil;
 import com.miku.ktv.miku_android.presenter.LoginCodePresenter;
-import com.miku.ktv.miku_android.view.iview.IRegisterView;
+import com.miku.ktv.miku_android.view.iview.IRegisterCheckView;
 
 import java.util.HashMap;
 
-public class LoginCheckActivity extends AppCompatActivity implements IRegisterView<LoginCheckBean>, TextWatcher, View.OnClickListener{
+public class LoginCheckActivity extends AppCompatActivity implements IRegisterCheckView<LoginCheckBean, RegisterBean>, TextWatcher, View.OnClickListener{
 
     public static final String TAG = "LoginCheckActivity";
 
@@ -40,6 +41,7 @@ public class LoginCheckActivity extends AppCompatActivity implements IRegisterVi
         setContentView(R.layout.activity_login_check);
 
         sp = getSharedPreferences("config", MODE_PRIVATE);
+        edit=sp.edit();
         initView();
         setTimer();
         initListener();
@@ -142,7 +144,9 @@ public class LoginCheckActivity extends AppCompatActivity implements IRegisterVi
                 finish();
                 break;
             case R.id.LC_sendAgain:
-
+                HashMap<String,String> map=new HashMap<>();
+                map.put("phone",sp.getString("loginPhoneEdit","null"));
+                loginCodePresenter.getSms_login(map,RegisterBean.class);
                 break;
 
             default:
@@ -154,11 +158,21 @@ public class LoginCheckActivity extends AppCompatActivity implements IRegisterVi
     public void onSuccess(LoginCheckBean loginCheckBean) {
         if (loginCheckBean.getStatus() == 1) {
             Toast.makeText(this, "验证码验证成功", Toast.LENGTH_SHORT).show();
+            edit.putString("LoginToken",loginCheckBean.getBody().getToken());
+            edit.putString("nick",loginCheckBean.getBody().getNick());
+            edit.putString("id",loginCheckBean.getBody().getFullname());
+            edit.putString("avatar",loginCheckBean.getBody().getAvatar());
+            edit.commit();
             Intent intent=new Intent(this, HomeActivity.class);
             //关闭之前所有Activity
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             Log.d(TAG, "onSuccess: " + loginCheckBean.getMsg());
+
+//            String path = Environment.getExternalStorageDirectory()+"/sina/weibo/weibo/img-5jyf.jpg";
+//            File file = new File(path);
+//            new RegisterInfoPresenter().postAvatar(loginCheckBean.getBody().getToken(), file, AvatarBean.class);
+
         }else {
             Toast.makeText(this, "验证码验证失败", Toast.LENGTH_SHORT).show();
             lc_codeError.setVisibility(View.VISIBLE);
@@ -168,6 +182,19 @@ public class LoginCheckActivity extends AppCompatActivity implements IRegisterVi
 
     @Override
     public void onError(LoginCheckBean loginCheckBean) {
+
+    }
+
+    @Override
+    public void onSendVetifyCodeSuccess(RegisterBean t) {
+        Log.d(TAG, "onSendVetifyCodeSuccess: " + t.getMsg());
+
+    }
+
+    @Override
+    public void onSendVetifyCodeError(Throwable throwable) {
+        throwable.printStackTrace();
+        Log.d(TAG, "onSendVetifyCodeError: " + throwable.toString());
 
     }
 }

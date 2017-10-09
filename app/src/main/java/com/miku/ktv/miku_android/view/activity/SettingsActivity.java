@@ -1,6 +1,7 @@
 package com.miku.ktv.miku_android.view.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,11 +24,15 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
     private TextView settigs_textView_logout;
     private TextView dialog_textView_cancel;
     private TextView dialog_textView_ok;
+    private SharedPreferences sp;
+    private SharedPreferences.Editor edit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+        sp=getSharedPreferences("config",MODE_PRIVATE);
+        edit=sp.edit();
         initState();
         initView();
         initListener();
@@ -41,7 +46,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 finish();
                 break;
             case R.id.Settigs_TextView_Service:
-
+                startActivity(new Intent(this,WebActivity.class));
                 break;
             case R.id.Settigs_TextView_Logout:
 
@@ -61,6 +66,8 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 dialog_textView_ok.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        edit.clear();
+                        edit.commit();
                         Intent intent=new Intent(SettingsActivity.this,MainActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);

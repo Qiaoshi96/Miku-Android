@@ -25,23 +25,32 @@
         </activity>
         <activity
             android:name=".view.activity.LoginActivity"
-            android:windowSoftInputMode="adjustResize|stateHidden"/>
+            android:windowSoftInputMode="stateVisible|adjustResize"/>
         <activity
             android:name=".view.activity.LoginCheckActivity"
-            android:windowSoftInputMode="adjustResize|stateHidden"/>
+            android:windowSoftInputMode="stateVisible|adjustResize"/>
         <activity
             android:name=".view.activity.RegisterCodeActivity"
-            android:windowSoftInputMode="adjustResize|stateHidden"/>
+            android:windowSoftInputMode="stateVisible|adjustResize"/>
         <activity
             android:name=".view.activity.RegisterCheckActivity"
-            android:windowSoftInputMode="adjustResize|stateHidden"/>
+            android:windowSoftInputMode="stateVisible|adjustResize"/>
         <activity android:name=".view.activity.RegisterSettingActivity"/>
         <activity android:name=".view.activity.HomeActivity"/>
         <activity android:name=".view.activity.KTVActivity"/>
         <activity android:name=".view.activity.SettingsActivity"/>
-        <activity android:name=".view.activity.PersonalActivity">
-        </activity>
-        <activity android:name=".view.activity.SuggestActivity">
+        <activity android:name=".view.activity.EditActivity"/>
+        <activity android:name=".view.activity.PersonalActivity"/>
+        <activity
+            android:name=".view.activity.SuggestActivity"
+            android:windowSoftInputMode="stateVisible|adjustResize"/>
+        <activity
+            android:name=".view.activity.EditNickActivity"
+            android:windowSoftInputMode="stateVisible|adjustResize"/>
+        <activity
+            android:name=".view.activity.EditSignActivity"
+            android:windowSoftInputMode="stateVisible|adjustResize"/>
+        <activity android:name=".view.activity.WebActivity">
         </activity>
     </application>
 

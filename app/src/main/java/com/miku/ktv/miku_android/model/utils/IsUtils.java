@@ -1,7 +1,11 @@
 package com.miku.ktv.miku_android.model.utils;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.text.TextUtils;
+import android.util.Base64;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.regex.Matcher;
@@ -53,6 +57,10 @@ public class IsUtils {
         Toast.makeText(context,s, Toast.LENGTH_LONG).show();
     }
 
+    public static void initGlide(Context context, String s, ImageView imageView){
+
+    }
+
     public static boolean IsSex(String sex){
         if(sex.equals("男")||sex.equals("女")){
             return true;
@@ -60,5 +68,30 @@ public class IsUtils {
         return false;
     }
 
+    /**
+     * string转成bitmap
+     *
+     * @param str
+     */
+    public static Bitmap stringToBitmap(String str)
+    {
+        // OutputStream out;
+        Bitmap bitmap = null;
+        try
+        {
+            // out = new FileOutputStream("/sdcard/aa.jpg");
+            byte[] bitmapArray;
+            bitmapArray = Base64.decode(str, Base64.DEFAULT);
+            bitmap =
+                    BitmapFactory.decodeByteArray(bitmapArray, 0,
+                            bitmapArray.length);
+            // bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+            return bitmap;
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
 
 }

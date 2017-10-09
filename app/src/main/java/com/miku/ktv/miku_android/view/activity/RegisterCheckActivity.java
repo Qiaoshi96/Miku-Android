@@ -16,13 +16,14 @@ import android.widget.Toast;
 
 import com.miku.ktv.miku_android.R;
 import com.miku.ktv.miku_android.model.bean.CheckBean;
+import com.miku.ktv.miku_android.model.bean.RegisterBean;
 import com.miku.ktv.miku_android.model.utils.CountDownTimerUtil;
 import com.miku.ktv.miku_android.presenter.RegisterPresenter;
-import com.miku.ktv.miku_android.view.iview.IRegisterView;
+import com.miku.ktv.miku_android.view.iview.IRegisterCheckView;
 
 import java.util.HashMap;
 
-public class RegisterCheckActivity extends AppCompatActivity implements IRegisterView<CheckBean>, TextWatcher, View.OnClickListener {
+public class RegisterCheckActivity extends AppCompatActivity implements IRegisterCheckView<CheckBean, RegisterBean>, TextWatcher, View.OnClickListener {
 
     public static final String TAG = "RegisterCheckActivity";
 
@@ -123,7 +124,7 @@ public class RegisterCheckActivity extends AppCompatActivity implements IRegiste
                 /////////////////////////////////////////////////////
                 HashMap<String, String> map = new HashMap<>();
                 map.put("phone", sp.getString("phoneEdit", "null"));
-                presenter.post(map, CheckBean.class);
+                presenter.post(map, RegisterBean.class);
                 break;
 
             default:
@@ -171,4 +172,14 @@ public class RegisterCheckActivity extends AppCompatActivity implements IRegiste
     public void onError(CheckBean checkBean) {
     }
 
+    @Override
+    public void onSendVetifyCodeSuccess(RegisterBean bean) {
+        Log.d(TAG, "onSendAgainSuccess: " + bean.getMsg());
+    }
+
+    @Override
+    public void onSendVetifyCodeError(Throwable throwable) {
+        throwable.printStackTrace();
+        Log.d(TAG, "onSendAgainError: ");
+    }
 }

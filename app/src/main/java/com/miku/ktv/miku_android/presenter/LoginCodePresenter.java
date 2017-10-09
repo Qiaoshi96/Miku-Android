@@ -5,7 +5,7 @@ import android.util.Log;
 import com.miku.ktv.miku_android.base.BasePresenter;
 import com.miku.ktv.miku_android.model.utils.Constant;
 import com.miku.ktv.miku_android.model.utils.HttpUtil;
-import com.miku.ktv.miku_android.view.iview.IBaseView;
+import com.miku.ktv.miku_android.view.iview.IRegisterCheckView;
 
 import java.util.Map;
 
@@ -15,7 +15,7 @@ import io.reactivex.functions.Consumer;
  * Created by 焦帆 on 2017/9/27.
  */
 
-public class LoginCodePresenter extends BasePresenter<IBaseView> {
+public class LoginCodePresenter<T extends IRegisterCheckView> extends BasePresenter<T> {
     public static final String TAG="LoginCodePresenter";
 
     //get请求
@@ -26,12 +26,14 @@ public class LoginCodePresenter extends BasePresenter<IBaseView> {
             public void accept(String s) throws Exception {
                 Log.e(TAG, "getSms_login   "+s);
                 T t =Constant.GsonToBean(s, cla);
-                getIBaseView().onSuccess(t);
+                getIBaseView().onSendVetifyCodeSuccess(t);
+
             }
         }, new Consumer<Throwable>() {
             @Override
             public void accept(Throwable throwable) throws Exception {
-                getIBaseView().onError(throwable);
+                getIBaseView().onSendVetifyCodeError(throwable);
+
                 Log.e(TAG, "getSms_login-throwable:  "+throwable.toString());
             }
         });
@@ -43,7 +45,7 @@ public class LoginCodePresenter extends BasePresenter<IBaseView> {
         HttpUtil.postSms_login(sign, map, new Consumer<String>() {
             @Override
             public void accept(String s) throws Exception {
-                Log.e(TAG, "getSms_login   "+s);
+                Log.e(TAG, "postSms_login   "+s);
                 T t =Constant.GsonToBean(s, cla);
                 getIBaseView().onSuccess(t);
             }
@@ -51,7 +53,7 @@ public class LoginCodePresenter extends BasePresenter<IBaseView> {
             @Override
             public void accept(Throwable throwable) throws Exception {
                 getIBaseView().onError(throwable);
-                Log.e(TAG, "getSms_login-throwable:  "+throwable.toString());
+                Log.e(TAG, "postSms_login-throwable:  "+throwable.toString());
             }
         });
     }

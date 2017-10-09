@@ -11,6 +11,7 @@ public class Constant {
     public static final String TAG="Constant";
     public static String SYSTEM_SHARE_NAME="config";
     public static final String LINK_MAIN = "http://ktv.fibar.cn/api/v1/";
+    public static final String BASE_PIC_URL = "http://ktv.fibar.cn";
     public static final String SECRET = "eKxzhDfGkvcv9MaLQdeWgSlqnX4CosiIkR17Z0oAPmNUjBOw6nlHcTfupzbFhupy";
     public static SharedPreferences mSharedPreferences;
     public static SharedPreferences.Editor mSharedPreferencesEditor;

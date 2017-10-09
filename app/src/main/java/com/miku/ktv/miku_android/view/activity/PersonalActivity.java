@@ -1,21 +1,28 @@
 package com.miku.ktv.miku_android.view.activity;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.miku.ktv.miku_android.R;
+import com.miku.ktv.miku_android.model.utils.Constant;
 
 public class PersonalActivity extends AppCompatActivity implements View.OnClickListener {
-
+    public static final String TAG = "PersonalActivity";
+    private static final int WRITE_PERMISSION = 0x01;
     private LinearLayout personal_linearLayout_back;
     private ImageView personal_imageView_edit;
     private ImageView personal_imageView_head;
@@ -34,9 +41,12 @@ public class PersonalActivity extends AppCompatActivity implements View.OnClickL
         sp = getSharedPreferences("config", MODE_PRIVATE);
         edit = sp.edit();
         initState();
+        requestWritePermission();
         initView();
         initListener();
-
+        personal_textView_nick.setText(sp.getString("nickEdit",""));
+        personal_textView_sign.setText(sp.getString("signEdit",""));
+        personal_textView_nick.invalidate();
     }
 
     @Override
@@ -46,17 +56,15 @@ public class PersonalActivity extends AppCompatActivity implements View.OnClickL
                 finish();
                 break;
             case R.id.Personal_ImageView_Edit:
-
+                startActivity(new Intent(this,EditActivity.class));
                 break;
             case R.id.Personal_TextView_Sign:
-
+                startActivity(new Intent(this,EditSignActivity.class));
                 break;
             case R.id.Personal_Relative_FeedBack:
                 startActivity(new Intent(this,SuggestActivity.class));
                 break;
             case R.id.Personal_Relative_Settings:
-                edit.clear();
-                edit.commit();
                 startActivity(new Intent(this,SettingsActivity.class));
                 break;
 
@@ -82,14 +90,24 @@ public class PersonalActivity extends AppCompatActivity implements View.OnClickL
         personal_textView_sign = (TextView) findViewById(R.id.Personal_TextView_Sign);
         personal_relative_feedBack = (RelativeLayout) findViewById(R.id.Personal_Relative_FeedBack);
         personal_relative_settings = (RelativeLayout) findViewById(R.id.Personal_Relative_Settings);
-//        Intent intent = getIntent();
-//        if(intent !=null)
-//        {
-//            byte [] bis=intent.getByteArrayExtra("bitmap");
-//            Bitmap bitmap= BitmapFactory.decodeByteArray(bis, 0, bis.length);
-//            personal_imageView_head.setImageBitmap(bitmap);
-//        }
 
+        personal_textView_nick.setText(sp.getString("nick","null"));
+        personal_textView_id.setText(sp.getString("id","null"));
+
+        Log.d(TAG, "initView: "+Constant.BASE_PIC_URL+sp.getString("avatar",""));
+        String s = Constant.BASE_PIC_URL + sp.getString("avatar", "");
+        Glide.with(this)
+                .load(s)
+                .placeholder(R.mipmap.bg9)
+                .error(R.mipmap.bg9)
+                .into(personal_imageView_head);
+
+    }
+
+    private void requestWritePermission(){
+        if(ActivityCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},WRITE_PERMISSION);
+        }
     }
 
     private void initState() {

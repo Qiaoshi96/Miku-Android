@@ -16,11 +16,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-
 import com.miku.ktv.miku_android.R;
 import com.miku.ktv.miku_android.model.bean.RegisterInfoBean;
-
-import com.miku.ktv.miku_android.model.bean.RoomBean;
 import com.netease.nimlib.sdk.avchat.AVChatCallback;
 import com.netease.nimlib.sdk.avchat.AVChatManager;
 import com.netease.nimlib.sdk.avchat.AVChatStateObserver;
@@ -63,7 +60,7 @@ public class KTVActivity extends AppCompatActivity  implements View.OnClickListe
         //RoomBean roomBean = new RoomBean();
         //String room_id = roomBean.getBody().getRoom_id();
         //加入房间
-       // enterRoom(room_id);
+        //enterRoom(room_id);
 
 
         //初始化控件findViewById

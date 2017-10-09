@@ -6,7 +6,7 @@ package com.miku.ktv.miku_android.view.iview;
 
 public interface IRegisterCheckView<T, E> extends IBaseView<T>{
 
-    void onSendAgainSuccess(E t);
-    void onSendAgainError(E t);
+    void onSendVetifyCodeSuccess(E t);
+    void onSendVetifyCodeError(Throwable throwable);
 
 }

@@ -51,8 +51,8 @@ public class HomeActivity extends AppCompatActivity implements IRoomsView<RoomsB
         setContentView(R.layout.activity_home);
         initState();
         sp = getSharedPreferences("config",MODE_PRIVATE);
-        binPresenter();
         editor = sp.edit();
+        binPresenter();
         initView();
         initListener();
 

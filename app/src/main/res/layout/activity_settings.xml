@@ -15,11 +15,11 @@
         >
         <ImageView
             android:id="@+id/Settings_ImageView_Back"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
             android:src="@mipmap/back_white"
             android:layout_marginLeft="15dp"
-            android:layout_marginTop="35dp"
+            android:layout_marginTop="40dp"
             />
         <TextView
             android:layout_width="wrap_content"
@@ -37,7 +37,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_below="@id/Settings_RelativeLayout"
-
         >
         <TextView
             android:id="@+id/Settigs_TextView_Service"
