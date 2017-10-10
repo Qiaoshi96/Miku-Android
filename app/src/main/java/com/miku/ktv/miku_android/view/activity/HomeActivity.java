@@ -186,6 +186,7 @@ public class HomeActivity extends AppCompatActivity implements IJoinRoomView<Roo
     public void onJoinSuccess(JoinRoomBean bean) {
         if (bean.getStatus()==1){
             Log.e(TAG,"onJoinSuccess: "+bean.getBody().getParticipants().get(0).getNick());
+            startActivity(new Intent(this,KTVActivity.class));
             IsUtils.showShort(this,"加入聊天室成功");
         }else {
             IsUtils.showShort(this,"加入聊天室失败");

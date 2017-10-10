@@ -21,7 +21,7 @@ public class RegisterInfoPresenter<T extends IRegisterInfoView> extends BasePres
 
     public static final String TAG="RegisterInfoPresenter";
 
-    //post
+    //postInfo
     public <T> void postInfo(Map<String, String> map, final Class<T> cla){
         final String sign = "?timestamp="+ Constant.getTime()+"&sign="+ Constant.getSign();
         HttpUtil.postInfo(sign, map, new Consumer<String>() {

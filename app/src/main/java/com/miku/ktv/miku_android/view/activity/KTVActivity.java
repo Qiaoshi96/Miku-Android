@@ -2,6 +2,7 @@ package com.miku.ktv.miku_android.view.activity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,7 +18,11 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.miku.ktv.miku_android.R;
+import com.miku.ktv.miku_android.model.bean.ExitRoomBean;
 import com.miku.ktv.miku_android.model.bean.RegisterInfoBean;
+import com.miku.ktv.miku_android.model.utils.IsUtils;
+import com.miku.ktv.miku_android.presenter.ExitRoomPresenter;
+import com.miku.ktv.miku_android.view.iview.IExitRoomView;
 import com.netease.nimlib.sdk.avchat.AVChatCallback;
 import com.netease.nimlib.sdk.avchat.AVChatManager;
 import com.netease.nimlib.sdk.avchat.AVChatStateObserver;
@@ -34,10 +39,11 @@ import com.netease.nimlib.sdk.avchat.model.AVChatSurfaceViewRenderer;
 import com.netease.nimlib.sdk.avchat.model.AVChatVideoCapturerFactory;
 import com.netease.nimlib.sdk.avchat.model.AVChatVideoFrame;
 
+import java.util.HashMap;
 import java.util.Map;
 
 
-public class KTVActivity extends AppCompatActivity  implements View.OnClickListener ,AVChatStateObserver{
+public class KTVActivity extends AppCompatActivity  implements IExitRoomView<Object,ExitRoomBean>, View.OnClickListener, AVChatStateObserver{
 
     private ImageView mIvback;
     private LinearLayout mLlPaimailist;
@@ -52,10 +58,17 @@ public class KTVActivity extends AppCompatActivity  implements View.OnClickListe
 
     private boolean isOpen = false ;
     private final int CAMERA_OK = 100;
+
+    private ExitRoomPresenter exitRoomPresenter;
+    private SharedPreferences sp;
+    private SharedPreferences.Editor editor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ktv);
+        sp = getSharedPreferences("config",MODE_PRIVATE);
+        editor = sp.edit();
 
         //RoomBean roomBean = new RoomBean();
         //String room_id = roomBean.getBody().getRoom_id();
@@ -67,10 +80,17 @@ public class KTVActivity extends AppCompatActivity  implements View.OnClickListe
         initView();
         //加载监听器
         initListener();
+        //绑定ExitRoomPresenter
+        bindPresenter();
         //inithead();
         //检查权限
         ccheckPermission();
 
+    }
+
+    private void bindPresenter() {
+        exitRoomPresenter = new ExitRoomPresenter();
+        exitRoomPresenter.attach(this);
     }
 
     private void enterRoom(String roomId) {
@@ -142,7 +162,29 @@ public class KTVActivity extends AppCompatActivity  implements View.OnClickListe
         switch (v.getId()){
             //返回键的点击事件
             case R.id.iv_back:
-                finish();
+                AlertDialog.Builder builder = new AlertDialog.Builder(KTVActivity.this);
+                builder.setTitle("退出房间");
+                builder.setMessage("确定退出房间？");
+
+                builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+
+                    public void onClick(DialogInterface dialog, int which) {
+                        HashMap<String,String> map=new HashMap<>();
+                        map.put("token",sp.getString("LoginToken",""));
+                        exitRoomPresenter.getExitRoom(map,ExitRoomBean.class);
+                        dialog.dismiss();
+                    }
+
+                });
+
+                builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                builder.create().show();
                 break;
             //排麦的点击事件
             case R.id.ll_diangelist:
@@ -366,6 +408,33 @@ public class KTVActivity extends AppCompatActivity  implements View.OnClickListe
 //互动直播事件通知
     @Override
     public void onLiveEvent(int event) {
+
+    }
+
+    //退出登录成功回调
+    @Override
+    public void onExitRoomSuccess(ExitRoomBean bean) {
+        if (bean.getStatus()==1){
+            finish();
+            IsUtils.showShort(this,"退出房间成功");
+        }else {
+            IsUtils.showShort(this,"退出房间失败");
+        }
+    }
+
+    @Override
+    public void onExitRoomError(Throwable t) {
+
+    }
+
+    //IBaseView成功回调
+    @Override
+    public void onSuccess(Object o) {
+
+    }
+
+    @Override
+    public void onError(Object o) {
 
     }
 }
