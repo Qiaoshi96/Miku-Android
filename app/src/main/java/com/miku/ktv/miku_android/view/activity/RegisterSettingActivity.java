@@ -171,15 +171,15 @@ public class RegisterSettingActivity extends AppCompatActivity implements IRegis
             if(file!=null){
                 infoPresenter.postAvatar(registerInfoBean.getBody().getToken(), file, AvatarBean.class);
             }
+        }else {
+            IsUtils.showShort(this,"注册失败");
+            Log.e(TAG,"onError  "+registerInfoBean.getMsg());
         }
     }
 
     @Override
     public void onError(RegisterInfoBean registerInfoBean) {
-        if (registerInfoBean.getStatus()!=1){
-            IsUtils.showShort(this,"注册失败");
-            Log.e(TAG,"onError  "+registerInfoBean.getMsg());
-        }
+
     }
 
     private void setDialog() {

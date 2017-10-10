@@ -80,7 +80,6 @@ public class RegisterCodeActivity extends AppCompatActivity implements IRegister
     }
 
     @Override
-//    public void onSuccess(RegisterBean registerBean) {
     public void onSendVetifyCodeSuccess(RegisterBean registerBean) {
         if (registerBean.getStatus()==1){
             edit.putString("phoneEdit",register_editText_phone.getText().toString());
@@ -89,9 +88,14 @@ public class RegisterCodeActivity extends AppCompatActivity implements IRegister
             startActivity(new Intent(this, RegisterCheckActivity.class));
             Log.d(TAG, "onSuccess: "+registerBean.getMsg());
         }else if(registerBean.getStatus()==4 &&registerBean.getMsg().equals("该用户已注册")){
-            IsUtils.showShort(this,"该用户已注册");
+            IsUtils.showShort(this,"该手机号已注册");
             jumpDialog();
         }
+    }
+
+    @Override
+    public void onSendVetifyCodeError(Throwable throwable) {
+        throwable.printStackTrace();
     }
 
     private void jumpDialog() {
@@ -119,20 +123,6 @@ public class RegisterCodeActivity extends AppCompatActivity implements IRegister
                 startActivity(new Intent(RegisterCodeActivity.this,LoginActivity.class));
             }
         });
-    }
-
-//    @Override
-////    public void onError(RegisterBean registerBean) {
-//    public void onSendVetifyCodeError(RegisterBean registerBean) {
-//        if (registerBean.getStatus()!=1){
-//            Toast.makeText(this,"验证码发送失败",Toast.LENGTH_SHORT).show();
-//            Log.d(TAG, "onError: "+registerBean.getMsg());
-//        }
-//    }
-
-    @Override
-    public void onSendVetifyCodeError(Throwable throwable) {
-        throwable.printStackTrace();
     }
 
     private void bindPresenter() {

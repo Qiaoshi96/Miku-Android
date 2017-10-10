@@ -17,11 +17,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.miku.ktv.miku_android.R;
+import com.miku.ktv.miku_android.model.bean.JoinRoomBean;
 import com.miku.ktv.miku_android.model.bean.RoomsBean;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
 import com.miku.ktv.miku_android.presenter.CreateRoomPresenter;
 import com.miku.ktv.miku_android.view.adapter.RoomsAdapter;
-import com.miku.ktv.miku_android.view.iview.IRoomsView;
+import com.miku.ktv.miku_android.view.iview.IJoinRoomView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +30,7 @@ import java.util.List;
 
 import static com.miku.ktv.miku_android.model.utils.Constant.gson;
 
-public class HomeActivity extends AppCompatActivity implements IRoomsView<RoomsBean>,View.OnClickListener {
+public class HomeActivity extends AppCompatActivity implements IJoinRoomView<RoomsBean,JoinRoomBean>,View.OnClickListener {
     public static final String TAG="HomeActivity";
 
     private ListView home_lv;
@@ -129,6 +130,7 @@ public class HomeActivity extends AppCompatActivity implements IRoomsView<RoomsB
             roomsBean1 = gson.fromJson(roomsJson, RoomsBean.class);
             list=roomsBean1.getBody().getRoom_list();
 
+
             initData();
             Log.e(TAG,"onSuccess: "+roomsBean.getMsg());
         }
@@ -154,7 +156,12 @@ public class HomeActivity extends AppCompatActivity implements IRoomsView<RoomsB
         home_lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                startActivity(new Intent(HomeActivity.this,KTVActivity.class));
+                String room_id = roomsBean1.getBody().getRoom_list().get(position).getRoom_id();
+                Log.d(TAG, "onItemClick:  ---  "+room_id);
+                //请求加入聊天室接口
+                HashMap<String,String> map=new HashMap<>();
+                map.put("token",sp.getString("LoginToken",""));
+                roomPresenter.getRoom_id(room_id, map, JoinRoomBean.class);
             }
         });
     }
@@ -173,5 +180,20 @@ public class HomeActivity extends AppCompatActivity implements IRoomsView<RoomsB
             }
         });
         thread.start();
+    }
+
+    @Override
+    public void onJoinSuccess(JoinRoomBean bean) {
+        if (bean.getStatus()==1){
+            Log.e(TAG,"onJoinSuccess: "+bean.getBody().getParticipants().get(0).getNick());
+            IsUtils.showShort(this,"加入聊天室成功");
+        }else {
+            IsUtils.showShort(this,"加入聊天室失败");
+        }
+    }
+
+    @Override
+    public void onJoinError(Throwable t) {
+
     }
 }

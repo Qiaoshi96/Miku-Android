@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.regex.Matcher;
@@ -55,10 +54,6 @@ public class IsUtils {
 
     public static void showLong(Context context, String s){
         Toast.makeText(context,s, Toast.LENGTH_LONG).show();
-    }
-
-    public static void initGlide(Context context, String s, ImageView imageView){
-
     }
 
     public static boolean IsSex(String sex){

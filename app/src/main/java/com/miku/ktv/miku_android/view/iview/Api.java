@@ -38,15 +38,14 @@ public interface Api {
     //获取全部房间列表
     @GET("rooms/{sign}")
     Observable<String> getRooms(@Path("sign") String sign, @QueryMap Map<String, String> map);
-
     //上传头像
-//    @FormUrlEncoded
     @POST("avatar/{sign}")
     Observable<String> postAvatar(@Path("sign") String sign, @Body RequestBody Body);
-
+    //进入聊天室
+    @GET("room/{room_id}/{sign}")
+    Observable<String> getRoom_id(@Path("room_id") String room_id, @Path("sign") String sign, @QueryMap Map<String, String> map);
     //修改个人信息：昵称
     @FormUrlEncoded
     @POST("info/{sign}")
     Observable<String> postNick(@Path("sign") String sign, @FieldMap Map<String, String> map);
-
 }
