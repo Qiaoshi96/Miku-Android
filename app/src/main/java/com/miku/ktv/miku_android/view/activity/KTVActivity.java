@@ -3,12 +3,15 @@ package com.miku.ktv.miku_android.view.activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.WindowDecorActionBar;
+import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,14 +21,20 @@ import android.widget.Toast;
 
 import com.miku.ktv.miku_android.R;
 import com.miku.ktv.miku_android.model.bean.RegisterInfoBean;
+import com.miku.ktv.miku_android.model.bean.RoomsBean;
 import com.netease.nimlib.sdk.avchat.AVChatCallback;
 import com.netease.nimlib.sdk.avchat.AVChatManager;
 import com.netease.nimlib.sdk.avchat.AVChatStateObserver;
+import com.netease.nimlib.sdk.avchat.constant.AVChatChannelProfile;
 import com.netease.nimlib.sdk.avchat.constant.AVChatResCode;
 import com.netease.nimlib.sdk.avchat.constant.AVChatType;
+import com.netease.nimlib.sdk.avchat.constant.AVChatUserRole;
+import com.netease.nimlib.sdk.avchat.constant.AVChatVideoCaptureOrientation;
+import com.netease.nimlib.sdk.avchat.constant.AVChatVideoCropRatio;
 import com.netease.nimlib.sdk.avchat.constant.AVChatVideoScalingType;
 import com.netease.nimlib.sdk.avchat.model.AVChatAudioFrame;
 import com.netease.nimlib.sdk.avchat.model.AVChatCameraCapturer;
+import com.netease.nimlib.sdk.avchat.model.AVChatChannelInfo;
 import com.netease.nimlib.sdk.avchat.model.AVChatData;
 import com.netease.nimlib.sdk.avchat.model.AVChatNetworkStats;
 import com.netease.nimlib.sdk.avchat.model.AVChatParameters;
@@ -33,6 +42,7 @@ import com.netease.nimlib.sdk.avchat.model.AVChatSessionStats;
 import com.netease.nimlib.sdk.avchat.model.AVChatSurfaceViewRenderer;
 import com.netease.nimlib.sdk.avchat.model.AVChatVideoCapturerFactory;
 import com.netease.nimlib.sdk.avchat.model.AVChatVideoFrame;
+import com.netease.nrtc.video.render.IVideoRender;
 
 import java.util.Map;
 
@@ -48,15 +58,26 @@ public class KTVActivity extends AppCompatActivity  implements View.OnClickListe
     AVChatSurfaceViewRenderer masterRender; // 自己的画布
 
     private ViewGroup MyVideoLayout;
+
+    private ViewGroup AudienceVideoLayout;
+
     private ImageView mIvVideo;
 
     private boolean isOpen = false ;
     private final int CAMERA_OK = 100;
+
+    private String mRoomName = null;
+    private static String TAG = KTVActivity.class.getName();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ktv);
-
+        Intent intent = getIntent();
+        mRoomName = intent.getStringExtra("roomName");
+        //mRoomName = "R1507514984236893";
+        AVChatManager.getInstance().observeAVChatState(this, true);
+        Log.e(TAG, "onCreate " + mRoomName);
         //RoomBean roomBean = new RoomBean();
         //String room_id = roomBean.getBody().getRoom_id();
         //加入房间
@@ -70,7 +91,6 @@ public class KTVActivity extends AppCompatActivity  implements View.OnClickListe
         //inithead();
         //检查权限
         ccheckPermission();
-
     }
 
     private void enterRoom(String roomId) {
@@ -135,6 +155,8 @@ public class KTVActivity extends AppCompatActivity  implements View.OnClickListe
         mIvVideo = (ImageView) findViewById(R.id.iv_video);
         //第一个摄像头区域
         MyVideoLayout = (ViewGroup) findViewById(R.id.v1);
+
+        AudienceVideoLayout = (ViewGroup) findViewById(R.id.v2);
     }
 
     @Override
@@ -171,10 +193,28 @@ public class KTVActivity extends AppCompatActivity  implements View.OnClickListe
 
     //关闭摄像头
     private void closeVideo() {
+        AVChatManager.getInstance().setupLocalVideoRender(null, false, AVChatVideoScalingType.SCALE_ASPECT_BALANCED);
         AVChatManager.getInstance().stopVideoPreview();
         AVChatManager.getInstance().disableVideo();
-        /*//关闭音视频引擎
-        AVChatManager.getInstance().disableRtc();*/
+        AVChatManager.getInstance().leaveRoom2(mRoomName, new AVChatCallback<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+
+            }
+
+            @Override
+            public void onFailed(int code) {
+
+            }
+
+            @Override
+            public void onException(Throwable exception) {
+
+            }
+        });
+        //关闭音视频引擎
+        AVChatManager.getInstance().disableRtc();
+
         //移除画布
         MyVideoLayout.removeAllViews();
     }
@@ -183,13 +223,23 @@ public class KTVActivity extends AppCompatActivity  implements View.OnClickListe
     private void openVideo() {
 
         AVChatManager.getInstance().enableRtc();
-        // 打开视频模块
-        AVChatManager.getInstance().enableVideo();
         // 设置视频采集模块
         if (videoCapturer == null) {
             videoCapturer = AVChatVideoCapturerFactory.createCameraCapturer();
             AVChatManager.getInstance().setupVideoCapturer(videoCapturer);
         }
+
+        AVChatParameters parameters = new AVChatParameters();
+        parameters.setBoolean(AVChatParameters.KEY_SESSION_LIVE_MODE, true);
+        parameters.setInteger(AVChatParameters.KEY_SESSION_MULTI_MODE_USER_ROLE, AVChatUserRole.NORMAL);
+        parameters.setInteger(AVChatParameters.KEY_VIDEO_FIXED_CROP_RATIO, AVChatVideoCropRatio.CROP_RATIO_16_9);
+        int videoOrientation = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? AVChatVideoCaptureOrientation.ORIENTATION_PORTRAIT : AVChatVideoCaptureOrientation.ORIENTATION_LANDSCAPE_RIGHT;
+        parameters.setInteger(AVChatParameters.KEY_VIDEO_CAPTURE_ORIENTATION, videoOrientation);
+        parameters.setBoolean(AVChatParameters.KEY_VIDEO_ROTATE_IN_RENDING, true);
+        AVChatManager.getInstance().setParameters(parameters);
+
+        // 打开视频模块
+        AVChatManager.getInstance().enableVideo();
         //
         if (masterRender == null) {
             masterRender = new AVChatSurfaceViewRenderer(this);
@@ -198,7 +248,22 @@ public class KTVActivity extends AppCompatActivity  implements View.OnClickListe
         AVChatManager.getInstance().setupLocalVideoRender(masterRender, false, AVChatVideoScalingType.SCALE_ASPECT_BALANCED);
         //打开视频预览
         AVChatManager.getInstance().startVideoPreview();
+        AVChatManager.getInstance().joinRoom2(mRoomName, AVChatType.VIDEO, new AVChatCallback<AVChatData>() {
+            @Override
+            public void onSuccess(AVChatData avChatData) {
+                Log.e(TAG, "onSuccess");
+            }
 
+            @Override
+            public void onFailed(int code) {
+                Log.e(TAG, "onFailed");
+            }
+
+            @Override
+            public void onException(Throwable exception) {
+                Log.e(TAG, "onException");
+            }
+        });
     }
 
 
@@ -210,6 +275,13 @@ public class KTVActivity extends AppCompatActivity  implements View.OnClickListe
             MyVideoLayout.addView(surfaceView);
         surfaceView.setZOrderMediaOverlay(true);
 
+    }
+
+    public void addIntoAudiencePreviewLayout(SurfaceView surfaceView) {
+        if (surfaceView.getParent()!=null)
+            ((ViewGroup) surfaceView.getParent()).removeView(surfaceView);
+        AudienceVideoLayout.addView(surfaceView);
+        surfaceView.setZOrderMediaOverlay(true);
     }
 
     private void showDialog() {
@@ -240,6 +312,7 @@ public class KTVActivity extends AppCompatActivity  implements View.OnClickListe
 //当前音视频服务器连接回调
     @Override
     public void onJoinedChannel(int code, String audioFile, String videoFile, int elapsed) {
+        Log.e(TAG, "onJoinedChannel");
         if (code != AVChatResCode.JoinChannelCode.OK) {
             Toast.makeText(this, "joined channel:" + code, Toast.LENGTH_SHORT).show();
         }
@@ -248,7 +321,10 @@ public class KTVActivity extends AppCompatActivity  implements View.OnClickListe
 //加入当前音视频频道用户帐号回调
     @Override
     public void onUserJoined(String account) {
-
+        Log.e(TAG, "onUserJoined" + account);
+        AVChatSurfaceViewRenderer render =  new AVChatSurfaceViewRenderer(this);
+        addIntoAudiencePreviewLayout(render);
+        AVChatManager.getInstance().setupRemoteVideoRender(account, render, false, AVChatVideoScalingType.SCALE_ASPECT_BALANCED);
     }
 //当前用户离开频道回调
     @Override
@@ -367,6 +443,12 @@ public class KTVActivity extends AppCompatActivity  implements View.OnClickListe
     @Override
     public void onLiveEvent(int event) {
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        AVChatManager.getInstance().observeAVChatState(this, false);
     }
 }
 
