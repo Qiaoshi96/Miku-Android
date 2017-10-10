@@ -1,11 +1,11 @@
 package com.miku.ktv.miku_android.model.utils;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.text.TextUtils;
-import android.util.Base64;
 import android.widget.Toast;
+
+import com.miku.ktv.miku_android.R;
+import com.miku.ktv.miku_android.view.custom.ProgressDialogLoading;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -56,37 +56,20 @@ public class IsUtils {
         Toast.makeText(context,s, Toast.LENGTH_LONG).show();
     }
 
+    public static void showCustomDialog(Context context){
+        ProgressDialogLoading mLoading=new ProgressDialogLoading(context, R.style.CustomProgressDialog);
+        mLoading.show();
+    }
+
+    public static void dismissCustomDialog(Context context){
+        ProgressDialogLoading mLoading=new ProgressDialogLoading(context, R.style.CustomProgressDialog);
+        mLoading.dismiss();
+    }
+
     public static boolean IsSex(String sex){
         if(sex.equals("男")||sex.equals("女")){
             return true;
         }
         return false;
     }
-
-    /**
-     * string转成bitmap
-     *
-     * @param str
-     */
-    public static Bitmap stringToBitmap(String str)
-    {
-        // OutputStream out;
-        Bitmap bitmap = null;
-        try
-        {
-            // out = new FileOutputStream("/sdcard/aa.jpg");
-            byte[] bitmapArray;
-            bitmapArray = Base64.decode(str, Base64.DEFAULT);
-            bitmap =
-                    BitmapFactory.decodeByteArray(bitmapArray, 0,
-                            bitmapArray.length);
-            // bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-            return bitmap;
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
-    }
-
 }

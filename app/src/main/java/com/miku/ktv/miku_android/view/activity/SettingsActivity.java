@@ -12,12 +12,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.miku.ktv.miku_android.R;
+import com.miku.ktv.miku_android.model.bean.LogoutBean;
+import com.miku.ktv.miku_android.model.utils.IsUtils;
+import com.miku.ktv.miku_android.presenter.LogoutPresenter;
+import com.miku.ktv.miku_android.view.iview.ILogoutView;
+
+import java.util.HashMap;
 
 /**
  * Created by 焦帆 on 2017/9/28.
  */
 
-public class SettingsActivity extends AppCompatActivity implements View.OnClickListener {
+public class SettingsActivity extends AppCompatActivity implements ILogoutView<Object,LogoutBean>, View.OnClickListener {
 
     private ImageView settings_imageView_back;
     private TextView settigs_textView_service;
@@ -26,6 +32,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
     private TextView dialog_textView_ok;
     private SharedPreferences sp;
     private SharedPreferences.Editor edit;
+    private LogoutPresenter logoutPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +43,13 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         initState();
         initView();
         initListener();
+        bindPresenter();
 
+    }
+
+    private void bindPresenter() {
+        logoutPresenter = new LogoutPresenter();
+        logoutPresenter.attach(this);
     }
 
     @Override
@@ -66,11 +79,11 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 dialog_textView_ok.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        edit.clear();
-                        edit.commit();
-                        Intent intent=new Intent(SettingsActivity.this,MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
+                        //退出登录的接口
+                        HashMap<String,String> map=new HashMap<>();
+                        map.put("token",sp.getString("LoginToken",""));
+                        logoutPresenter.getLogout(map,LogoutBean.class);
+                        builder.dismiss();
                     }
                 });
                 break;
@@ -102,4 +115,33 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
+    @Override
+    public void onLogoutSuccess(LogoutBean bean) {
+        if (bean.getStatus()==1){
+
+            edit.clear();
+            edit.commit();
+            Intent intent=new Intent(SettingsActivity.this,MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            IsUtils.showShort(this,"退出登录成功");
+        }else {
+            IsUtils.showShort(this,"退出登录失败");
+        }
+    }
+
+    @Override
+    public void onLogoutError(Throwable t) {
+
+    }
+
+    @Override
+    public void onSuccess(Object o) {
+
+    }
+
+    @Override
+    public void onError(Object o) {
+
+    }
 }

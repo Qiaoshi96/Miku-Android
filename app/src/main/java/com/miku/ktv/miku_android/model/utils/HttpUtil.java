@@ -113,6 +113,15 @@ public class HttpUtil {
                 .subscribe(onNext, onError);
     }
 
+    //getLogout退出登录
+    public static void getLogout(String sign, Map<String, String> map, Consumer<String> onNext, Consumer<Throwable> onError) {
+        Api api = retrofit.create(Api.class);
+        Observable<String> observable = api.getLogout(sign,map);
+        observable.observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(onNext, onError);
+    }
+
     //postNick
     public static void postNick(String sign, Map<String, String> map,Consumer<String> onNext, Consumer<Throwable> onError) {
         Api api = retrofit.create(Api.class);

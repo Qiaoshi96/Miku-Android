@@ -72,9 +72,11 @@ public class LoginActivity extends AppCompatActivity implements IRegisterCheckVi
                     IsUtils.showShort(this,"请输入手机号");
                 }else {
                     if (IsUtils.validatePhoneNumber(login_editText_phone.getText().toString())){
+                        IsUtils.showCustomDialog(this);
                         HashMap<String,String> map=new HashMap<>();
                         map.put("phone",login_editText_phone.getText().toString());
                         loginCodePresenter.getSms_login(map, LoginCodeBean.class);
+                        IsUtils.dismissCustomDialog(this);
                     }else {
                         login_textView_phoneError.setVisibility(View.VISIBLE);
                     }
@@ -122,7 +124,6 @@ public class LoginActivity extends AppCompatActivity implements IRegisterCheckVi
             login_textView_phoneError.setVisibility(View.GONE);
         }
     }
-
 
     @Override
     public void onSuccess(Object o) {
