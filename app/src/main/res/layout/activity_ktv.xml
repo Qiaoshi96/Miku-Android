@@ -40,7 +40,7 @@
                     android:layout_marginTop="5dp"
                     android:textColor="#ffffff"
                     android:id="@+id/tv_nameinfo"
-                    android:text="崔大朕"
+                    android:text="昵称"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
                 <TextView

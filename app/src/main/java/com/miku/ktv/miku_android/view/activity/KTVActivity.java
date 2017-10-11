@@ -1,5 +1,6 @@
 package com.miku.ktv.miku_android.view.activity;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,7 +10,6 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,7 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class KTVActivity extends AppCompatActivity  implements IExitRoomView<Object,ExitRoomBean>, View.OnClickListener, AVChatStateObserver{
+public class KTVActivity extends Activity implements IExitRoomView<Object,ExitRoomBean>, View.OnClickListener, AVChatStateObserver{
 
     private ImageView mIvback;
     private LinearLayout mLlPaimailist;
@@ -74,7 +74,6 @@ public class KTVActivity extends AppCompatActivity  implements IExitRoomView<Obj
         //String room_id = roomBean.getBody().getRoom_id();
         //加入房间
         //enterRoom(room_id);
-
 
         //初始化控件findViewById
         initView();
@@ -162,35 +161,13 @@ public class KTVActivity extends AppCompatActivity  implements IExitRoomView<Obj
         switch (v.getId()){
             //返回键的点击事件
             case R.id.iv_back:
-                AlertDialog.Builder builder = new AlertDialog.Builder(KTVActivity.this);
-                builder.setTitle("退出房间");
-                builder.setMessage("确定退出房间？");
-
-                builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                    @Override
-
-                    public void onClick(DialogInterface dialog, int which) {
-                        HashMap<String,String> map=new HashMap<>();
-                        map.put("token",sp.getString("LoginToken",""));
-                        exitRoomPresenter.getExitRoom(map,ExitRoomBean.class);
-                        dialog.dismiss();
-                    }
-
-                });
-
-                builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                builder.create().show();
-                break;
-            //排麦的点击事件
-            case R.id.ll_diangelist:
-
+                exitRoomDialog();
                 break;
             //点歌的点击事件
+            case R.id.ll_diangelist:
+                startActivity(new Intent(this,SongsActivity.class));
+                break;
+            //排麦的点击事件
             case R.id.ll_paimailist:
 
                 break;
@@ -209,6 +186,32 @@ public class KTVActivity extends AppCompatActivity  implements IExitRoomView<Obj
                 break;
 
         }
+    }
+
+    private void exitRoomDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(KTVActivity.this);
+        builder.setTitle("退出房间");
+        builder.setMessage("确定退出房间？");
+
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+
+            public void onClick(DialogInterface dialog, int which) {
+                HashMap<String,String> map=new HashMap<>();
+                map.put("token",sp.getString("LoginToken",""));
+                exitRoomPresenter.getExitRoom(map,ExitRoomBean.class);
+                dialog.dismiss();
+            }
+
+        });
+
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
     }
 
     //关闭摄像头

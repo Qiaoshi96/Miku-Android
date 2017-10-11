@@ -1,12 +1,12 @@
 package com.miku.ktv.miku_android.view.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -23,7 +23,7 @@ import java.util.HashMap;
  * Created by 焦帆 on 2017/9/28.
  */
 
-public class SettingsActivity extends AppCompatActivity implements ILogoutView<Object,LogoutBean>, View.OnClickListener {
+public class SettingsActivity extends Activity implements ILogoutView<Object,LogoutBean>, View.OnClickListener {
 
     private ImageView settings_imageView_back;
     private TextView settigs_textView_service;

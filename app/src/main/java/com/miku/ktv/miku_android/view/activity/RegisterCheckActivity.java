@@ -1,9 +1,9 @@
 package com.miku.ktv.miku_android.view.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -23,7 +23,7 @@ import com.miku.ktv.miku_android.view.iview.IRegisterCheckView;
 
 import java.util.HashMap;
 
-public class RegisterCheckActivity extends AppCompatActivity implements IRegisterCheckView<CheckBean, RegisterBean>, TextWatcher, View.OnClickListener {
+public class RegisterCheckActivity extends Activity implements IRegisterCheckView<CheckBean, RegisterBean>, TextWatcher, View.OnClickListener {
 
     public static final String TAG = "RegisterCheckActivity";
 

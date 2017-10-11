@@ -1,6 +1,7 @@
 package com.miku.ktv.miku_android.view.activity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -8,7 +9,6 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -20,7 +20,7 @@ import com.bumptech.glide.Glide;
 import com.miku.ktv.miku_android.R;
 import com.miku.ktv.miku_android.model.utils.Constant;
 
-public class PersonalActivity extends AppCompatActivity implements View.OnClickListener {
+public class PersonalActivity extends Activity implements View.OnClickListener {
     public static final String TAG = "PersonalActivity";
     private static final int WRITE_PERMISSION = 0x01;
     private LinearLayout personal_linearLayout_back;

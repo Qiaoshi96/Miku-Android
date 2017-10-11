@@ -15,7 +15,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/ApppTheme">
         <activity android:name=".view.activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -51,6 +51,8 @@
             android:name=".view.activity.EditSignActivity"
             android:windowSoftInputMode="stateVisible|adjustResize"/>
         <activity android:name=".view.activity.WebActivity">
+        </activity>
+        <activity android:name=".view.activity.SongsActivity">
         </activity>
     </application>
 
