@@ -1,9 +1,9 @@
 package com.miku.ktv.miku_android.view.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -11,7 +11,7 @@ import android.widget.TextView;
 import com.miku.ktv.miku_android.R;
 import com.miku.ktv.miku_android.model.utils.Constant;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends Activity implements View.OnClickListener {
 
     public static final String TAG="MainActivity";
     private LinearLayout main_linearLayout_phone,main_linearLayout_wechat,main_linearLayout_qq;

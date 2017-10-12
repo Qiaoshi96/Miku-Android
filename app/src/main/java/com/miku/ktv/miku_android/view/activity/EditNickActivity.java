@@ -1,11 +1,11 @@
 package com.miku.ktv.miku_android.view.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
@@ -20,7 +20,7 @@ import com.miku.ktv.miku_android.view.iview.IRegisterView;
 
 import java.util.HashMap;
 
-public class EditNickActivity extends AppCompatActivity implements IRegisterView<NickBean>,View.OnClickListener {
+public class EditNickActivity extends Activity implements IRegisterView<NickBean>,View.OnClickListener {
 
     private ImageView en_imageView_back;
     private TextView en_textView_save;

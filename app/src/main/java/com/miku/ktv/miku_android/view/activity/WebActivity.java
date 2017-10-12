@@ -1,7 +1,7 @@
 package com.miku.ktv.miku_android.view.activity;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -12,7 +12,7 @@ import android.widget.ProgressBar;
 
 import com.miku.ktv.miku_android.R;
 
-public class WebActivity extends AppCompatActivity {
+public class WebActivity extends Activity {
 
     private WebView webView1;
     private ProgressBar progressBar1;

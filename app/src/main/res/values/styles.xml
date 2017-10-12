@@ -6,6 +6,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
     </style>
 
     <style name="BottomDialog" parent="@style/Base.V7.Theme.AppCompat.Light.Dialog">
@@ -16,6 +18,11 @@
     <style name="BottomDialog.Animation" parent="Animation.AppCompat.Dialog">
         <item name="android:windowEnterAnimation">@anim/translate_dialog_in</item>
         <item name="android:windowExitAnimation">@anim/translate_dialog_out</item>
+    </style>
+
+    <style name="CustomProgressDialog" parent="Theme.AppCompat.Dialog">
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
 </resources>

@@ -1,9 +1,9 @@
 package com.miku.ktv.miku_android.view.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -28,7 +28,7 @@ import com.netease.nimlib.sdk.auth.LoginInfo;
 
 import java.util.HashMap;
 
-public class LoginCheckActivity extends AppCompatActivity implements IRegisterCheckView<LoginCheckBean, RegisterBean>, TextWatcher, View.OnClickListener{
+public class LoginCheckActivity extends Activity implements IRegisterCheckView<LoginCheckBean, RegisterBean>, TextWatcher, View.OnClickListener{
 
     public static final String TAG = "LoginCheckActivity";
 

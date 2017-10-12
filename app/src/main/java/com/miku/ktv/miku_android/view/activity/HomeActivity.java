@@ -1,12 +1,12 @@
 package com.miku.ktv.miku_android.view.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -30,7 +30,7 @@ import java.util.List;
 
 import static com.miku.ktv.miku_android.model.utils.Constant.gson;
 
-public class HomeActivity extends AppCompatActivity implements IJoinRoomView<RoomsBean,JoinRoomBean>,View.OnClickListener {
+public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,JoinRoomBean>,View.OnClickListener {
     public static final String TAG="HomeActivity";
 
     private ListView home_lv;

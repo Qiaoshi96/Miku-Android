@@ -1,9 +1,9 @@
 package com.miku.ktv.miku_android.view.activity;
 
+import android.app.Activity;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.miku.ktv.miku_android.R;
 
-public class SuggestActivity extends AppCompatActivity implements View.OnClickListener {
+public class SuggestActivity extends Activity implements View.OnClickListener {
 
     private ImageView suggest_imageView_back;
     private TextView suggest_textView_submit;

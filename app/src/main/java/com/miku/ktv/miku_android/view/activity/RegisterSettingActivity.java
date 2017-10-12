@@ -1,5 +1,6 @@
 package com.miku.ktv.miku_android.view.activity;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,7 +10,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -32,7 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class RegisterSettingActivity extends AppCompatActivity implements IRegisterInfoView<RegisterInfoBean>, View.OnClickListener {
+public class RegisterSettingActivity extends Activity implements IRegisterInfoView<RegisterInfoBean>, View.OnClickListener {
 
     public static final String TAG="RegisterSettingActivity";
     private SharedPreferences sp;

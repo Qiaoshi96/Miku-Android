@@ -1,11 +1,11 @@
 package com.miku.ktv.miku_android.view.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
@@ -15,7 +15,7 @@ import android.widget.TextView;
 import com.miku.ktv.miku_android.R;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
 
-public class EditSignActivity extends AppCompatActivity implements View.OnClickListener {
+public class EditSignActivity extends Activity implements View.OnClickListener {
 
     private ImageView es_imageView_back;
     private TextView es_textView_save;

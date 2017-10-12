@@ -1,9 +1,9 @@
 package com.miku.ktv.miku_android.view.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -20,7 +20,7 @@ import com.miku.ktv.miku_android.view.iview.IRegisterCheckView;
 
 import java.util.HashMap;
 
-public class LoginActivity extends AppCompatActivity implements IRegisterCheckView<Object,LoginCodeBean>,TextWatcher,View.OnClickListener {
+public class LoginActivity extends Activity implements IRegisterCheckView<Object,LoginCodeBean>,TextWatcher,View.OnClickListener {
 
     public static final String TAG="LoginActivity";
     private TextView login_textView_send;
@@ -72,9 +72,11 @@ public class LoginActivity extends AppCompatActivity implements IRegisterCheckVi
                     IsUtils.showShort(this,"请输入手机号");
                 }else {
                     if (IsUtils.validatePhoneNumber(login_editText_phone.getText().toString())){
+                        IsUtils.showCustomDialog(this);
                         HashMap<String,String> map=new HashMap<>();
                         map.put("phone",login_editText_phone.getText().toString());
                         loginCodePresenter.getSms_login(map, LoginCodeBean.class);
+                        IsUtils.dismissCustomDialog(getApplicationContext());
                     }else {
                         login_textView_phoneError.setVisibility(View.VISIBLE);
                     }
@@ -122,7 +124,6 @@ public class LoginActivity extends AppCompatActivity implements IRegisterCheckVi
             login_textView_phoneError.setVisibility(View.GONE);
         }
     }
-
 
     @Override
     public void onSuccess(Object o) {
