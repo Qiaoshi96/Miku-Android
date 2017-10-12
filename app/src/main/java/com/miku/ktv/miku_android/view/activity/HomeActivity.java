@@ -46,6 +46,7 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
     private RoomsAdapter roomsAdapter;
     private RoomsBean roomsBean1;
 
+    private String mRoomName;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -155,12 +156,14 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
         home_lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String room_id = roomsBean1.getBody().getRoom_list().get(position).getRoom_id();
-                Log.d(TAG, "onItemClick:  ---  "+room_id);
+                mRoomName = roomsBean1.getBody().getRoom_list().get(position).getRoom_id();
+                editor.putString("roomname",mRoomName);
+                editor.commit();
+                Log.e(TAG, "onItemClick:  ---  "+mRoomName);
                 //请求加入聊天室接口
                 HashMap<String,String> map=new HashMap<>();
                 map.put("token",sp.getString("LoginToken",""));
-                roomPresenter.getRoom_id(room_id, map, JoinRoomBean.class);
+                roomPresenter.getRoom_id(mRoomName, map, JoinRoomBean.class);
             }
         });
     }
@@ -184,9 +187,14 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
     @Override
     public void onJoinSuccess(JoinRoomBean bean) {
         if (bean.getStatus()==1){
-            Log.e(TAG,"onJoinSuccess: "+bean.getBody().getParticipants().get(0).getNick());
+            Log.e(TAG,"onJoinSuccess: "+bean.getBody().getParticipants().get(0).getNick() + mRoomName);
             startActivity(new Intent(this,KTVActivity.class));
             IsUtils.showShort(this,"加入聊天室成功");
+            Intent intent=new Intent(HomeActivity.this, KTVActivity.class);
+            intent.putExtra("roomName", mRoomName);
+            //关闭之前所有Activity
+            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         }else {
             IsUtils.showShort(this,"加入聊天室失败");
         }
