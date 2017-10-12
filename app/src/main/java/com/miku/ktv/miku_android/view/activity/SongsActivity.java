@@ -1,5 +1,6 @@
 package com.miku.ktv.miku_android.view.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -21,7 +22,7 @@ import com.miku.ktv.miku_android.view.fragment.HotFragment;
 
 import java.util.ArrayList;
 
-public class SongsActivity extends FragmentActivity {
+public class SongsActivity extends FragmentActivity implements View.OnClickListener {
     public static final String TAG = "SongsActivity";
 
     private ViewPager songs_vp;
@@ -89,6 +90,21 @@ public class SongsActivity extends FragmentActivity {
         songs_textView_hot.setTextColor(getResources().getColor(R.color.yellow));
         //设置viewpager页面滑动监听事件
         songs_vp.setOnPageChangeListener(new MyOnPageChangeListener());
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.Songs_ImageView_Back:
+                finish();
+                break;
+            case R.id.Songs_RelativeLayout_Search:
+                startActivity(new Intent(this,SearchActivity.class));
+                break;
+
+            default:
+                break;
+        }
     }
 
     /**
@@ -159,6 +175,8 @@ public class SongsActivity extends FragmentActivity {
         songs_textView_histroy = (TextView) findViewById(R.id.Songs_TextView_Histroy);
         songs_imageView_cursor = (ImageView) findViewById(R.id.Songs_ImageView_Cursor);
         songs_relativeLayout_search = (RelativeLayout) findViewById(R.id.Songs_RelativeLayout_Search);
+        songs_imageView_back.setOnClickListener(this);
+        songs_relativeLayout_search.setOnClickListener(this);
     }
 
     /**
@@ -167,13 +185,10 @@ public class SongsActivity extends FragmentActivity {
      * @version 1.0
      */
     public class MyOnClickListener implements View.OnClickListener{
-
         private int index = 0 ;
-
         public MyOnClickListener(int i) {
             index = i;
         }
-
         @Override
         public void onClick(View v) {
             songs_vp.setCurrentItem(index);

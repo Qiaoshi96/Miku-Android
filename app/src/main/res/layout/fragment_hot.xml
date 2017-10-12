@@ -3,10 +3,14 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="1111111111111111111111"
+
+    <com.miku.ktv.miku_android.pulltorefreshlistview.PullToRefreshListView
+        xmlns:ptr="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/pull_to_refresh_listview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        ptr:ptrMode="both"
+        ptr:ptrAnimationStyle="rotate"
         />
 
 </LinearLayout>

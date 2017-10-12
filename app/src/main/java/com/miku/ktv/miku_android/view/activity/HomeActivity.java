@@ -130,7 +130,6 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
             roomsBean1 = gson.fromJson(roomsJson, RoomsBean.class);
             list=roomsBean1.getBody().getRoom_list();
 
-
             initData();
             Log.e(TAG,"onSuccess: "+roomsBean.getMsg());
         }

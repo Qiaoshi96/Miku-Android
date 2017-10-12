@@ -131,4 +131,13 @@ public class HttpUtil {
                 .subscribe(onNext, onError);
     }
 
+    //getSongsList获取歌曲列表
+    public static void getSongsList(String sign, Consumer<String> onNext, Consumer<Throwable> onError) {
+        Api api = retrofit.create(Api.class);
+        Observable<String> observable = api.getSongsList(sign);
+        observable.observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(onNext, onError);
+    }
+
 }

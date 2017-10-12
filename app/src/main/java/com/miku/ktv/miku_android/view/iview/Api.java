@@ -54,4 +54,7 @@ public interface Api {
     //退出登录
     @GET("logout/{sign}")
     Observable<String> getLogout(@Path("sign") String sign, @QueryMap Map<String, String> map);
+    //获取歌曲列表
+    @GET("songs/{sign}")
+    Observable<String> getSongsList(@Path("sign") String sign);
 }
