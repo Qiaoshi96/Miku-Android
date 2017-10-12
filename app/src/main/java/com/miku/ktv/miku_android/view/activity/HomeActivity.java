@@ -158,7 +158,9 @@ public class HomeActivity extends AppCompatActivity implements IJoinRoomView<Roo
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mRoomName = roomsBean1.getBody().getRoom_list().get(position).getRoom_id();
-                Log.d(TAG, "onItemClick:  ---  "+mRoomName);
+                editor.putString("roomname",mRoomName);
+                editor.commit();
+                Log.e(TAG, "onItemClick:  ---  "+mRoomName);
                 //请求加入聊天室接口
                 HashMap<String,String> map=new HashMap<>();
                 map.put("token",sp.getString("LoginToken",""));
@@ -186,7 +188,8 @@ public class HomeActivity extends AppCompatActivity implements IJoinRoomView<Roo
     @Override
     public void onJoinSuccess(JoinRoomBean bean) {
         if (bean.getStatus()==1){
-            Log.e(TAG,"onJoinSuccess: "+bean.getBody().getParticipants().get(0).getNick());
+            Log.e(TAG,"onJoinSuccess: "+bean.getBody().getParticipants().get(0).getNick() + mRoomName);
+            startActivity(new Intent(this,KTVActivity.class));
             IsUtils.showShort(this,"加入聊天室成功");
             Intent intent=new Intent(HomeActivity.this, KTVActivity.class);
             intent.putExtra("roomName", mRoomName);

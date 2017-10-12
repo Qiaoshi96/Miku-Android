@@ -18,6 +18,8 @@ public class Constant {
     public static Gson gson;
     private static final int DEFAULT_TIMEOUT = 20;
 
+    public static final int CAMERA_OK = 100;
+
     //初始化
     public static void init(Context context) {
         mSharedPreferences = context.getSharedPreferences(Constant.SYSTEM_SHARE_NAME, Activity.MODE_PRIVATE);

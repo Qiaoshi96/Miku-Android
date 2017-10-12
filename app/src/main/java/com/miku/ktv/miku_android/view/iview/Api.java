@@ -17,10 +17,10 @@ import retrofit2.http.QueryMap;
  */
 
 public interface Api {
-    //获取注册验证码
+    //验证注册验证码
     @GET("verify/{sign}")
     Observable<String> get(@Path("sign") String sign, @QueryMap Map<String, String> map);
-    //效验注册验证码
+    //获取注册验证码
     @FormUrlEncoded
     @POST("verify/{sign}")
     Observable<String> post(@Path("sign") String sign, @FieldMap Map<String, String> map);
@@ -48,4 +48,10 @@ public interface Api {
     @FormUrlEncoded
     @POST("info/{sign}")
     Observable<String> postNick(@Path("sign") String sign, @FieldMap Map<String, String> map);
+    //退出房间
+    @GET("exit_room/{sign}")
+    Observable<String> getExitRoom(@Path("sign") String sign, @QueryMap Map<String, String> map);
+    //退出登录
+    @GET("logout/{sign}")
+    Observable<String> getLogout(@Path("sign") String sign, @QueryMap Map<String, String> map);
 }

@@ -28,7 +28,7 @@ public class HttpUtil {
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build();
 
-    //get封装
+    //get验证注册验证码
     public static void get(String sign, Map<String, String> map, Consumer<String> onNext, Consumer<Throwable> onError) {
         Api api = retrofit.create(Api.class);
         Observable<String> observable = api.get(sign,map);
@@ -37,7 +37,7 @@ public class HttpUtil {
                 .subscribe(onNext, onError);
     }
 
-    //post封装
+    //post获取注册验证码
     public static void post(String sign, Map<String, String> map,Consumer<String> onNext, Consumer<Throwable> onError) {
         Api api = retrofit.create(Api.class);
         Observable<String> observable = api.post(sign,map);
@@ -72,7 +72,7 @@ public class HttpUtil {
                 .subscribe(onNext, onError);
     }
 
-    //getRooms封装
+    //getRooms获取房间列表
     public static void getRooms(String sign, Map<String, String> map,Consumer<String> onNext, Consumer<Throwable> onError) {
         Api api = retrofit.create(Api.class);
         Observable<String> observable = api.getRooms(sign,map);
@@ -81,7 +81,7 @@ public class HttpUtil {
                 .subscribe(onNext, onError);
     }
 
-    //postSms_login
+    //postAvatar上传头像到服务器
     public static void postAvatar(String sign, String token, File avatar, Consumer<String> onNext, Consumer<Throwable> onError) {
         Api api = retrofit.create(Api.class);
         //构建body
@@ -104,6 +104,15 @@ public class HttpUtil {
                 .subscribe(onNext, onError);
     }
 
+    //getExitRoom退出房间
+    public static void getExitRoom(String sign, Map<String, String> map, Consumer<String> onNext, Consumer<Throwable> onError) {
+        Api api = retrofit.create(Api.class);
+        Observable<String> observable = api.getExitRoom(sign,map);
+        observable.observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(onNext, onError);
+    }
+
     //postNick
     public static void postNick(String sign, Map<String, String> map,Consumer<String> onNext, Consumer<Throwable> onError) {
         Api api = retrofit.create(Api.class);
@@ -112,4 +121,5 @@ public class HttpUtil {
                 .subscribeOn(Schedulers.io())
                 .subscribe(onNext, onError);
     }
+
 }

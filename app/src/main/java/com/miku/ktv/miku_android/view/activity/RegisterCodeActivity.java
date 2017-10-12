@@ -120,6 +120,7 @@ public class RegisterCodeActivity extends AppCompatActivity implements IRegister
         dialogJustLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                builder.dismiss();
                 startActivity(new Intent(RegisterCodeActivity.this,LoginActivity.class));
             }
         });

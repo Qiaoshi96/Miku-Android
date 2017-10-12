@@ -8,5 +8,4 @@ public interface IJoinRoomView<T,E> extends IBaseView<T>{
 
     void onJoinSuccess(E t);
     void onJoinError(Throwable t);
-
 }
