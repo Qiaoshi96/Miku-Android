@@ -2,14 +2,18 @@ package com.miku.ktv.miku_android.view.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.miku.ktv.miku_android.R;
@@ -22,12 +26,12 @@ import com.netease.nimlib.sdk.avchat.model.AVChatSurfaceViewRenderer;
 public class VideoGridView extends FrameLayout {
 
     /**
-     *  surface view render
+     * surface view render
      */
     private AVChatSurfaceViewRenderer mSurfaceViewRender;
 
     /**
-     *  non-video layout
+     * non-video layout
      */
     private ConstraintLayout mNonVideoLayout;
 
@@ -42,14 +46,29 @@ public class VideoGridView extends FrameLayout {
     private ImageView mVolumeIv;
 
     /**
+     * volume shade
+     */
+    private LinearLayout mVolumeShade;
+
+    /**
+     * volume shade layoutParams
+     */
+    private FrameLayout.LayoutParams mVolumeShadeLayoutParams;
+
+    /**
      * name text
      */
     private TextView mNameTv;
+
+    private float mScale;
+
+    private Bitmap mVolumeBitmap;
 
 
     public VideoGridView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
+        mScale = context.getResources().getDisplayMetrics().density;
         // add render
         FrameLayout.LayoutParams renderLayoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
         mSurfaceViewRender = new AVChatSurfaceViewRenderer(context);
@@ -67,27 +86,14 @@ public class VideoGridView extends FrameLayout {
         // add head image view to nonVideoLayout
         mHeadIv = new ImageView(context);
         mHeadIv.setImageResource(R.mipmap.icon_qq);
-        ConstraintLayout.LayoutParams mHeadLayoutParams = new ConstraintLayout.LayoutParams(45, 45);
+        ConstraintLayout.LayoutParams mHeadLayoutParams = new ConstraintLayout.LayoutParams((int) (45 * mScale), (int) (45 * mScale));
         mHeadLayoutParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
         mHeadLayoutParams.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
         mHeadLayoutParams.leftToLeft = ConstraintLayout.LayoutParams.PARENT_ID;
-        mHeadLayoutParams.rightToRight = ConstraintLayout.LayoutParams.PARENT_ID;;
-        mHeadLayoutParams.bottomMargin = 20;
-        //mHeadLayoutParams.width = 45;
-        //mHeadLayoutParams.height = 45;
+        mHeadLayoutParams.rightToRight = ConstraintLayout.LayoutParams.PARENT_ID;
+        mHeadLayoutParams.bottomMargin = (int) (20 * mScale);
         mHeadIv.setLayoutParams(mHeadLayoutParams);
         mNonVideoLayout.addView(mHeadIv);
-
-        // add volume image view to nonVideoLayout
-        mVolumeIv = new ImageView(context);
-        mVolumeIv.setImageResource(R.drawable.bg_identify_code_normal);
-        ConstraintLayout.LayoutParams mVolumeLayoutParams = new ConstraintLayout.LayoutParams(10, 50);
-        mVolumeLayoutParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
-        mVolumeLayoutParams.rightToRight = ConstraintLayout.LayoutParams.PARENT_ID;;
-        mVolumeLayoutParams.bottomMargin = 5;
-        mVolumeLayoutParams.rightMargin = 5;
-        mVolumeIv.setLayoutParams(mVolumeLayoutParams);
-        mNonVideoLayout.addView(mVolumeIv);
 
         // add name text view to nonVideoLayout
         mNameTv = new TextView(context);
@@ -99,8 +105,37 @@ public class VideoGridView extends FrameLayout {
         mNameLayoutParams.leftToLeft = ConstraintLayout.LayoutParams.PARENT_ID;
         mNameLayoutParams.rightToRight = ConstraintLayout.LayoutParams.PARENT_ID;
         mNameTv.setLayoutParams(mNameLayoutParams);
-        mNameLayoutParams.topMargin = 50;
+        mNameLayoutParams.topMargin = (int) (50 * mScale);
         mNonVideoLayout.addView(mNameTv);
+
+
+        // volume Layout
+        FrameLayout fl = new FrameLayout(context);
+        ConstraintLayout.LayoutParams flLayoutParams = new ConstraintLayout.LayoutParams((int) (10 * mScale), (int) (50 * mScale));
+        flLayoutParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
+        flLayoutParams.rightToRight = ConstraintLayout.LayoutParams.PARENT_ID;
+        flLayoutParams.bottomMargin = (int) (5 * mScale);
+        flLayoutParams.rightMargin = (int) (5 * mScale);
+        fl.setLayoutParams(flLayoutParams);
+        mNonVideoLayout.addView(fl);
+
+
+        // add volume image view to frame layout
+        mVolumeIv = new ImageView(context);
+        mVolumeBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.headinfo);
+        //mVolumeIv.setImageBitmap(mVolumeBitmap);
+        mVolumeIv.setBackgroundColor(Color.WHITE);
+        FrameLayout.LayoutParams volumeLayoutParams  = new FrameLayout.LayoutParams((int)(10 * mScale), (int) (50 * mScale));
+        mVolumeIv.setLayoutParams(volumeLayoutParams);
+        fl.addView(mVolumeIv);
+
+        // add volume shader to frame layout
+        mVolumeShade = new LinearLayout(context);
+        ColorDrawable colorDrawable= (ColorDrawable) this.getBackground();
+        mVolumeShade.setBackgroundColor(colorDrawable.getColor());
+        mVolumeShadeLayoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        mVolumeShade.setLayoutParams(mVolumeShadeLayoutParams);
+        fl.addView(mVolumeShade);
     }
 
 
@@ -116,8 +151,9 @@ public class VideoGridView extends FrameLayout {
         mNameTv.setText(name);
     }
 
-    public void setVolumeImage(Bitmap bitmap) {
-        mVolumeIv.setImageBitmap(bitmap);
+    public void setVolume(int percent) {
+        mVolumeShadeLayoutParams.height = mVolumeIv.getHeight() * (100 - percent) / 100;
+        mVolumeShade.setLayoutParams(mVolumeShadeLayoutParams);
     }
 
     public void setVisibility(boolean video, boolean nonVideo) {

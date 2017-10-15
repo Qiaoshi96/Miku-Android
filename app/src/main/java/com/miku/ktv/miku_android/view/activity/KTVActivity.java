@@ -5,9 +5,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -20,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.miku.ktv.miku_android.R;
+import com.miku.ktv.miku_android.main.AvatarImageFetchRunnable;
 import com.miku.ktv.miku_android.model.bean.ExitRoomBean;
 import com.miku.ktv.miku_android.model.bean.JoinRoomBean;
 import com.miku.ktv.miku_android.model.bean.RegisterInfoBean;
@@ -49,13 +53,18 @@ import com.netease.nimlib.sdk.avchat.model.AVChatSurfaceViewRenderer;
 import com.netease.nimlib.sdk.avchat.model.AVChatVideoCapturerFactory;
 import com.netease.nimlib.sdk.avchat.model.AVChatVideoFrame;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 
-public class KTVActivity extends AppCompatActivity implements IExitRoomView<Object, ExitRoomBean>, IFetchRoomInfoView<Object, JoinRoomBean>, View.OnClickListener, AVChatStateObserver {
+public class KTVActivity extends AppCompatActivity implements IExitRoomView<Object, ExitRoomBean>, IFetchRoomInfoView<Object, JoinRoomBean>, View.OnClickListener, AVChatStateObserver, AvatarImageFetchRunnable.FetchAvatarImageCallBack {
     private static final String TAG = KTVActivity.class.getName();
 
     /**
@@ -120,6 +129,8 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
 
     List<VideoGridView> mVideoGridViewList = null;
 
+    Map<String, Bitmap> mAccount2BitmapMap = null;
+
 
     /**
      * 是否开启视频，true表示开启视频， false表示关闭视频
@@ -153,6 +164,11 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
     private String mAccount;
 
 
+    /**
+     * handler
+     */
+    private Handler mHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -173,9 +189,11 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
         //检查权限
         ccheckPermission();
 
+        mHandler = new Handler();
+
         mAccount2GridMap = new HashMap<>();
         mGrid2AccountMap = new HashMap<>();
-
+        mAccount2BitmapMap = new HashMap<>();
         mVideoGridViewList = new ArrayList<>();
         Resources res = getResources();
         for (int i = 0; i < 12; i++) {
@@ -338,7 +356,9 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
             String account = participants.get(i).getFullname();
             String nickname = participants.get(i).getNick();
             String avatarUrl = "http://ktv.fibar.cn" + participants.get(i).getAvatar();
-
+            if (!mAccount2BitmapMap.containsKey(account)) {
+                fetchAvatarImage(account, avatarUrl);
+            }
             Log.e(TAG, "---- old index" + mAccount2GridMap.get(account) + ", account: " + account);
             if (mAccount2GridMap.get(account) == null) {
                 continue;
@@ -367,7 +387,11 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
                 mAccount2GridMap.put(account, newIndex);
                 mGrid2AccountMap.put(newIndex, account);
             }
-            mVideoGridViewList.get(newIndex).setVisibility(true, false);
+            if (mAccount2BitmapMap.containsKey(account)) {
+                mVideoGridViewList.get(newIndex).setHeadImage(mAccount2BitmapMap.get(account));
+            }
+            mVideoGridViewList.get(i).setNameText(nickname);
+            mVideoGridViewList.get(newIndex).setVisibility(false, true);
         }
 
         for (int i = 0; i < 12; i++) {
@@ -383,6 +407,31 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
     public void onFetchRoomInfoError(Throwable t) {
         Log.e(TAG, "onFetchInfoError", t);
     }
+
+    private void fetchAvatarImage(String account, String url) {
+        AvatarImageFetchRunnable runnable = new AvatarImageFetchRunnable(account, url, this, mHandler);
+        new Thread(runnable).start();
+    }
+
+    @Override
+    public void onAvatarImageFetchSuccess(String account, Bitmap bitmap) {
+        mAccount2BitmapMap.put(account, bitmap);
+        if (mAccount2GridMap.containsKey(account)) {
+            int index = mAccount2GridMap.get(account);
+            mVideoGridViewList.get(index).setHeadImage(bitmap);
+        }
+    }
+
+    @Override
+    public void onAvatarImageFetchFailed(String account, String path, String message) {
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.icon_qq);
+        mAccount2BitmapMap.put(account, bitmap);
+        if (mAccount2GridMap.containsKey(account)) {
+            int index = mAccount2GridMap.get(account);
+            mVideoGridViewList.get(index).setHeadImage(bitmap);
+        }
+    }
+
 
     //当前音视频服务器连接回调
     @Override
@@ -568,6 +617,16 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
     @Override
     public void onReportSpeaker(Map<String, Integer> speakers, int mixedEnergy) {
         Log.e(TAG, "onReportSpeaker");
+        Iterator<Map.Entry<String, Integer>> it = speakers.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, Integer> entry = it.next();
+            if (mAccount2GridMap.containsKey(entry.getKey())) {
+                Log.e(TAG, "------- valume" + entry.getValue());
+                int percent = entry.getValue() / 50;
+                if (percent > 100) percent = 100;
+                mVideoGridViewList.get(mAccount2GridMap.get(entry.getKey())).setVolume(percent);
+            }
+        }
     }
 
     //伴音事件通知
@@ -771,7 +830,7 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
             }
         });
         builder.create().show();
-
     }
+
 }
 

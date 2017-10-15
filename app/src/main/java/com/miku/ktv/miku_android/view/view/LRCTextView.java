@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-@SuppressLint("NewApi")
 public class LRCTextView extends RelativeLayout {
 
     private TextView tvDefault;
@@ -16,11 +15,6 @@ public class LRCTextView extends RelativeLayout {
 
     private float percent;
 
-    public LRCTextView(Context context, AttributeSet attrs, int defStyleAttr,
-                       int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-        init();
-    }
 
     public LRCTextView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
