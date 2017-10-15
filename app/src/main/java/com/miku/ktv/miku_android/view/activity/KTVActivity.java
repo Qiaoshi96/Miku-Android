@@ -15,7 +15,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -24,12 +23,12 @@ import com.miku.ktv.miku_android.R;
 import com.miku.ktv.miku_android.model.bean.ExitRoomBean;
 import com.miku.ktv.miku_android.model.bean.JoinRoomBean;
 import com.miku.ktv.miku_android.model.bean.RegisterInfoBean;
-import com.miku.ktv.miku_android.model.bean.RoomsBean;
 import com.miku.ktv.miku_android.model.utils.Constant;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
 import com.miku.ktv.miku_android.presenter.ExitRoomPresenter;
 import com.miku.ktv.miku_android.presenter.FetchRoomInfoPresenter;
-import com.miku.ktv.miku_android.view.VideoGridView;
+import com.miku.ktv.miku_android.view.view.LRCLayout;
+import com.miku.ktv.miku_android.view.view.VideoGridView;
 import com.miku.ktv.miku_android.view.iview.IExitRoomView;
 import com.miku.ktv.miku_android.view.iview.IFetchRoomInfoView;
 import com.netease.nimlib.sdk.avchat.AVChatCallback;
@@ -51,9 +50,7 @@ import com.netease.nimlib.sdk.avchat.model.AVChatVideoCapturerFactory;
 import com.netease.nimlib.sdk.avchat.model.AVChatVideoFrame;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -99,6 +96,11 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
      * 视频开关按钮
      */
     private ImageView videoSwitchIv;
+
+    /**
+     * 歌词播放视图
+     */
+    private LRCLayout lrcLayout;
 
 
     /**
@@ -309,6 +311,23 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
         HashMap<String, String> map = new HashMap<>();
         map.put("token", sp.getString("LoginToken", ""));
         mFetchRoomInfoPresenter.fetchRoomInfo(mRoomName, map, JoinRoomBean.class);
+    }
+
+    /**
+     * 点歌
+     */
+    private void sing() {
+        Log.e(TAG, "sing");
+        // mp3 location
+        String mp3Location = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/test.mp3";
+        String lrcLocation = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/test.bph";
+        try {
+            lrcLayout.loadLrcFromFile(lrcLocation);
+            AVChatManager.getInstance().startAudioMixing(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/test.mp3", false, false, 0, 0.5f);
+            lrcLayout.start();
+        } catch (Exception e) {
+            Log.e(TAG, "sing", e);
+        }
     }
 
     @Override
@@ -695,6 +714,7 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
         line2Layout = (LinearLayout) findViewById(R.id.ll_2);
         line3Layout = (LinearLayout) findViewById(R.id.ll_3);
 
+        lrcLayout = (LRCLayout) findViewById(R.id.lrc_layout);
     }
 
     @Override
@@ -704,11 +724,11 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
             case R.id.iv_back:
                 onBackButtonPressed();
                 break;
-            //排麦的点击事件
-            case R.id.ll_diangelist:
-
-                break;
             //点歌的点击事件
+            case R.id.ll_diangelist:
+                sing();
+                break;
+            //排麦的点击事件
             case R.id.ll_paimailist:
 
                 break;

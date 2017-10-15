@@ -105,30 +105,30 @@
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <com.miku.ktv.miku_android.view.VideoGridView
+            <com.miku.ktv.miku_android.view.view.VideoGridView
                 android:id="@+id/v0"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#6098f4">
 
-            </com.miku.ktv.miku_android.view.VideoGridView>
+            </com.miku.ktv.miku_android.view.view.VideoGridView>
 
-            <com.miku.ktv.miku_android.view.VideoGridView
+            <com.miku.ktv.miku_android.view.view.VideoGridView
                 android:id="@+id/v1"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#01f20d" />
 
-            <com.miku.ktv.miku_android.view.VideoGridView
+            <com.miku.ktv.miku_android.view.view.VideoGridView
                 android:id="@+id/v2"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1.01"
                 android:background="#385f9f" />
 
-            <com.miku.ktv.miku_android.view.VideoGridView
+            <com.miku.ktv.miku_android.view.view.VideoGridView
                 android:id="@+id/v3"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -143,28 +143,28 @@
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <com.miku.ktv.miku_android.view.VideoGridView
+            <com.miku.ktv.miku_android.view.view.VideoGridView
                 android:id="@+id/v4"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#b74416" />
 
-            <com.miku.ktv.miku_android.view.VideoGridView
+            <com.miku.ktv.miku_android.view.view.VideoGridView
                 android:id="@+id/v5"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#df9d0e" />
 
-            <com.miku.ktv.miku_android.view.VideoGridView
+            <com.miku.ktv.miku_android.view.view.VideoGridView
                 android:id="@+id/v6"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#5a18de7c" />
 
-            <com.miku.ktv.miku_android.view.VideoGridView
+            <com.miku.ktv.miku_android.view.view.VideoGridView
                 android:id="@+id/v7"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -179,28 +179,28 @@
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <com.miku.ktv.miku_android.view.VideoGridView
+            <com.miku.ktv.miku_android.view.view.VideoGridView
                 android:id="@+id/v8"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#a3842177" />
 
-            <com.miku.ktv.miku_android.view.VideoGridView
+            <com.miku.ktv.miku_android.view.view.VideoGridView
                 android:id="@+id/v9"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#aee293e1" />
 
-            <com.miku.ktv.miku_android.view.VideoGridView
+            <com.miku.ktv.miku_android.view.view.VideoGridView
                 android:id="@+id/v10"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#c3d7dd23" />
 
-            <com.miku.ktv.miku_android.view.VideoGridView
+            <com.miku.ktv.miku_android.view.view.VideoGridView
                 android:id="@+id/v11"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -213,16 +213,12 @@
         android:background="#b64c3838"
         android:layout_width="match_parent"
         android:layout_height="0dp"/>
-    <TextView
-        android:layout_weight="3"
-        android:id="@+id/tv_lrc"
-        android:gravity="center"
-        android:textSize="25sp"
-        android:textColor="#fff"
-        android:text="没有人唱歌"
-        android:background="#000"
+    <com.miku.ktv.miku_android.view.view.LRCLayout
+        android:id="@+id/lrc_layout"
         android:layout_width="match_parent"
-        android:layout_height="0dp"/>
+        android:layout_height="50dp"
+        android:background="#000"/>
+
     <View
         android:background="#b64c3838"
         android:layout_width="match_parent"

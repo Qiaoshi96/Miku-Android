@@ -1,4 +1,4 @@
-package com.miku.ktv.miku_android.view;
+package com.miku.ktv.miku_android.view.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
