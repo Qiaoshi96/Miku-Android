@@ -13,6 +13,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.ArraySet;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 
 import com.miku.ktv.miku_android.R;
 import com.miku.ktv.miku_android.main.AvatarImageFetchRunnable;
+import com.miku.ktv.miku_android.main.RoomWebSocket;
 import com.miku.ktv.miku_android.model.bean.ExitRoomBean;
 import com.miku.ktv.miku_android.model.bean.JoinRoomBean;
 import com.miku.ktv.miku_android.model.bean.RegisterInfoBean;
@@ -31,10 +33,10 @@ import com.miku.ktv.miku_android.model.utils.Constant;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
 import com.miku.ktv.miku_android.presenter.ExitRoomPresenter;
 import com.miku.ktv.miku_android.presenter.FetchRoomInfoPresenter;
-import com.miku.ktv.miku_android.view.view.LRCLayout;
-import com.miku.ktv.miku_android.view.view.VideoGridView;
 import com.miku.ktv.miku_android.view.iview.IExitRoomView;
 import com.miku.ktv.miku_android.view.iview.IFetchRoomInfoView;
+import com.miku.ktv.miku_android.view.view.LRCLayout;
+import com.miku.ktv.miku_android.view.view.VideoGridView;
 import com.netease.nimlib.sdk.avchat.AVChatCallback;
 import com.netease.nimlib.sdk.avchat.AVChatManager;
 import com.netease.nimlib.sdk.avchat.AVChatStateObserver;
@@ -50,21 +52,20 @@ import com.netease.nimlib.sdk.avchat.model.AVChatNetworkStats;
 import com.netease.nimlib.sdk.avchat.model.AVChatParameters;
 import com.netease.nimlib.sdk.avchat.model.AVChatSessionStats;
 import com.netease.nimlib.sdk.avchat.model.AVChatSurfaceViewRenderer;
+import com.netease.nimlib.sdk.avchat.model.AVChatTextureViewRenderer;
 import com.netease.nimlib.sdk.avchat.model.AVChatVideoCapturerFactory;
 import com.netease.nimlib.sdk.avchat.model.AVChatVideoFrame;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
-public class KTVActivity extends AppCompatActivity implements IExitRoomView<Object, ExitRoomBean>, IFetchRoomInfoView<Object, JoinRoomBean>, View.OnClickListener, AVChatStateObserver, AvatarImageFetchRunnable.FetchAvatarImageCallBack {
+public class KTVActivity extends AppCompatActivity implements IExitRoomView<Object, ExitRoomBean>, IFetchRoomInfoView<Object, JoinRoomBean>, View.OnClickListener, AVChatStateObserver, AvatarImageFetchRunnable.FetchAvatarImageCallBack, RoomWebSocket.RoomWebSocketMsgInterface {
     private static final String TAG = KTVActivity.class.getName();
 
     /**
@@ -120,16 +121,18 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
     /**
      * 房间视频画布渲染列表
      */
-    Map<String, Integer> mAccount2GridMap = null;
+    private Map<String, Integer> mAccount2GridMap = null;
 
     /**
      *
      */
-    Map<Integer, String> mGrid2AccountMap = null;
+    private Map<Integer, String> mGrid2AccountMap = null;
 
-    List<VideoGridView> mVideoGridViewList = null;
+    private List<VideoGridView> mVideoGridViewList = null;
 
-    Map<String, Bitmap> mAccount2BitmapMap = null;
+    private Map<String, Bitmap> mAccount2BitmapMap = null;
+
+    private Set<String> mVideoEnabledUsers = null;
 
 
     /**
@@ -169,6 +172,8 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
      */
     private Handler mHandler;
 
+    private RoomWebSocket mRoomWebSocket;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -194,6 +199,7 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
         mAccount2GridMap = new HashMap<>();
         mGrid2AccountMap = new HashMap<>();
         mAccount2BitmapMap = new HashMap<>();
+        mVideoEnabledUsers = new ArraySet<>();
         mVideoGridViewList = new ArrayList<>();
         Resources res = getResources();
         for (int i = 0; i < 12; i++) {
@@ -201,6 +207,8 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
             VideoGridView vg = (VideoGridView) findViewById(resIdentifier);
             mVideoGridViewList.add(vg);
         }
+        mRoomWebSocket = new RoomWebSocket(this, mRoomName, mAccount);
+        mRoomWebSocket.joinRoom();
 
         startAVChat();
     }
@@ -248,15 +256,14 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
         //AVChatManager.getInstance().setupLocalVideoRender(mVideoGridViewList.get(0).getRender(), false, AVChatVideoScalingType.SCALE_ASPECT_BALANCED);
 
         //9. 设置视频通话可选参数[可以不设置]
-        //AVChatParameters parameters = new AVChatParameters();
-        //AVChatManager.getInstance().setParameters(parameters);
-
+        AVChatParameters parameters = new AVChatParameters();
+        parameters.set(AVChatParameters.KEY_VIDEO_FPS_REPORTED, true);
+        AVChatManager.getInstance().setParameters(parameters);
         //10. 开启视频预览
         AVChatManager.getInstance().startVideoPreview();
 
         //11.角色设置
         AVChatManager.getInstance().setParameter(AVChatParameters.KEY_SESSION_MULTI_MODE_USER_ROLE, AVChatUserRole.NORMAL);
-
         //11. 加入房间
         AVChatManager.getInstance().joinRoom2(mRoomName, AVChatType.VIDEO, new AVChatCallback<AVChatData>() {
             @Override
@@ -266,6 +273,7 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
                 AVChatParameters avChatParameters = new AVChatParameters();
                 avChatParameters.setBoolean(AVChatParameters.KEY_AUDIO_REPORT_SPEAKER, true);
                 AVChatManager.getInstance().setParameters(avChatParameters);
+                AVChatManager.getInstance().muteLocalVideo(true);
                 Log.e(TAG, Environment.getExternalStorageDirectory().getPath() + "/test.mp4");
                 //AVChatManager.getInstance().startAudioMixing(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/test.mp3", false, false, 0, 0.5f);
             }
@@ -310,14 +318,18 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
      * 开启视频聊天
      */
     private void openVideo() {
-        AVChatManager.getInstance().muteLocalVideo(true);
+        Log.e(TAG, "openVideo");
+        AVChatManager.getInstance().muteLocalVideo(false);
+        mRoomWebSocket.disableCamera(false);
     }
 
     /**
      * 关闭视频聊天
      */
     private void closeVideo() {
-        AVChatManager.getInstance().muteLocalVideo(false);
+        Log.e(TAG, "closeVideo");
+        AVChatManager.getInstance().muteLocalVideo(true);
+        mRoomWebSocket.disableCamera(true);
     }
 
 
@@ -370,6 +382,7 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
             if (oldIndex != newIndex) {
                 AVChatSurfaceViewRenderer render1 = mVideoGridViewList.get(oldIndex).getRender();
                 AVChatSurfaceViewRenderer render2 = mVideoGridViewList.get(newIndex).getRender();
+                AVChatTextureViewRenderer textureViewRenderer;
                 mVideoGridViewList.get(oldIndex).removeRender();
                 mVideoGridViewList.get(newIndex).removeRender();
 
@@ -391,21 +404,34 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
                 mVideoGridViewList.get(newIndex).setHeadImage(mAccount2BitmapMap.get(account));
             }
             mVideoGridViewList.get(i).setNameText(nickname);
-            mVideoGridViewList.get(newIndex).setVisibility(false, true);
+            //mVideoGridViewList.get(newIndex).setVisibility(true, false);
         }
-
-        for (int i = 0; i < 12; i++) {
-            if (!mGrid2AccountMap.containsKey(i)) {
-                mVideoGridViewList.get(i).setVisibility(false, false);
-            }
-        }
-
+        updateGridView();
         Log.e(TAG, "-----" + mAccount2GridMap.get(mAccount));
     }
 
     @Override
     public void onFetchRoomInfoError(Throwable t) {
         Log.e(TAG, "onFetchInfoError", t);
+    }
+
+    public void updateGridView() {
+        Log.e(TAG, "updateGridView");
+
+        // 隐藏空出来的格子
+        for (int i = 0; i < 12; i++) {
+            if (!mGrid2AccountMap.containsKey(i)) {
+                mVideoGridViewList.get(i).setVisibility(false, false);
+            }
+        }
+
+        // 显示视频或者用户头像
+        Iterator<Map.Entry<String, Integer>> it = mAccount2GridMap.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, Integer> entry = it.next();
+            boolean videoEnabled = mVideoEnabledUsers.contains(entry.getKey());
+           mVideoGridViewList.get(entry.getValue()).setVisibility(videoEnabled, !videoEnabled);
+        }
     }
 
     private void fetchAvatarImage(String account, String url) {
@@ -491,7 +517,7 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
             mAccount2GridMap.remove(account);
         }
         //AVChatManager.getInstance().setupRemoteVideoRender(account, null, false, AVChatVideoScalingType.SCALE_ASPECT_BALANCED);
-
+        mVideoEnabledUsers.remove(account);
         getParticipantsFromServer();
     }
 
@@ -501,6 +527,7 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
         Log.e(TAG, "onLeaveChannel");
         mGrid2AccountMap.remove(mAccount2GridMap.get(mAccount));
         mAccount2GridMap.remove(mAccount);
+        mVideoEnabledUsers.remove(mAccount);
         AVChatManager.getInstance().setupLocalVideoRender(null, false, AVChatVideoScalingType.SCALE_ASPECT_BALANCED);
     }
 
@@ -570,7 +597,11 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
     //用户第一帧画面通知
     @Override
     public void onFirstVideoFrameAvailable(String account) {
-        //Log.e(TAG, "onFirstVideoFrameAvailable: "  + account);
+        Log.e(TAG, "onFirstVideoFrameAvailable: "  + account);
+        if (!account.equals(mAccount)) {
+            mVideoEnabledUsers.add(account);
+            updateGridView();
+        }
     }
 
     //用户视频画面分辨率改变通知
@@ -588,7 +619,7 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
     //用户视频帧率汇报
     @Override
     public void onVideoFpsReported(String account, int fps) {
-        //Log.e(TAG, "onFirstVideoFrameRendered: "  + account + ", " + fps);
+        Log.e(TAG, "onVideoFpsReported: "  + account + ", " + fps);
     }
 
 
@@ -652,6 +683,7 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
     protected void onDestroy() {
         super.onDestroy();
         stopAVChat();
+        mRoomWebSocket.leaveRoom();
     }
 
     //退出登录成功回调
@@ -832,5 +864,19 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
         builder.create().show();
     }
 
+    @Override
+    public void onUserDisableCamera(String user, boolean disable) {
+        if (disable) {
+            mVideoEnabledUsers.remove(user);
+        } else {
+            mVideoEnabledUsers.add(user);
+        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                updateGridView();
+            }
+        });
+    }
 }
 
