@@ -141,7 +141,7 @@ public class SettingsActivity extends Activity implements ILogoutView<Object,Log
     }
 
     @Override
-    public void onError(Object o) {
+    public void onError(Throwable t) {
 
     }
 }

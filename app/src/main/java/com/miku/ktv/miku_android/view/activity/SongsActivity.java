@@ -16,6 +16,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.miku.ktv.miku_android.R;
+import com.miku.ktv.miku_android.model.bean.HistroyBean;
 import com.miku.ktv.miku_android.view.adapter.MyFragmentPagerAdapter;
 import com.miku.ktv.miku_android.view.fragment.HistroyFragment;
 import com.miku.ktv.miku_android.view.fragment.HotFragment;
@@ -41,6 +42,8 @@ public class SongsActivity extends FragmentActivity implements View.OnClickListe
     private int offset = 0;
     private int position_one;
     private int position_two;
+    private HotFragment hotFragment;
+    private HistroyFragment histroyFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +54,13 @@ public class SongsActivity extends FragmentActivity implements View.OnClickListe
         InitImageView();
         InitFragment();
         InitViewPager();
+
+        hotFragment.setOnDataTransmissionListener(new HotFragment.OnDataTransmissionListener() {
+            @Override
+            public void dataTransmission(ArrayList<HistroyBean> list) {
+                histroyFragment.setData(list);
+            }
+        });
     }
 
     private void InitImageView() {
@@ -157,8 +167,10 @@ public class SongsActivity extends FragmentActivity implements View.OnClickListe
 
     private void InitFragment() {
         fragmentList = new ArrayList<>();
-        fragmentList.add(new HotFragment());
-        fragmentList.add(new HistroyFragment());
+        hotFragment = new HotFragment();
+        histroyFragment = new HistroyFragment();
+        fragmentList.add(hotFragment);
+        fragmentList.add(histroyFragment);
 
         fragmentManager = getSupportFragmentManager();
     }

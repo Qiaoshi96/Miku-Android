@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:layout_centerVertical="true"
+        >
+        <TextView
+            android:id="@+id/Search_item_TextView_Music"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Music"
+            android:textColor="@color/black"
+            />
+        <TextView
+            android:id="@+id/Search_item_TextView_Singer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Singer"
+            android:layout_marginTop="2dp"
+            android:textSize="13sp"
+            />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/Search_item_TextView_DownLoad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="缓冲"
+        android:textSize="13sp"
+        android:textColor="@color/black"
+        android:layout_alignParentRight="true"
+        android:layout_margin="10dp"
+        android:gravity="center"
+        android:layout_centerVertical="true"
+        android:background="@drawable/shape_hotfragment_download"
+        />
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/Search_item_TextView_Paimai"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="排麦"
+        android:textSize="13sp"
+        android:textColor="@color/black"
+        android:layout_alignParentRight="true"
+        android:layout_margin="10dp"
+        android:gravity="center"
+        android:layout_centerVertical="true"
+        android:background="@drawable/shape_hotfragment_download"
+        />
+
+</RelativeLayout>

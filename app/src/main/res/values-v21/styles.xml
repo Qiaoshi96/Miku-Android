@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="ApppTheme" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="ApppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="android:colorPrimary">@color/daohang</item>
         <item name="android:statusBarColor">@color/daohang</item>

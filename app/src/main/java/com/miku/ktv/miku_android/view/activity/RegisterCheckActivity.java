@@ -169,7 +169,7 @@ public class RegisterCheckActivity extends Activity implements IRegisterCheckVie
     }
 
     @Override
-    public void onError(CheckBean checkBean) {
+    public void onError(Throwable t) {
     }
 
     @Override

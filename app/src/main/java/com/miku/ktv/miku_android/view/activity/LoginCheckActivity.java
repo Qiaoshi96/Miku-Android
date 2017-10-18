@@ -20,11 +20,6 @@ import com.miku.ktv.miku_android.model.bean.RegisterBean;
 import com.miku.ktv.miku_android.model.utils.CountDownTimerUtil;
 import com.miku.ktv.miku_android.presenter.LoginCodePresenter;
 import com.miku.ktv.miku_android.view.iview.IRegisterCheckView;
-import com.netease.nimlib.sdk.AbortableFuture;
-import com.netease.nimlib.sdk.NIMClient;
-import com.netease.nimlib.sdk.RequestCallback;
-import com.netease.nimlib.sdk.auth.AuthService;
-import com.netease.nimlib.sdk.auth.LoginInfo;
 
 import java.util.HashMap;
 
@@ -169,32 +164,36 @@ public class LoginCheckActivity extends Activity implements IRegisterCheckView<L
             edit.putString("avatar",loginCheckBean.getBody().getAvatar());
             edit.putString("account", loginCheckBean.getBody().getFullname());
             edit.commit();
+            Intent intent=new Intent(LoginCheckActivity.this, HomeActivity.class);
+                //关闭之前所有Activity
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
             Log.d(TAG, "onSuccess: " + loginCheckBean.getMsg());
-            AbortableFuture<LoginInfo> loginRequest = NIMClient.getService(AuthService.class).login(new LoginInfo(loginCheckBean.getBody().getFullname(), loginCheckBean.getBody().getToken()));
-            loginRequest.setCallback(new RequestCallback<LoginInfo>() {
-                @Override
-                public void onSuccess(LoginInfo param) {
-                    Log.i(TAG, "login success");
-                    Intent intent=new Intent(LoginCheckActivity.this, HomeActivity.class);
-                    //关闭之前所有Activity
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                }
-
-                @Override
-                public void onFailed(int code) {
-                    if (code == 302 || code == 404) {
-                        Toast.makeText(LoginCheckActivity.this, "账号或者密码错误", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(LoginCheckActivity.this, "登录失败: " + code, Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onException(Throwable exception) {
-                    Log.e(TAG, "onException", exception);
-                }
-            });
+//            AbortableFuture<LoginInfo> loginRequest = NIMClient.getService(AuthService.class).login(new LoginInfo(loginCheckBean.getBody().getFullname(), loginCheckBean.getBody().getToken()));
+//            loginRequest.setCallback(new RequestCallback<LoginInfo>() {
+//                @Override
+//                public void onSuccess(LoginInfo param) {
+//                    Log.i(TAG, "login success");
+//                    Intent intent=new Intent(LoginCheckActivity.this, HomeActivity.class);
+//                    //关闭之前所有Activity
+//                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    startActivity(intent);
+//                }
+//
+//                @Override
+//                public void onFailed(int code) {
+//                    if (code == 302 || code == 404) {
+//                        Toast.makeText(LoginCheckActivity.this, "账号或者密码错误", Toast.LENGTH_SHORT).show();
+//                    } else {
+//                        Toast.makeText(LoginCheckActivity.this, "登录失败: " + code, Toast.LENGTH_SHORT).show();
+//                    }
+//                }
+//
+//                @Override
+//                public void onException(Throwable exception) {
+//                    Log.e(TAG, "onException", exception);
+//                }
+//            });
 
 
         }else {
@@ -205,7 +204,7 @@ public class LoginCheckActivity extends Activity implements IRegisterCheckView<L
     }
 
     @Override
-    public void onError(LoginCheckBean loginCheckBean) {
+    public void onError(Throwable t) {
 
     }
 

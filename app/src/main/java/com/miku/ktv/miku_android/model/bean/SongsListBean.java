@@ -181,6 +181,7 @@ public class SongsListBean {
             private boolean hidden;
             private int recommand;
             private int id;
+//            private int statecode;
 
             public boolean isCatch_lrc() {
                 return catch_lrc;
@@ -293,6 +294,14 @@ public class SongsListBean {
             public void setId(int id) {
                 this.id = id;
             }
+
+//            public int getStatecode() {
+//                return statecode;
+//            }
+//
+//            public void setStatecode(int statecode) {
+//                this.statecode = statecode;
+//            }
         }
     }
 }

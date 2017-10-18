@@ -6,5 +6,5 @@ package com.miku.ktv.miku_android.view.iview;
 
 public interface IBaseView<T> {
     void onSuccess(T t);
-    void onError(T t);
+    void onError(Throwable t);
 }

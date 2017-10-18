@@ -57,4 +57,14 @@ public interface Api {
     //获取歌曲列表
     @GET("songs/{sign}")
     Observable<String> getSongsList(@Path("sign") String sign);
+    //搜索歌曲
+    @GET("songs/{sign}")
+    Observable<String> getSearch(@Path("sign") String sign, @QueryMap Map<String, String> map);
+    //上麦
+    @FormUrlEncoded
+    @POST("room/{room_id}/singer/create/{sign}")
+    Observable<String> postAdd(@Path("room_id") String room_id, @Path("sign") String sign, @FieldMap Map<String, String> map);
+    //下麦
+    @GET("room/{room_id}/singers/{sign}")
+    Observable<String> delete(@Path("room_id") String room_id, @Path("sign") String sign);
 }

@@ -1,5 +1,6 @@
 package com.miku.ktv.miku_android.view.activity;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,7 +12,6 @@ import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -24,7 +24,6 @@ import com.miku.ktv.miku_android.R;
 import com.miku.ktv.miku_android.model.bean.ExitRoomBean;
 import com.miku.ktv.miku_android.model.bean.JoinRoomBean;
 import com.miku.ktv.miku_android.model.bean.RegisterInfoBean;
-import com.miku.ktv.miku_android.model.bean.RoomsBean;
 import com.miku.ktv.miku_android.model.utils.Constant;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
 import com.miku.ktv.miku_android.presenter.ExitRoomPresenter;
@@ -54,7 +53,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class KTVActivity extends AppCompatActivity  implements IExitRoomView<Object,ExitRoomBean>, IFetchRoomInfoView<Object, JoinRoomBean>, View.OnClickListener, AVChatStateObserver {
+public class KTVActivity extends Activity implements IExitRoomView<Object,ExitRoomBean>, IFetchRoomInfoView<Object, JoinRoomBean>, View.OnClickListener, AVChatStateObserver {
     private static final String TAG = KTVActivity.class.getName();
 
     /**
@@ -203,11 +202,11 @@ public class KTVActivity extends AppCompatActivity  implements IExitRoomView<Obj
             case R.id.iv_back:
                 onBackButtonPressed();
                 break;
-            //排麦的点击事件
-            case R.id.ll_diangelist:
-
-                break;
             //点歌的点击事件
+            case R.id.ll_diangelist:
+                startActivity(new Intent(this,SongsActivity.class));
+                break;
+            //排麦的点击事件
             case R.id.ll_paimailist:
 
                 break;
@@ -224,7 +223,6 @@ public class KTVActivity extends AppCompatActivity  implements IExitRoomView<Obj
                     mVideoSwitch = false;
                 }
                 break;
-
         }
     }
 
@@ -594,7 +592,7 @@ public class KTVActivity extends AppCompatActivity  implements IExitRoomView<Obj
     }
 
     @Override
-    public void onError(Object o) {
+    public void onError(Throwable t) {
 
     }
 

@@ -85,7 +85,7 @@ public class EditNickActivity extends Activity implements IRegisterView<NickBean
     }
 
     @Override
-    public void onError(NickBean nickBean) {
+    public void onError(Throwable t) {
 
     }
 

@@ -178,7 +178,7 @@ public class RegisterSettingActivity extends Activity implements IRegisterInfoVi
     }
 
     @Override
-    public void onError(RegisterInfoBean registerInfoBean) {
+    public void onError(Throwable t) {
 
     }
 

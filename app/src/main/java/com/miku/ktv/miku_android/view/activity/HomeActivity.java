@@ -126,7 +126,8 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
     public void onSuccess(RoomsBean roomsBean) {
         if (roomsBean.getStatus()==1){
             IsUtils.showShort(this,"请求房间列表成功");
-
+            editor.putString("roomid",roomsBean.getBody().getRoom_list().get(0).getRoom_id());
+            editor.commit();
             String roomsJson = gson.toJson(roomsBean);
             roomsBean1 = gson.fromJson(roomsJson, RoomsBean.class);
             list=roomsBean1.getBody().getRoom_list();
@@ -137,10 +138,8 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
     }
 
     @Override
-    public void onError(RoomsBean roomsBean) {
-        if (roomsBean.getStatus()!=1){
-            Log.e(TAG,"onError: "+roomsBean.getMsg());
-        }
+    public void onError(Throwable t) {
+            Log.e(TAG,"onError: "+t.getMessage());
     }
 
 
@@ -188,7 +187,7 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
     public void onJoinSuccess(JoinRoomBean bean) {
         if (bean.getStatus()==1){
             Log.e(TAG,"onJoinSuccess: "+bean.getBody().getParticipants().get(0).getNick() + mRoomName);
-            startActivity(new Intent(this,KTVActivity.class));
+//            startActivity(new Intent(this,KTVActivity.class));
             IsUtils.showShort(this,"加入聊天室成功");
             Intent intent=new Intent(HomeActivity.this, KTVActivity.class);
             intent.putExtra("roomName", mRoomName);

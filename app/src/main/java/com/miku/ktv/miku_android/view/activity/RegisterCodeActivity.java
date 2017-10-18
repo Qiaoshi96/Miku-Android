@@ -169,7 +169,7 @@ public class RegisterCodeActivity extends Activity implements IRegisterCheckView
     }
 
     @Override
-    public void onError(Object o) {
+    public void onError(Throwable t) {
 
     }
 }
