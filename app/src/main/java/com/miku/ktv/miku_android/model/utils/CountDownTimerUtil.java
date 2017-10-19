@@ -16,16 +16,6 @@ import com.miku.ktv.miku_android.R;
 public class CountDownTimerUtil extends CountDownTimer {
     private TextView mTextView;
 
-    /**
-     * @param textView          The TextView
-     *
-     *
-     * @param millisInFuture    The number of millis in the future from the call
-     *                          to {@link #start()} until the countdown is done and {@link #onFinish()}
-     *                          is called.
-     * @param countDownInterval The interval along the way to receiver
-     *                          {@link #onTick(long)} callbacks.
-     */
     public CountDownTimerUtil(TextView textView, long millisInFuture, long countDownInterval) {
         super(millisInFuture, countDownInterval);
         this.mTextView = textView;

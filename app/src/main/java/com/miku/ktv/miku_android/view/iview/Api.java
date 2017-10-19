@@ -5,6 +5,7 @@ import java.util.Map;
 import io.reactivex.Observable;
 import okhttp3.RequestBody;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -65,6 +66,6 @@ public interface Api {
     @POST("room/{room_id}/singer/create/{sign}")
     Observable<String> postAdd(@Path("room_id") String room_id, @Path("sign") String sign, @FieldMap Map<String, String> map);
     //下麦
-    @GET("room/{room_id}/singers/{sign}")
+    @DELETE("room/{room_id}/singers/{sign}")
     Observable<String> delete(@Path("room_id") String room_id, @Path("sign") String sign);
 }
