@@ -328,6 +328,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                     @Override
                     public void onFinish() {
                         dialogTimeTV.setText("已自动放弃");
+                        //请求下麦接口
                         HashMap<String,String> map=new HashMap<>();
                         map.put("token",sp.getString("LoginToken",""));
                         addPresenter.delete(sp.getString("roomid",""), map, DeleteBean.class);
