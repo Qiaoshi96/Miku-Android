@@ -97,4 +97,5 @@ public class RoomWebSocket {
     public interface RoomWebSocketMsgInterface {
         void onUserDisableCamera(String user, boolean disable);
     }
+
 }
