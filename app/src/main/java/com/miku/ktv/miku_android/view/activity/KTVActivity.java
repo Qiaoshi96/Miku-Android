@@ -956,7 +956,6 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
             }else {
                 Log.d(TAG, "onAddListSuccess: "+addList.size());
                 initData();
-
             }
             Log.d(TAG, "onAddListSuccess: "+bean.getMsg());
         }
