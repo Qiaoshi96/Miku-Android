@@ -25,4 +25,9 @@
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
+    <style name="Anim_Bottom_Pop" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/pop_enter</item>
+        <item name="android:windowExitAnimation">@anim/pop_exit</item>
+    </style>
+
 </resources>

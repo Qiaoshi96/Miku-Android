@@ -73,10 +73,12 @@ public class LoginActivity extends Activity implements IRegisterCheckView<Object
                 }else {
                     if (IsUtils.validatePhoneNumber(login_editText_phone.getText().toString())){
                         IsUtils.showCustomDialog(this);
+
                         HashMap<String,String> map=new HashMap<>();
                         map.put("phone",login_editText_phone.getText().toString());
                         loginCodePresenter.getSms_login(map, LoginCodeBean.class);
-                        IsUtils.dismissCustomDialog(getApplicationContext());
+
+                        IsUtils.dismissCustomDialog(this);
                     }else {
                         login_textView_phoneError.setVisibility(View.VISIBLE);
                     }

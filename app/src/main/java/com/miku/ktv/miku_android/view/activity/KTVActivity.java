@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -18,22 +19,32 @@ import android.support.v4.util.ArraySet;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.miku.ktv.miku_android.R;
 import com.miku.ktv.miku_android.main.AvatarImageFetchRunnable;
 import com.miku.ktv.miku_android.main.RoomWebSocket;
+import com.miku.ktv.miku_android.model.bean.AddListBean;
+import com.miku.ktv.miku_android.model.bean.DeleteBean;
 import com.miku.ktv.miku_android.model.bean.ExitRoomBean;
 import com.miku.ktv.miku_android.model.bean.JoinRoomBean;
 import com.miku.ktv.miku_android.model.bean.RegisterInfoBean;
 import com.miku.ktv.miku_android.model.utils.Constant;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
+import com.miku.ktv.miku_android.presenter.AddPresenter;
 import com.miku.ktv.miku_android.presenter.ExitRoomPresenter;
 import com.miku.ktv.miku_android.presenter.FetchRoomInfoPresenter;
+import com.miku.ktv.miku_android.view.adapter.PopAdapter;
+import com.miku.ktv.miku_android.view.iview.IAddView;
 import com.miku.ktv.miku_android.view.iview.IExitRoomView;
 import com.miku.ktv.miku_android.view.iview.IFetchRoomInfoView;
 import com.miku.ktv.miku_android.view.view.LRCLayout;
@@ -64,9 +75,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.miku.ktv.miku_android.model.utils.Constant.gson;
 
-public class KTVActivity extends AppCompatActivity implements IExitRoomView<Object, ExitRoomBean>, IFetchRoomInfoView<Object, JoinRoomBean>, View.OnClickListener, AVChatStateObserver, AvatarImageFetchRunnable.FetchAvatarImageCallBack, RoomWebSocket.RoomWebSocketMsgInterface {
+
+public class KTVActivity extends AppCompatActivity implements IAddView<Object,DeleteBean,AddListBean>, IExitRoomView<Object, ExitRoomBean>, IFetchRoomInfoView<Object, JoinRoomBean>, View.OnClickListener, AVChatStateObserver, AvatarImageFetchRunnable.FetchAvatarImageCallBack, RoomWebSocket.RoomWebSocketMsgInterface {
     private static final String TAG = KTVActivity.class.getName();
+    public static final int REQUEST_CODE=1;
 
     /**
      * 返回键
@@ -173,6 +187,14 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
     private Handler mHandler;
 
     private RoomWebSocket mRoomWebSocket;
+
+    private TextView paimaiCount;
+    private PopupWindow popupWindow;
+    private List<AddListBean.BodyBean.SingerListBean> addList;
+    private AddPresenter addPresenter;
+    private AddListBean addListBean1;
+    private ListView refreshLVPop;
+    private PopAdapter popAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -640,7 +662,6 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
         //Log.e(TAG, "onAudioDeviceChanged");
     }
 
-
     //语音正在说话用户声音强度通知
     @Override
     public void onReportSpeaker(Map<String, Integer> speakers, int mixedEnergy) {
@@ -795,6 +816,7 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
         paimaillistLayout = (LinearLayout) findViewById(R.id.ll_paimailist);
         //点歌的控件
         diangelistLayout = (LinearLayout) findViewById(R.id.ll_diangelist);
+        paimaiCount = (TextView) findViewById(R.id.paimaiCount);
         //更多按钮
         moreIv = (ImageView) findViewById(R.id.iv_more);
         //开启摄像头按钮
@@ -805,6 +827,9 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
         line3Layout = (LinearLayout) findViewById(R.id.ll_3);
 
         lrcLayout = (LRCLayout) findViewById(R.id.lrc_layout);
+
+        addPresenter = new AddPresenter();
+        addPresenter.attach(this);
     }
 
     @Override
@@ -817,11 +842,11 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
             //点歌的点击事件
             case R.id.ll_diangelist:
 //                sing();
-                startActivity(new Intent(this,SongsActivity.class));
+                startActivityForResult(new Intent(this,SongsActivity.class),REQUEST_CODE);
                 break;
             //排麦的点击事件
             case R.id.ll_paimailist:
-
+                showPopupWindow();
                 break;
             case R.id.iv_more:
                 showDialog();
@@ -838,6 +863,37 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
                 break;
 
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode==2){
+            if (requestCode==REQUEST_CODE){
+                String musicIntent=data.getStringExtra("musicIntent");
+                String linkIntent=data.getStringExtra("linkIntent");
+                String singerIntent=data.getStringExtra("singerIntent");
+                String lyricIntent=data.getStringExtra("lyricIntent");
+                Log.d(TAG, "onActivityResult: "+musicIntent+"\n"+linkIntent+"\n"+singerIntent+"\n"+lyricIntent);
+            }
+        }
+    }
+
+    private void showPopupWindow() {
+        View view=View.inflate(this, R.layout.ktv_pop, null);
+        popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT,695,true);
+        //点击外部区域popwindow消失
+        popupWindow.setBackgroundDrawable(new BitmapDrawable());
+        popupWindow.setFocusable(true);
+        popupWindow.setAnimationStyle(R.style.Anim_Bottom_Pop);
+        //显示(从底部)
+        popupWindow.showAtLocation(view, Gravity.BOTTOM, 0, 0);
+
+        refreshLVPop = (ListView) view.findViewById(R.id.refreshLVPop);
+
+        HashMap<String,String> map=new HashMap<>();
+        map.put("page","1");
+        addPresenter.getAddList(sp.getString("roomname",""),map,AddListBean.class);
     }
 
     private void showDialog() {
@@ -878,5 +934,45 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
             }
         });
     }
-}
 
+    @Override
+    public void onDeleteSuccess(DeleteBean t) {
+
+    }
+
+    @Override
+    public void onDeleteError(Throwable throwable) {
+
+    }
+
+    @Override
+    public void onAddListSuccess(AddListBean bean) {
+        if (bean.getStatus()==1){
+            String addListJson=gson.toJson(bean);
+            addListBean1 = gson.fromJson(addListJson, AddListBean.class);
+            addList=addListBean1.getBody().getSinger_list();
+            if (addList==null){
+                Log.d(TAG, "addList为空，size为: "+addList.size());
+            }else {
+                Log.d(TAG, "onAddListSuccess: "+addList.size());
+                initData();
+
+            }
+            Log.d(TAG, "onAddListSuccess: "+bean.getMsg());
+        }
+    }
+
+    private void initData() {
+        popAdapter = new PopAdapter(this,addList);
+        refreshLVPop.setAdapter(popAdapter);
+        //当前列表内的歌曲数量
+        paimaiCount.setText(refreshLVPop.getCount()+"");
+
+    }
+
+
+    @Override
+    public void onAddListError(Throwable throwable) {
+
+    }
+}

@@ -32,7 +32,6 @@ import com.miku.ktv.miku_android.model.bean.SongsListBean;
 import com.miku.ktv.miku_android.model.utils.Constant;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
 import com.miku.ktv.miku_android.presenter.AddPresenter;
-import com.miku.ktv.miku_android.view.activity.KTVActivity;
 import com.miku.ktv.miku_android.view.adapter.MySongsListAdapter;
 import com.miku.ktv.miku_android.view.custom.RefreshListView;
 import com.miku.ktv.miku_android.view.iview.IAddView;
@@ -218,8 +217,10 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                                                 @Override
                                                 public void onClick(View v) {
                                                     IsUtils.showShort(mContext,"点了排麦"+i);
-                                                    edit.putString("musicName", songsListAll.get(i).getName());
-                                                    edit.putString("musicLink", songsListAll.get(i).getLink());
+                                                    edit.putString("musicname", songsListAll.get(i).getName());
+                                                    edit.putString("musiclink", songsListAll.get(i).getLink());
+                                                    edit.putString("singer", songsListAll.get(i).getAuthor());
+                                                    edit.putString("lyric", songsListAll.get(i).getLrc());
                                                     edit.commit();
                                                     Log.d(TAG, "歌名为："+songsListAll.get(i).getName());
 
@@ -317,8 +318,8 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                 dialogGiveupTV = (TextView) dialogView.findViewById(R.id.PaimaiDialog_TextView_Giveup);
                 dialogNowTV = (TextView) dialogView.findViewById(R.id.PaimaiDialog_TextView_Now);
 
-                dialogMusicTV.setText(sp.getString("musicName",""));
-                CountDownTimer timer=new CountDownTimer(15000, 1000) {
+                dialogMusicTV.setText(sp.getString("musicname",""));
+                final CountDownTimer timer=new CountDownTimer(15000, 1000) {
                     @Override
                     public void onTick(long millisUntilFinished) {
                         dialogTimeTV.setText((millisUntilFinished / 1000)+"秒后不上麦则自动放弃");
@@ -327,7 +328,9 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                     @Override
                     public void onFinish() {
                         dialogTimeTV.setText("已自动放弃");
-
+                        HashMap<String,String> map=new HashMap<>();
+                        map.put("token",sp.getString("LoginToken",""));
+                        addPresenter.delete(sp.getString("roomid",""), map, DeleteBean.class);
                     }
                 };
                 timer.start();
@@ -339,8 +342,10 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                     @Override
                     public void onClick(View v) {
                         //请求下麦接口
-                        addPresenter.delete(sp.getString("roomid",""), DeleteBean.class);
-
+                        HashMap<String,String> map=new HashMap<>();
+                        map.put("token",sp.getString("LoginToken",""));
+                        addPresenter.delete(sp.getString("roomid",""), map, DeleteBean.class);
+                        timer.cancel();
                     }
                 });
 
@@ -348,8 +353,17 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                     @Override
                     public void onClick(View v) {
                         IsUtils.showShort(getActivity(),"立即上麦");
-                        Intent intent=new Intent(getActivity(), KTVActivity.class);
 
+                        Intent intent=new Intent();
+                        intent.putExtra("musicIntent",sp.getString("musicname",""));
+                        intent.putExtra("linkIntent",sp.getString("musiclink",""));
+                        intent.putExtra("singerIntent",sp.getString("singer",""));
+                        intent.putExtra("lyricIntent",sp.getString("lyric",""));
+                        getActivity().setResult(2,intent);
+
+                        builder.dismiss();
+                        timer.cancel();
+                        getActivity().finish();
 
                     }
                 });
@@ -394,7 +408,6 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
     }
 
 
-
     public interface OnDataTransmissionListener {
         public void dataTransmission(ArrayList<HistroyBean> list);
     }
@@ -402,7 +415,6 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
     public void setOnDataTransmissionListener(OnDataTransmissionListener mListener) {
         this.mListener = mListener;
     }
-
 
     //下拉刷新
     @Override

@@ -159,9 +159,18 @@ public class HttpUtil {
     }
 
     //room/room_id/singers下麦
-    public static void delete(String roomid, String sign, Consumer<String> onNext, Consumer<Throwable> onError){
+    public static void delete(String roomid, String sign, Map<String, String> map, Consumer<String> onNext, Consumer<Throwable> onError){
         Api api = retrofit.create(Api.class);
-        Observable<String> observable = api.delete(roomid,sign);
+        Observable<String> observable = api.delete(roomid,sign,map);
+        observable.observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(onNext, onError);
+    }
+
+    //room/room_id/singers获取排麦列表
+    public static void getAddList(String roomid, String sign, Map<String, String> map, Consumer<String> onNext, Consumer<Throwable> onError){
+        Api api = retrofit.create(Api.class);
+        Observable<String> observable = api.getAddList(roomid,sign,map);
         observable.observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(onNext, onError);

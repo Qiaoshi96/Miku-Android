@@ -38,12 +38,12 @@ public class AddPresenter<T extends IAddView> extends BasePresenter<T> {
     }
 
     //delete下麦请求
-    public <T> void delete(String roomid, final Class<T> cla){
+    public <T> void delete(String roomid, Map<String, String> map, final Class<T> cla){
         final String sign = "?timestamp="+ Constant.getTime()+"&sign="+ Constant.getSign();
-        HttpUtil.delete(roomid, sign, new Consumer<String>() {
+        HttpUtil.delete(roomid, sign, map, new Consumer<String>() {
             @Override
             public void accept(String s) throws Exception {
-                Log.e(TAG, "delete   "+s);
+                Log.e(TAG, "delete   "+s.toString().trim());
                 T t =Constant.GsonToBean(s, cla);
                 getIBaseView().onDeleteSuccess(t);
             }
@@ -52,6 +52,25 @@ public class AddPresenter<T extends IAddView> extends BasePresenter<T> {
             public void accept(Throwable throwable) throws Exception {
                 getIBaseView().onDeleteError(throwable);
                 Log.e(TAG, "delete-throwable:  "+throwable.toString());
+            }
+        });
+    }
+
+    //getAddList排麦列表
+    public <T> void getAddList(String roomid, Map<String, String> map, final Class<T> cla){
+        final String sign = "?timestamp="+ Constant.getTime()+"&sign="+ Constant.getSign();
+        HttpUtil.getAddList(roomid, sign, map, new Consumer<String>() {
+            @Override
+            public void accept(String s) throws Exception {
+                Log.e(TAG, "getAddList   "+s.toString().trim());
+                T t =Constant.GsonToBean(s, cla);
+                getIBaseView().onAddListSuccess(t);
+            }
+        }, new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                getIBaseView().onAddListError(throwable);
+                Log.e(TAG, "getAddList-throwable:  "+throwable.toString());
             }
         });
     }

@@ -67,5 +67,8 @@ public interface Api {
     Observable<String> postAdd(@Path("room_id") String room_id, @Path("sign") String sign, @FieldMap Map<String, String> map);
     //下麦
     @DELETE("room/{room_id}/singers/{sign}")
-    Observable<String> delete(@Path("room_id") String room_id, @Path("sign") String sign);
+    Observable<String> delete(@Path("room_id") String room_id, @Path("sign") String sign, @QueryMap Map<String, String> map);
+    //排麦列表
+    @GET("room/{room_id}/singers/{sign}")
+    Observable<String> getAddList(@Path("room_id") String room_id, @Path("sign") String sign, @QueryMap Map<String, String> map);
 }
