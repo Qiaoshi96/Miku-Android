@@ -51,6 +51,8 @@ public class LRCLayout extends RelativeLayout {
 
     private Paint mPaint;
 
+    private String mSinger;
+
     private String mName;
 
     private long mTotalDuration;
@@ -83,10 +85,11 @@ public class LRCLayout extends RelativeLayout {
         mUIRunnable = new UIRunnable();
     }
 
-    public void loadLrcFromFile(String fileName, String name) throws Exception {
+    public void loadLrcFromFile(String fileName, String singer, String name) throws Exception {
         LrcParser parser = LrcParserFactory.createParserByFileName(fileName);
         String content = readFile(fileName);
         lrc = parser.parse(content);
+        mSinger = singer;
         mName = name;
         mTotalDuration = lrc.sentences.get(lrc.sentences.size() - 1).timestamp + lrc.sentences.get(lrc.sentences.size() - 1).duration;
     }

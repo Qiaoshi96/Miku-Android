@@ -346,10 +346,10 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
     /**
      * 点歌
      */
-    private void sing(String mp3Location, String lrcLocation, String name) {
-        Log.e(TAG, "sing " + mp3Location + ", " +  lrcLocation + ", " + name);
+    private void sing(String mp3Location, String lrcLocation, String singer, String name) {
+        Log.e(TAG, "sing " + mp3Location + ", " +  lrcLocation + ", " + singer + ", " + name);
         try {
-            lrcLayout.loadLrcFromFile(lrcLocation, name);
+            lrcLayout.loadLrcFromFile(lrcLocation, singer, name);
             AVChatManager.getInstance().startAudioMixing(mp3Location, false, false, 0, 0.5f);
             lrcLayout.start();
         } catch (Exception e) {
