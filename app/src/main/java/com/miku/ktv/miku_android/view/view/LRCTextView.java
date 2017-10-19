@@ -32,13 +32,13 @@ public class LRCTextView extends RelativeLayout {
 
     private void init() {
         tvDefault = new TextView(getContext());
-        tvDefault.setTextColor(Color.parseColor("#726463"));
+        tvDefault.setTextColor(Color.parseColor("#FFFFFF"));
         tvDefault.setEllipsize(null);
         tvDefault.setSingleLine();
         tvDefault.setTextSize(20);
 
         tvSelect = new TextView(getContext());
-        tvSelect.setTextColor(Color.parseColor("#39DF7C"));
+        tvSelect.setTextColor(Color.parseColor("#FC6863"));
         tvSelect.setEllipsize(null);
         tvSelect.setSingleLine();
         tvSelect.setTextSize(20);

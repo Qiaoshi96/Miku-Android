@@ -51,17 +51,20 @@ public class LRCLayout extends RelativeLayout {
 
     private Paint mPaint;
 
+    private String mName;
+
+    private long mTotalDuration;
+
     public LRCLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         mScale = context.getResources().getDisplayMetrics().density;
         Log.v(TAG, "scale is " + mScale);
         mTopLRCTextView = new LRCTextView(context);
-         mBottomLRCTextView = new LRCTextView(context);
+        mBottomLRCTextView = new LRCTextView(context);
         mTopLayout = new LayoutParams(
                 LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
         mTopLayout.addRule(RelativeLayout.ALIGN_PARENT_LEFT);//与父容器的左侧对齐
         mTopLayout.addRule(RelativeLayout.ALIGN_PARENT_TOP);//与父容器的上侧对齐
-        mTopLayout.leftMargin = 30;
         mTopLRCTextView.setLayoutParams(mTopLayout);//设置布局参数
         addView(mTopLRCTextView);//RelativeLayout添加子View
 
@@ -69,7 +72,6 @@ public class LRCLayout extends RelativeLayout {
                 LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
         mBottomLayout.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);//与父容器的左侧对齐
         mBottomLayout.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);//与父容器的上侧对齐
-        mBottomLayout.rightMargin = 30;
         mBottomLRCTextView.setLayoutParams(mBottomLayout);
         addView(mBottomLRCTextView);//RelativeLayout添加子View
         DisplayMetrics dm =getResources().getDisplayMetrics();
@@ -79,17 +81,14 @@ public class LRCLayout extends RelativeLayout {
         mPaint.setTextSize(20);
 
         mUIRunnable = new UIRunnable();
-        try {
-            start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
-    public void loadLrcFromFile(String fileName) throws Exception {
+    public void loadLrcFromFile(String fileName, String name) throws Exception {
         LrcParser parser = LrcParserFactory.createParserByFileName(fileName);
         String content = readFile(fileName);
         lrc = parser.parse(content);
+        mName = name;
+        mTotalDuration = lrc.sentences.get(lrc.sentences.size() - 1).timestamp + lrc.sentences.get(lrc.sentences.size() - 1).duration;
     }
 
     public void start() throws Exception {
@@ -99,7 +98,7 @@ public class LRCLayout extends RelativeLayout {
             public void run() {
                 try {
                     startTimestamp = System.currentTimeMillis();
-                    while (true) {
+                    while (isStart) {
                         // 歌词播放完毕
                         if (lineIndex >= lrc.sentences.size()) {
                             Log.v(TAG, "lrc finished");

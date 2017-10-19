@@ -1,5 +1,6 @@
 package com.miku.ktv.miku_android.view.activity;
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -345,14 +346,11 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
     /**
      * 点歌
      */
-    private void sing() {
-        Log.e(TAG, "sing");
-        // mp3 location
-        String mp3Location = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/test.mp3";
-        String lrcLocation = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/test.bph";
+    private void sing(String mp3Location, String lrcLocation, String name) {
+        Log.e(TAG, "sing " + mp3Location + ", " +  lrcLocation + ", " + name);
         try {
-            lrcLayout.loadLrcFromFile(lrcLocation);
-            AVChatManager.getInstance().startAudioMixing(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/test.mp3", false, false, 0, 0.5f);
+            lrcLayout.loadLrcFromFile(lrcLocation, name);
+            AVChatManager.getInstance().startAudioMixing(mp3Location, false, false, 0, 0.5f);
             lrcLayout.start();
         } catch (Exception e) {
             Log.e(TAG, "sing", e);
@@ -764,6 +762,8 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
     //检查版本权限问题
     private void ccheckPermission() {
         if (Build.VERSION.SDK_INT > 22) {
+            String[] permissions = new String[] {android.Manifest.permission.CAMERA,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,};
             if (ContextCompat.checkSelfPermission(KTVActivity.this,
                     android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 //先判断有没有权限 ，没有就在这里进行权限的申请
