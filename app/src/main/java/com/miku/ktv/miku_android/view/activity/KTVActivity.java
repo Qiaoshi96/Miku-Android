@@ -231,7 +231,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
         }
         mRoomWebSocket = new RoomWebSocket(this, mRoomName, mAccount);
         mRoomWebSocket.joinRoom();
-
+        lrcLayout.init(mRoomWebSocket);
         startAVChat();
     }
 
@@ -377,7 +377,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
         try {
             lrcLayout.loadLrcFromFile(lrcLocation, singer, name, (int)duration);
             AVChatManager.getInstance().startAudioMixing(mp3Location, false, false, 0, 0.5f);
-            lrcLayout.start();
+            lrcLayout.start(true);
         } catch (Exception e) {
             Log.e(TAG, "sing", e);
         }
@@ -939,6 +939,12 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
                 updateGridView();
             }
         });
+    }
+
+    @Override
+    public void onUserSing(String lyric, String musicInfo, long startTime) {
+        Log.e(TAG, "(((((((" + lyric + ", " + musicInfo + ", " +startTime);
+        //lrcLayout.loadLrcFromFile(lyric, "", musicInfo, );
     }
 
     @Override

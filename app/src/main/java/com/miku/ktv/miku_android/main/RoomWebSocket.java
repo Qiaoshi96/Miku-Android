@@ -60,6 +60,11 @@ public class RoomWebSocket {
                             if (body.has("cameraDisable")) {
                                 mCallback.onUserDisableCamera(body.getString("userId"), body.getBoolean("cameraDisable"));
                             }
+                            Log.e(TAG, "onStringAvailable------" + body.getInt("type"));
+                            if (body.getInt("type") == 7) {
+                                Log.e(TAG, "onStringAvailable------" + body.getInt("type"));
+                                mCallback.onUserSing(body.getString("music_subtitle"), body.getString("music_info"), body.getLong("start_time"));
+                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -94,8 +99,23 @@ public class RoomWebSocket {
         }
     }
 
+    public void sendLyric(JSONObject message) throws JSONException {
+        JSONObject body = new JSONObject();
+        body.put("message", message.toString());
+        body.put("type", 7);
+        body.put("userId", mAccount);
+
+        JSONObject data = new JSONObject();
+        data.put("room", mRoomName);
+        data.put("body", body.toString());
+        mWebSocket.send(data.toString());
+    }
+
     public interface RoomWebSocketMsgInterface {
         void onUserDisableCamera(String user, boolean disable);
+
+        void onUserSing(String lyric, String musicInfo, long startTime);
+
     }
 
 }
