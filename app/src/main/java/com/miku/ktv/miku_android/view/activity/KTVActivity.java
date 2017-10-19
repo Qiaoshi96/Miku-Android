@@ -816,7 +816,8 @@ public class KTVActivity extends AppCompatActivity implements IExitRoomView<Obje
                 break;
             //点歌的点击事件
             case R.id.ll_diangelist:
-                sing();
+//                sing();
+                startActivity(new Intent(this,SongsActivity.class));
                 break;
             //排麦的点击事件
             case R.id.ll_paimailist:

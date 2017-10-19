@@ -121,7 +121,7 @@
         </activity>
         <activity android:name=".view.activity.SearchActivity">
         </activity>
-        <activity android:name=".view.activity.KTVActivity" android:launchMode="singleInstance"/>
+        <activity android:name=".view.activity.KTVActivity"/>
     </application>
 
 </manifest>
