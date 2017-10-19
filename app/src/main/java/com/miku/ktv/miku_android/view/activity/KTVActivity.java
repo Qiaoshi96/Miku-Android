@@ -370,8 +370,12 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
      */
     private void sing(String mp3Location, String lrcLocation, String singer, String name) {
         Log.e(TAG, "sing " + mp3Location + ", " +  lrcLocation + ", " + singer + ", " + name);
+        android.media.MediaMetadataRetriever mmr = new android.media.MediaMetadataRetriever();
+        mmr.setDataSource(mp3Location);
+        long duration = Long.parseLong(mmr.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION));
+        Log.e(TAG, "++-----" + duration);
         try {
-            lrcLayout.loadLrcFromFile(lrcLocation, singer, name);
+            lrcLayout.loadLrcFromFile(lrcLocation, singer, name, (int)duration);
             AVChatManager.getInstance().startAudioMixing(mp3Location, false, false, 0, 0.5f);
             lrcLayout.start();
         } catch (Exception e) {
@@ -702,6 +706,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
         super.onDestroy();
         stopAVChat();
         mRoomWebSocket.leaveRoom();
+        lrcLayout.destroy();
     }
 
     //退出登录成功回调
@@ -827,7 +832,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
         line3Layout = (LinearLayout) findViewById(R.id.ll_3);
 
         lrcLayout = (LRCLayout) findViewById(R.id.lrc_layout);
-
+        lrcLayout.setSingerView((TextView)findViewById(R.id.tv_singer));
         addPresenter = new AddPresenter();
         addPresenter.attach(this);
     }
@@ -841,8 +846,8 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
                 break;
             //点歌的点击事件
             case R.id.ll_diangelist:
-//                sing();
-                startActivityForResult(new Intent(this,SongsActivity.class),REQUEST_CODE);
+                sing(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/test.mp3", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/test.bph", "wo", "hehe");
+                //startActivityForResult(new Intent(this,SongsActivity.class),REQUEST_CODE);
                 break;
             //排麦的点击事件
             case R.id.ll_paimailist:
@@ -874,7 +879,8 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
                 String linkIntent=data.getStringExtra("linkIntent");
                 String singerIntent=data.getStringExtra("singerIntent");
                 String lyricIntent=data.getStringExtra("lyricIntent");
-                Log.d(TAG, "onActivityResult: "+musicIntent+"\n"+linkIntent+"\n"+singerIntent+"\n"+lyricIntent);
+                Log.e(TAG, "onActivityResult: "+musicIntent+"\n"+linkIntent+"\n"+singerIntent+"\n"+lyricIntent);
+                sing(linkIntent, lyricIntent, singerIntent, musicIntent);
             }
         }
     }

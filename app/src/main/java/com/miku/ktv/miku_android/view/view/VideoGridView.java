@@ -86,12 +86,12 @@ public class VideoGridView extends FrameLayout {
         // add head image view to nonVideoLayout
         mHeadIv = new ImageView(context);
         mHeadIv.setImageResource(R.mipmap.icon_qq);
-        ConstraintLayout.LayoutParams mHeadLayoutParams = new ConstraintLayout.LayoutParams((int) (45 * mScale), (int) (45 * mScale));
+        ConstraintLayout.LayoutParams mHeadLayoutParams = new ConstraintLayout.LayoutParams((int) (30 * mScale), (int) (30 * mScale));
         mHeadLayoutParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
         mHeadLayoutParams.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
         mHeadLayoutParams.leftToLeft = ConstraintLayout.LayoutParams.PARENT_ID;
         mHeadLayoutParams.rightToRight = ConstraintLayout.LayoutParams.PARENT_ID;
-        mHeadLayoutParams.bottomMargin = (int) (20 * mScale);
+        mHeadLayoutParams.bottomMargin = (int) (10 * mScale);
         mHeadIv.setLayoutParams(mHeadLayoutParams);
         mNonVideoLayout.addView(mHeadIv);
 
@@ -99,19 +99,20 @@ public class VideoGridView extends FrameLayout {
         mNameTv = new TextView(context);
         mNameTv.setText("hello");
         mNameTv.setTextColor(Color.WHITE);
+        mNameTv.setTextSize(9);
         ConstraintLayout.LayoutParams mNameLayoutParams = new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT);
         mNameLayoutParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
         mNameLayoutParams.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
         mNameLayoutParams.leftToLeft = ConstraintLayout.LayoutParams.PARENT_ID;
         mNameLayoutParams.rightToRight = ConstraintLayout.LayoutParams.PARENT_ID;
         mNameTv.setLayoutParams(mNameLayoutParams);
-        mNameLayoutParams.topMargin = (int) (50 * mScale);
+        mNameLayoutParams.topMargin = (int) (30 * mScale);
         mNonVideoLayout.addView(mNameTv);
 
 
         // volume Layout
         FrameLayout fl = new FrameLayout(context);
-        ConstraintLayout.LayoutParams flLayoutParams = new ConstraintLayout.LayoutParams((int) (10 * mScale), (int) (50 * mScale));
+        ConstraintLayout.LayoutParams flLayoutParams = new ConstraintLayout.LayoutParams((int) (9 * mScale), (int) (30 * mScale));
         flLayoutParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
         flLayoutParams.rightToRight = ConstraintLayout.LayoutParams.PARENT_ID;
         flLayoutParams.bottomMargin = (int) (5 * mScale);
@@ -122,10 +123,9 @@ public class VideoGridView extends FrameLayout {
 
         // add volume image view to frame layout
         mVolumeIv = new ImageView(context);
-        mVolumeBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.headinfo);
-        //mVolumeIv.setImageBitmap(mVolumeBitmap);
-        mVolumeIv.setBackgroundColor(Color.WHITE);
-        FrameLayout.LayoutParams volumeLayoutParams  = new FrameLayout.LayoutParams((int)(10 * mScale), (int) (50 * mScale));
+        mVolumeBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.volume);
+        mVolumeIv.setImageBitmap(mVolumeBitmap);
+        FrameLayout.LayoutParams volumeLayoutParams  = new FrameLayout.LayoutParams((int)(9 * mScale), (int) (30 * mScale));
         mVolumeIv.setLayoutParams(volumeLayoutParams);
         fl.addView(mVolumeIv);
 
