@@ -972,6 +972,6 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
 
     @Override
     public void onAddListError(Throwable throwable) {
-
+        Log.d(TAG, "onAddListError: "+throwable.getMessage());
     }
 }
