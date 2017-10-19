@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.miku.ktv.miku_android.lrc_parser.LrcParser;
 import com.miku.ktv.miku_android.lrc_parser.LrcParserFactory;
 
+import org.json.JSONArray;
 import org.w3c.dom.Text;
 
 import java.io.BufferedInputStream;
@@ -229,7 +230,12 @@ public class LRCLayout extends RelativeLayout {
                         LrcParser.Slice slice = lrc.sentences.get(lineIndex).slices.get(sliceIndex);
                         float currentWidth = mPaint.measureText(slice.word);
                         float totalWidth = mPaint.measureText(lyric);
-                        float percent = (previousWidth + currentWidth * (currentTimestamp + 50 - slice.timestamp) / slice.duration) / totalWidth;
+                        float percent = (previousWidth + currentWidth * (currentTimestamp - slice.timestamp) / slice.duration) / totalWidth;
+                        if (sliceIndex == lrc.sentences.get(lineIndex).slices.size() - 1) {
+                            if (currentTimestamp + 50 > slice.timestamp + slice.duration) {
+                                percent = 1;
+                            }
+                        }
                         int margin = (int) (mWidth / 3 - totalWidth * mScale / 2);
                         if (margin < 0) {
                             margin = 0;
