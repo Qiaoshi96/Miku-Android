@@ -1,7 +1,6 @@
 package com.miku.ktv.miku_android.view.activity;
 
 import android.Manifest;
-import android.app.DownloadManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,7 +9,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -32,7 +30,6 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.koushikdutta.async.http.AsyncHttpClient;
 import com.miku.ktv.miku_android.R;
 import com.miku.ktv.miku_android.main.AvatarImageFetchRunnable;
 import com.miku.ktv.miku_android.main.RoomWebSocket;
@@ -82,7 +79,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 import static com.miku.ktv.miku_android.model.utils.Constant.gson;
@@ -1028,7 +1024,6 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         paimaiCount.setText(refreshLVPop.getCount() + "");
 
     }
-
 
     @Override
     public void onAddListError(Throwable throwable) {
