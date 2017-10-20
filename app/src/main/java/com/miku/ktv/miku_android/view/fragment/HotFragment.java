@@ -43,9 +43,12 @@ import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.StringCallback;
 
 import java.io.File;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import okhttp3.Call;
 
@@ -177,15 +180,23 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
 //
 //            }.start();
 
-            //下载歌词
+            //下载歌词　　　　　
             new Thread(){
                 @Override
                 public void run() {
                     Looper.prepare();
+                    String name = System.currentTimeMillis() + "";
+                    MessageDigest md5 = null;
+                    try {
+                        md5 = MessageDigest.getInstance("MD5");
+                        name = new String(md5.digest(songsList.get(i).getLrc().getBytes()));
+                    } catch (NoSuchAlgorithmException e) {
+                        e.printStackTrace();
+                    }
                     downloadManger = DUtil.init(mContext)
                             .url(songsListAll.get(i).getLrc())
                             .path(Environment.getExternalStorageDirectory() + "/MiDoDownUtil/")
-                            .name(songsListAll.get(i).getName() + "_lrc.kas")
+                            .name(name + songsListAll.get(i).getLrc().substring(songsListAll.get(i).getLrc().lastIndexOf(".")))
                             .childTaskCount(3)
                             .build()
                             .start(new DownloadCallback() {
@@ -253,10 +264,19 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
     };
     //下载Mp3
     private void downLoadMp3(final int position) {
+        String name = System.currentTimeMillis() + "";
+        MessageDigest md5 = null;
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+            name = new String(md5.digest(songsList.get(position).getLrc().getBytes()));
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
         downloadManger = DUtil.init(mContext)
                 .url(songsListAll.get(position).getLink())
                 .path(Environment.getExternalStorageDirectory() + "/MiDoDownUtil/")
-                .name(songsListAll.get(position).getName() + "banzou.mp3")
+                .name(name + ".mp3")
                 .childTaskCount(3)
                 .build()
                 .start(new DownloadCallback() {
@@ -305,6 +325,17 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                                         edit.putString("musiclink", songsListAll.get(position).getLink());
                                         edit.putString("singer", songsListAll.get(position).getAuthor());
                                         edit.putString("lyric", songsListAll.get(position).getLrc());
+                                        String name = System.currentTimeMillis() + "";
+                                        MessageDigest md5 = null;
+                                        try {
+                                            md5 = MessageDigest.getInstance("MD5");
+                                            name = new String(md5.digest(songsList.get(position).getLrc().getBytes()));
+                                        } catch (NoSuchAlgorithmException e) {
+                                            e.printStackTrace();
+                                        }
+
+                                        edit.putString("mp3Location", Environment.getExternalStorageDirectory() + "/MiDoDownUtil/" +  name + ".mp3");
+                                        edit.putString("lyricLocation", Environment.getExternalStorageDirectory() + "/MiDoDownUtil/" + name + songsListAll.get(position).getLrc().substring(songsListAll.get(position).getLrc().lastIndexOf(".")));
                                         edit.commit();
                                         Log.d(TAG, "歌名为："+songsListAll.get(position).getName());
 
@@ -441,8 +472,8 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                         intent.putExtra("lyricUrl",sp.getString("lyric",""));
 
                         //本地地址
-                        intent.putExtra("mp3Location",sp.getString("musiclink",""));
-                        intent.putExtra("lyricLocation",sp.getString("lyric",""));
+                        intent.putExtra("mp3Location",sp.getString("mp3Location",""));
+                        intent.putExtra("lyricLocation",sp.getString("lyricLocation",""));
 
                         intent.putExtra("musicName",sp.getString("musicname",""));
                         intent.putExtra("singer",sp.getString("singer",""));

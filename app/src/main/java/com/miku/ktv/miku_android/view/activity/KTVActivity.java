@@ -380,8 +380,8 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         mmr.setDataSource(mp3Location);
         long duration = Long.parseLong(mmr.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION));
         try {
-            lrcLayout.start(true, mp3Url, lyricUrl, lrcLocation, name + "-" + singer, System.currentTimeMillis(), duration);
             AVChatManager.getInstance().startAudioMixing(mp3Location, false, false, 0, 0.5f);
+            lrcLayout.start(true, mp3Url, lyricUrl, lrcLocation, name + "-" + singer, System.currentTimeMillis(), duration);
         } catch (Exception e) {
             Log.e(TAG, "sing", e);
         }
