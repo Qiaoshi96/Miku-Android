@@ -226,6 +226,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                                             paimaiTV.setVisibility(View.VISIBLE);
                                         }
                                     });
+
                                     //下载MP3
                                     downLoadMp3(i);
 
