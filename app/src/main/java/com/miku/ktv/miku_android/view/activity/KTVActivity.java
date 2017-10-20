@@ -1,6 +1,7 @@
 package com.miku.ktv.miku_android.view.activity;
 
 import android.Manifest;
+import android.app.DownloadManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,6 +10,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -30,6 +32,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.koushikdutta.async.http.AsyncHttpClient;
 import com.miku.ktv.miku_android.R;
 import com.miku.ktv.miku_android.main.AvatarImageFetchRunnable;
 import com.miku.ktv.miku_android.main.RoomWebSocket;
@@ -68,19 +71,26 @@ import com.netease.nimlib.sdk.avchat.model.AVChatTextureViewRenderer;
 import com.netease.nimlib.sdk.avchat.model.AVChatVideoCapturerFactory;
 import com.netease.nimlib.sdk.avchat.model.AVChatVideoFrame;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import static com.miku.ktv.miku_android.model.utils.Constant.gson;
 
 
-public class KTVActivity extends AppCompatActivity implements IAddView<Object,DeleteBean,AddListBean>, IExitRoomView<Object, ExitRoomBean>, IFetchRoomInfoView<Object, JoinRoomBean>, View.OnClickListener, AVChatStateObserver, AvatarImageFetchRunnable.FetchAvatarImageCallBack, RoomWebSocket.RoomWebSocketMsgInterface {
+public class KTVActivity extends AppCompatActivity implements IAddView<Object, DeleteBean, AddListBean>, IExitRoomView<Object, ExitRoomBean>, IFetchRoomInfoView<Object, JoinRoomBean>, View.OnClickListener, AVChatStateObserver, AvatarImageFetchRunnable.FetchAvatarImageCallBack, RoomWebSocket.RoomWebSocketMsgInterface {
     private static final String TAG = KTVActivity.class.getName();
-    public static final int REQUEST_CODE=1;
+    public static final int REQUEST_CODE = 1;
 
     /**
      * 返回键
@@ -368,16 +378,14 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
     /**
      * 点歌
      */
-    private void sing(String mp3Location, String lrcLocation, String singer, String name) {
-        Log.e(TAG, "sing " + mp3Location + ", " +  lrcLocation + ", " + singer + ", " + name);
+    private void sing(String mp3Url, String lyricUrl, String mp3Location, String lrcLocation, String singer, String name) {
+        Log.e(TAG, "sing " + mp3Location + ", " + lrcLocation + ", " + singer + ", " + name);
         android.media.MediaMetadataRetriever mmr = new android.media.MediaMetadataRetriever();
         mmr.setDataSource(mp3Location);
         long duration = Long.parseLong(mmr.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION));
-        Log.e(TAG, "++-----" + duration);
         try {
-            lrcLayout.loadLrcFromFile(lrcLocation, singer, name, (int)duration);
+            lrcLayout.start(true, mp3Url, lyricUrl, lrcLocation, name + "-" + singer, System.currentTimeMillis(), duration);
             AVChatManager.getInstance().startAudioMixing(mp3Location, false, false, 0, 0.5f);
-            lrcLayout.start(true);
         } catch (Exception e) {
             Log.e(TAG, "sing", e);
         }
@@ -453,7 +461,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
         while (it.hasNext()) {
             Map.Entry<String, Integer> entry = it.next();
             boolean videoEnabled = mVideoEnabledUsers.contains(entry.getKey());
-           mVideoGridViewList.get(entry.getValue()).setVisibility(videoEnabled, !videoEnabled);
+            mVideoGridViewList.get(entry.getValue()).setVisibility(videoEnabled, !videoEnabled);
         }
     }
 
@@ -620,7 +628,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
     //用户第一帧画面通知
     @Override
     public void onFirstVideoFrameAvailable(String account) {
-        Log.e(TAG, "onFirstVideoFrameAvailable: "  + account);
+        Log.e(TAG, "onFirstVideoFrameAvailable: " + account);
         if (!account.equals(mAccount)) {
             mVideoEnabledUsers.add(account);
             updateGridView();
@@ -642,7 +650,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
     //用户视频帧率汇报
     @Override
     public void onVideoFpsReported(String account, int fps) {
-        Log.e(TAG, "onVideoFpsReported: "  + account + ", " + fps);
+        Log.e(TAG, "onVideoFpsReported: " + account + ", " + fps);
     }
 
 
@@ -788,8 +796,8 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
     //检查版本权限问题
     private void ccheckPermission() {
         if (Build.VERSION.SDK_INT > 22) {
-            String[] permissions = new String[] {android.Manifest.permission.CAMERA,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,};
+            String[] permissions = new String[]{android.Manifest.permission.CAMERA,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,};
             if (ContextCompat.checkSelfPermission(KTVActivity.this,
                     android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 //先判断有没有权限 ，没有就在这里进行权限的申请
@@ -832,7 +840,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
         line3Layout = (LinearLayout) findViewById(R.id.ll_3);
 
         lrcLayout = (LRCLayout) findViewById(R.id.lrc_layout);
-        lrcLayout.setSingerView((TextView)findViewById(R.id.tv_singer));
+        lrcLayout.setSingerView((TextView) findViewById(R.id.tv_singer));
         addPresenter = new AddPresenter();
         addPresenter.attach(this);
     }
@@ -847,7 +855,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
             //点歌的点击事件
             case R.id.ll_diangelist:
 //                sing(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/test.mp3", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/test.bph", "wo", "hehe");
-                startActivityForResult(new Intent(this,SongsActivity.class),REQUEST_CODE);
+                startActivityForResult(new Intent(this, SongsActivity.class), REQUEST_CODE);
                 break;
             //排麦的点击事件
             case R.id.ll_paimailist:
@@ -873,27 +881,30 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-            if (resultCode==2){
-                switch (requestCode) {
-                    case 1:
-                        if (data==null){
-                            return;
-                        }else {
-                            String musicIntent=data.getStringExtra("musicIntent");
-                            String linkIntent=data.getStringExtra("linkIntent");
-                            String singerIntent=data.getStringExtra("singerIntent");
-                            String lyricIntent=data.getStringExtra("lyricIntent");
-                            Log.e(TAG, "onActivityResult: "+musicIntent+"\n"+linkIntent+"\n"+singerIntent+"\n"+lyricIntent);
-                            sing(linkIntent, lyricIntent, singerIntent, musicIntent);
-                        }
-                        break;
-                }
+        if (resultCode == 2) {
+            switch (requestCode) {
+                case 1:
+                    if (data == null) {
+                        return;
+                    } else {
+                        String mp3Url = data.getStringExtra("mp3Url");
+                        String lyricUrl = data.getStringExtra("lyricUrl");
+                        String mp3Location = data.getStringExtra("mp3Location");
+                        String lyricLocation = data.getStringExtra("lyricLocation");
+                        String singer = data.getStringExtra("singer");
+                        String musicName = data.getStringExtra("musicName");
+                        Log.e(TAG, "onActivityResult: " + mp3Url + "\n" + lyricUrl + "\n" + mp3Location + "\n" + lyricLocation + "\n" +
+                            singer + "\n" + musicName);
+                        sing(mp3Url, lyricUrl, mp3Location, lyricLocation, singer, musicName);
+                    }
+                    break;
+            }
         }
     }
 
     private void showPopupWindow() {
-        View view=View.inflate(this, R.layout.ktv_pop, null);
-        popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT,695,true);
+        View view = View.inflate(this, R.layout.ktv_pop, null);
+        popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, 695, true);
         //点击外部区域popwindow消失
         popupWindow.setBackgroundDrawable(new BitmapDrawable());
         popupWindow.setFocusable(true);
@@ -903,9 +914,9 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
 
         refreshLVPop = (ListView) view.findViewById(R.id.refreshLVPop);
 
-        HashMap<String,String> map=new HashMap<>();
-        map.put("page","1");
-        addPresenter.getAddList(sp.getString("roomname",""),map,AddListBean.class);
+        HashMap<String, String> map = new HashMap<>();
+        map.put("page", "1");
+        addPresenter.getAddList(sp.getString("roomname", ""), map, AddListBean.class);
     }
 
     private void showDialog() {
@@ -948,9 +959,40 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
     }
 
     @Override
-    public void onUserSing(String lyric, String musicInfo, long startTime) {
-        Log.e(TAG, "(((((((" + lyric + ", " + musicInfo + ", " +startTime);
-        //lrcLayout.loadLrcFromFile(lyric, "", musicInfo, );
+    public void onUserSing(final String mp3Url, final String lyricUrl, final String musicInfo, final long startTime) {
+        Log.e(TAG, "onUserSing: " + mp3Url + ", " + lyricUrl + ", " + musicInfo + ", " + startTime);
+        if (lrcLayout.check(mp3Url, lyricUrl, musicInfo, startTime)) {
+            return;
+        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL(lyricUrl);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    InputStream istream = connection.getInputStream();
+                    String lyricLocation = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + lyricUrl.substring(lyricUrl.lastIndexOf("/") + 1);
+                    File file = new File(lyricLocation);
+                    file.createNewFile();
+                    OutputStream output = new FileOutputStream(file);
+                    byte[] buffer = new byte[1024];
+                    while (istream.read(buffer) != -1) {
+                        output.write(buffer);
+                    }
+                    output.flush();
+                    output.close();
+                    istream.close();
+
+                    android.media.MediaMetadataRetriever mmr = new android.media.MediaMetadataRetriever();
+                    mmr.setDataSource(mp3Url, null);
+                    long duration = Long.parseLong(mmr.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION));
+                    lrcLayout.start(false, mp3Url, lyricUrl, lyricLocation, musicInfo, startTime, duration);
+                } catch (Exception e) {
+                    Log.e(TAG, "onUserSing", e);
+                }
+            }
+        }).start();
+
     }
 
     @Override
@@ -965,31 +1007,31 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
 
     @Override
     public void onAddListSuccess(AddListBean bean) {
-        if (bean.getStatus()==1){
-            String addListJson=gson.toJson(bean);
+        if (bean.getStatus() == 1) {
+            String addListJson = gson.toJson(bean);
             addListBean1 = gson.fromJson(addListJson, AddListBean.class);
-            addList=addListBean1.getBody().getSinger_list();
-            if (addList==null){
-                Log.d(TAG, "addList为空，size为: "+addList.size());
-        }else {
-            Log.d(TAG, "onAddListSuccess: "+addList.size());
-            initData();
-        }
-            Log.d(TAG, "onAddListSuccess: "+bean.getMsg());
+            addList = addListBean1.getBody().getSinger_list();
+            if (addList == null) {
+                Log.d(TAG, "addList为空，size为: " + addList.size());
+            } else {
+                Log.d(TAG, "onAddListSuccess: " + addList.size());
+                initData();
+            }
+            Log.d(TAG, "onAddListSuccess: " + bean.getMsg());
         }
     }
 
     private void initData() {
-        popAdapter = new PopAdapter(this,addList);
+        popAdapter = new PopAdapter(this, addList);
         refreshLVPop.setAdapter(popAdapter);
         //当前列表内的歌曲数量
-        paimaiCount.setText(refreshLVPop.getCount()+"");
+        paimaiCount.setText(refreshLVPop.getCount() + "");
 
     }
 
 
     @Override
     public void onAddListError(Throwable throwable) {
-        Log.d(TAG, "onAddListError: "+throwable.getMessage());
+        Log.d(TAG, "onAddListError: " + throwable.getMessage());
     }
 }
