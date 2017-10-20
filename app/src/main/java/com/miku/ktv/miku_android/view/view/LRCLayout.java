@@ -12,16 +12,22 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.koushikdutta.async.http.WebSocket;
 import com.miku.ktv.miku_android.lrc_parser.LrcParser;
 import com.miku.ktv.miku_android.lrc_parser.LrcParserFactory;
+import com.miku.ktv.miku_android.main.RoomWebSocket;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 /**
  * Created by lenovo on 2017/10/13.
@@ -70,6 +76,9 @@ public class LRCLayout extends RelativeLayout {
 
     private boolean isRun;
 
+    private RoomWebSocket mWebSocket;
+
+    private boolean isMyself;
 
     public LRCLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -116,7 +125,11 @@ public class LRCLayout extends RelativeLayout {
 
     }
 
+    public void init(RoomWebSocket webSocket) {
+        this.mWebSocket = webSocket;
+    }
     public void loadLrcFromFile(String fileName, String singer, String name, int duration) throws Exception {
+        startTimestamp = 0;
         if (isStart) {
             isStart = false;
         }
@@ -128,11 +141,15 @@ public class LRCLayout extends RelativeLayout {
         mTotalDuration = duration;
     }
 
-    public void start() throws Exception {
+    public void start(boolean myself) throws Exception {
         lineIndex = 0;
         sliceIndex = 0;
         startTimestamp = System.currentTimeMillis();
         isStart = true;
+        isMyself = myself;
+        if (isMyself) {
+            syncLyric(true);
+        }
     }
 
     public void stop() {
@@ -185,6 +202,7 @@ public class LRCLayout extends RelativeLayout {
 
         @Override
         public void run() {
+            boolean newLine = false;
             while (isRun) {
                 if (isStart) {
                     long currentTimestamp = System.currentTimeMillis() - startTimestamp;
@@ -194,6 +212,7 @@ public class LRCLayout extends RelativeLayout {
                         if (currentTimestamp >= sentence.timestamp + sentence.duration) {
                             Log.v(TAG, "sentence finished");
                             lineIndex++;
+                            newLine = true;
                             continue;
                         }
 
@@ -208,8 +227,19 @@ public class LRCLayout extends RelativeLayout {
                         if (sliceIndex == -1) {
                             Log.v(TAG, "slice finished");
                             lineIndex++;
+                            newLine = true;
                             continue;
                         }
+                        if (newLine) {
+                            if (lineIndex < lrc.sentences.size() && isMyself) {
+                                try {
+                                    syncLyric(false);
+                                } catch (JSONException e) {
+                                    Log.e(TAG, "sync lyric failed", e);
+                                }
+                            }
+                        }
+                        newLine = false;
 
                         // 整句歌词
                         StringBuilder sb = new StringBuilder();
@@ -366,5 +396,117 @@ public class LRCLayout extends RelativeLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         isRun = false;
+    }
+
+    private void syncLyric(boolean isStart) throws JSONException {
+        Lyric lyric = new Lyric();
+        if (isStart) {
+            lyric.index = -1;
+        } else {
+            lyric.index = lineIndex;
+        }
+
+        JSONObject body = new JSONObject();
+        body.put("index", lyric.index);
+
+        LrcParser.Sentence cur = lrc.sentences.get(lineIndex);
+        lyric.currentStartTime = cur.timestamp;
+
+        float curTotal = 0;
+        lyric.currentPositions.add(0, (float)0);
+        for (int i = 0; i < cur.slices.size(); i++) {
+            lyric.currentSentence += cur.slices.get(i).word;
+            curTotal += mPaint.measureText(cur.slices.get(i).word);
+            lyric.currentPositions.add(i + 1, curTotal);
+            lyric.currentTimestamps.add(i, (float)(cur.slices.get(i).timestamp - cur.timestamp) / 1000);
+        }
+        lyric.currentTimestamps.add(cur.slices.size(), (float)(cur.slices.get(cur.slices.size() - 1).timestamp  + cur.slices.get(cur.slices.size() - 1).duration- cur.timestamp) / 1000);
+
+        for (int i = 0; i < lyric.currentPositions.size(); i++) {
+            lyric.currentPositions.set(i, lyric.currentPositions.get(i)/curTotal);
+        }
+
+        // current
+        JSONObject currentTitle = new JSONObject();
+        JSONArray currentPositions = new JSONArray();
+        for (int i = 0; i  < lyric.currentPositions.size(); i++) {
+            currentPositions.put(i, lyric.currentPositions.get(i));
+        }
+        JSONArray currentTimestamps = new JSONArray();
+        for (int i = 0; i  < lyric.currentTimestamps.size(); i++) {
+            currentTimestamps.put(i, lyric.currentTimestamps.get(i));
+        }
+        currentTitle.put("start_time", lyric.currentStartTime);
+        currentTitle.put("sentence", lyric.currentSentence);
+        currentTitle.put("timeArray", currentTimestamps);
+        currentTitle.put("locationArray", currentPositions);
+
+        body.put("current_subtitle", currentTitle);
+
+        if (lineIndex < lrc.sentences.size() - 1) {
+            LrcParser.Sentence next = lrc.sentences.get(lineIndex + 1);
+            lyric.nextStatTime = next.timestamp;
+
+            lyric.nextPositions.add(0, (float)0);
+            float nextTotal = 0;
+            for (int i = 0; i < next.slices.size(); i++) {
+                lyric.nextSentence += next.slices.get(i).word;
+                nextTotal += mPaint.measureText(next.slices.get(i).word);
+                lyric.nextPositions.add(i+1, nextTotal);
+                lyric.nextTimestamps.add(i, (float)(next.slices.get(i).timestamp - next.timestamp) / 1000);
+            }
+            lyric.nextTimestamps.add(next.slices.size(), (float)(next.slices.get(next.slices.size() - 1).timestamp  + next.slices.get(next.slices.size() - 1).duration- next.timestamp) / 1000);
+
+            for (int i = 0; i < lyric.nextPositions.size(); i++) {
+                lyric.nextPositions.set(i, lyric.nextPositions.get(i)/nextTotal);
+            }
+
+
+            // current
+            JSONObject nextTitle = new JSONObject();
+            JSONArray nextPositions = new JSONArray();
+            for (int i = 0; i  < lyric.nextPositions.size(); i++) {
+                nextPositions.put(i, lyric.nextPositions.get(i));
+            }
+            JSONArray nextTimeStamps = new JSONArray();
+            for (int i = 0; i  < lyric.nextTimestamps.size(); i++) {
+                nextTimeStamps.put(i, lyric.nextTimestamps.get(i));
+            }
+            nextTitle.put("start_time", lyric.nextStatTime);
+            nextTitle.put("sentence", lyric.nextSentence);
+            nextTitle.put("timeArray", nextTimeStamps);
+            nextTitle.put("locationArray", nextPositions);
+
+            body.put("next_subtitle", nextTitle);
+        }
+
+        Log.e(TAG, "########" + body.toString());
+        mWebSocket.sendLyric(body);
+
+    }
+
+    public class Lyric {
+        String currentSentence;
+        long currentStartTime;
+        ArrayList<Float> currentPositions;
+        ArrayList<Float> currentTimestamps;
+
+        String nextSentence;
+        long nextStatTime;
+        ArrayList<Float> nextPositions;
+        ArrayList<Float> nextTimestamps;
+
+        int index;
+
+        public Lyric() {
+            currentSentence = "";
+            nextSentence = "";
+
+            currentPositions = new ArrayList<>();
+            currentTimestamps = new ArrayList<>();
+
+            nextPositions = new ArrayList<>();
+            nextTimestamps = new ArrayList<>();
+        }
     }
 }
