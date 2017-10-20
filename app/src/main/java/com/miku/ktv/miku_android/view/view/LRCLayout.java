@@ -86,7 +86,7 @@ public class LRCLayout extends RelativeLayout {
 
     private Object Lock = new Object();
 
-    private long mTimeStampDelay;
+    private long checkStartTime = 0;
 
     public LRCLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -127,7 +127,6 @@ public class LRCLayout extends RelativeLayout {
 
         mWorkThreadRun = true;
 
-        mTimeStampDelay = 0;
         new Thread(new WorkRunnable()).start();
     }
 
@@ -145,9 +144,6 @@ public class LRCLayout extends RelativeLayout {
             mMusicLyricUrl = lrcUrl;
             mMusicInfo = musicInfo;
             mMusicStartTime = startTimestamp;
-            if (!isSelfSing) {
-                mMusicStartTime -= mTimeStampDelay;
-            }
             mMusicDuratioin = duration;
 
             mMusicLineIndex = 0;
@@ -176,25 +172,16 @@ public class LRCLayout extends RelativeLayout {
     }
 
     public boolean check(String mp3Url, String lyricUrl, String musicInfo, long startTime) {
-        if (lyricUrl == mMusicLyricUrl && startTime == mMusicStartTime) {
+        if (lyricUrl == mMusicLyricUrl && startTime == checkStartTime) {
             return true;
         }
+        checkStartTime = startTime;
         return false;
     }
 
     public class WorkRunnable implements Runnable {
         @Override
         public void run() {
-            try {
-                URL url = new URL("http://www.baidu.com");
-                URLConnection uc = url.openConnection();//生成连接对象
-                uc.connect(); //发出连接
-                long ld = uc.getDate(); //取得网站日期时间
-                mTimeStampDelay = ld - System.currentTimeMillis();
-            } catch (Exception e) {
-                Log.e(TAG, "get time", e);
-            }
-
             boolean newLine = false;
             while (mWorkThreadRun) {
                 synchronized (Lock) {
@@ -225,15 +212,15 @@ public class LRCLayout extends RelativeLayout {
                                 continue;
                             }
                             if (newLine) {
-                                if (mMusicLineIndex < lrc.sentences.size() && mMusicSelfSing) {
+                                if (mMusicLineIndex < lrc.sentences.size() && mMusicSelfSing && currentTimestamp >= sentence.timestamp) {
                                     try {
                                         syncLyric();
                                     } catch (JSONException e) {
                                         Log.e(TAG, "sync lyric failed", e);
                                     }
                                 }
+                                newLine = false;
                             }
-                            newLine = false;
 
                             // 整句歌词
                             StringBuilder sb = new StringBuilder();
@@ -473,7 +460,7 @@ public class LRCLayout extends RelativeLayout {
             body.put("music_link", mMusicMp3Url);
             body.put("music_subtitle", mMusicLyricUrl);
             body.put("music_info", mMusicInfo);
-            body.put("start_time", mMusicStartTime + mTimeStampDelay);
+            body.put("start_time", mMusicStartTime);
         }
         mWebSocket.sendLyric(body);
 

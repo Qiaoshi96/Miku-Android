@@ -970,13 +970,15 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
                     URL url = new URL(lyricUrl);
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     InputStream istream = connection.getInputStream();
+
                     String lyricLocation = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + lyricUrl.substring(lyricUrl.lastIndexOf("/") + 1);
                     File file = new File(lyricLocation);
                     file.createNewFile();
                     OutputStream output = new FileOutputStream(file);
                     byte[] buffer = new byte[1024];
-                    while (istream.read(buffer) != -1) {
-                        output.write(buffer);
+                    int readLen = 0;
+                    while ((readLen = istream.read(buffer)) != -1) {
+                        output.write(buffer, 0, readLen);
                     }
                     output.flush();
                     output.close();
@@ -985,7 +987,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
                     android.media.MediaMetadataRetriever mmr = new android.media.MediaMetadataRetriever();
                     mmr.setDataSource(mp3Url, new HashMap<String, String>());
                     long duration = Long.parseLong(mmr.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION));
-                    lrcLayout.start(false, mp3Url, lyricUrl, lyricLocation, musicInfo, startTime, duration);
+                    lrcLayout.start(false, mp3Url, lyricUrl, lyricLocation, musicInfo, System.currentTimeMillis(), duration);
                 } catch (Exception e) {
                     Log.e(TAG, "onUserSing", e);
                 }
