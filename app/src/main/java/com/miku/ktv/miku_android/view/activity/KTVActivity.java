@@ -846,8 +846,8 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
                 break;
             //点歌的点击事件
             case R.id.ll_diangelist:
-                sing(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/test.mp3", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/test.bph", "wo", "hehe");
-                //startActivityForResult(new Intent(this,SongsActivity.class),REQUEST_CODE);
+//                sing(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/test.mp3", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/test.bph", "wo", "hehe");
+                startActivityForResult(new Intent(this,SongsActivity.class),REQUEST_CODE);
                 break;
             //排麦的点击事件
             case R.id.ll_paimailist:
@@ -873,15 +873,21 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode==2){
-            if (requestCode==REQUEST_CODE){
-                String musicIntent=data.getStringExtra("musicIntent");
-                String linkIntent=data.getStringExtra("linkIntent");
-                String singerIntent=data.getStringExtra("singerIntent");
-                String lyricIntent=data.getStringExtra("lyricIntent");
-                Log.e(TAG, "onActivityResult: "+musicIntent+"\n"+linkIntent+"\n"+singerIntent+"\n"+lyricIntent);
-                sing(linkIntent, lyricIntent, singerIntent, musicIntent);
-            }
+            if (resultCode==2){
+                switch (requestCode) {
+                    case 1:
+                        if (data==null){
+                            return;
+                        }else {
+                            String musicIntent=data.getStringExtra("musicIntent");
+                            String linkIntent=data.getStringExtra("linkIntent");
+                            String singerIntent=data.getStringExtra("singerIntent");
+                            String lyricIntent=data.getStringExtra("lyricIntent");
+                            Log.e(TAG, "onActivityResult: "+musicIntent+"\n"+linkIntent+"\n"+singerIntent+"\n"+lyricIntent);
+                            sing(linkIntent, lyricIntent, singerIntent, musicIntent);
+                        }
+                        break;
+                }
         }
     }
 
@@ -959,10 +965,10 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object,De
             addList=addListBean1.getBody().getSinger_list();
             if (addList==null){
                 Log.d(TAG, "addList为空，size为: "+addList.size());
-            }else {
-                Log.d(TAG, "onAddListSuccess: "+addList.size());
-                initData();
-            }
+        }else {
+            Log.d(TAG, "onAddListSuccess: "+addList.size());
+            initData();
+        }
             Log.d(TAG, "onAddListSuccess: "+bean.getMsg());
         }
     }
