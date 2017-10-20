@@ -165,6 +165,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                 paimaiTV = (TextView) itemLayout.findViewById(R.id.HotFragment_item_TextView_Paimai);
             }
             IsUtils.showShort(mContext, "点击了缓冲，位置是： " + i);
+            //下载歌曲
             new Thread(){
                 @Override
                 public void run() {
@@ -226,7 +227,10 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
 
                                                     HashMap<String,String> map=new HashMap<>();
                                                     map.put("token",sp.getString("LoginToken",""));
+                                                    Log.d(TAG, "登录的token:  "+sp.getString("LoginToken",""));
                                                     map.put("sid",songsListAll.get(i).getId()+"");
+                                                    Log.d(TAG, "歌曲ID:  "+songsListAll.get(i).getId()+"");
+                                                    Log.d(TAG, "roomId:  "+sp.getString("roomid",""));
                                                     addPresenter.postAdd(sp.getString("roomid",""), map, AddBean.class);
                                                 }
                                             });
@@ -234,7 +238,116 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                                     });
                                     Log.d(TAG, "onFinish: ");
 
-//                                    handler.sendEmptyMessage(2);
+                                    handler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            ArrayList<HistroyBean> list = new ArrayList<>();
+                                            HistroyBean histroyBean = new HistroyBean();
+                                            histroyBean.setId(songsListAll.get(i).getId());
+                                            histroyBean.setName(songsListAll.get(i).getName());
+                                            histroyBean.setAuthor(songsListAll.get(i).getAuthor());
+                                            histroyBean.setLrc(songsListAll.get(i).getLrc());
+                                            histroyBean.setOriginal(songsListAll.get(i).getOriginal());
+                                            histroyBean.setLink(songsListAll.get(i).getLink());
+                                            list.add(histroyBean);
+
+                                            if (mListener != null) {
+                                                mListener.dataTransmission(list);
+                                            }
+                                        }
+                                    });
+
+                                }
+
+                                @Override
+                                public void onWait() {
+
+                                }
+
+                                @Override
+                                public void onError(String error) {
+                                    Log.d(TAG, "onError: ");
+
+                                }
+                            });
+                    Looper.loop();
+                }
+
+            }.start();
+
+            //下载歌词
+            new Thread(){
+                @Override
+                public void run() {
+                    Looper.prepare();
+                    downloadManger = DUtil.init(mContext)
+                            .url(songsListAll.get(i).getLrc())
+                            .path(Environment.getExternalStorageDirectory() + "/MiDoDownUtil/")
+                            .name(songsListAll.get(i).getName() + "_lrc.kas")
+                            .childTaskCount(3)
+                            .build()
+                            .start(new DownloadCallback() {
+                                @Override
+                                public void onStart(long currentSize, long totalSize, float progress) {
+                                    Log.d(TAG, "onStart:");
+
+                                }
+
+                                @Override
+                                public void onProgress(long currentSize, long totalSize, final float progress) {
+                                    downTV.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            downTV.setText("正在缓冲" + progress + "%");
+
+                                        }
+                                    });
+                                    Log.d(TAG, "onProgress:  " + progress + "%");
+
+                                }
+
+                                @Override
+                                public void onPause() {
+
+                                }
+
+                                @Override
+                                public void onCancel() {
+
+                                }
+
+                                @Override
+                                public void onFinish(File file) {
+                                    downTV.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            downTV.setVisibility(View.GONE);
+                                            paimaiTV.setVisibility(View.VISIBLE);
+
+                                            paimaiTV.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    IsUtils.showShort(mContext,"点了排麦"+i);
+                                                    edit.putString("musicname", songsListAll.get(i).getName());
+                                                    edit.putString("musiclink", songsListAll.get(i).getLink());
+                                                    edit.putString("singer", songsListAll.get(i).getAuthor());
+                                                    edit.putString("lyric", songsListAll.get(i).getLrc());
+                                                    edit.commit();
+                                                    Log.d(TAG, "歌名为："+songsListAll.get(i).getName());
+
+                                                    HashMap<String,String> map=new HashMap<>();
+                                                    map.put("token",sp.getString("LoginToken",""));
+                                                    Log.d(TAG, "登录的token:  "+sp.getString("LoginToken",""));
+                                                    map.put("sid",songsListAll.get(i).getId()+"");
+                                                    Log.d(TAG, "歌曲ID:  "+songsListAll.get(i).getId()+"");
+                                                    Log.d(TAG, "roomId:  "+sp.getString("roomid",""));
+                                                    addPresenter.postAdd(sp.getString("roomid",""), map, AddBean.class);
+                                                }
+                                            });
+                                        }
+                                    });
+                                    Log.d(TAG, "onFinish: ");
+
                                     handler.post(new Runnable() {
                                         @Override
                                         public void run() {
@@ -490,7 +603,6 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
 
             @Override
             protected void onPostExecute(Void result) {
-
                 handler.sendEmptyMessage(1);
             }
 

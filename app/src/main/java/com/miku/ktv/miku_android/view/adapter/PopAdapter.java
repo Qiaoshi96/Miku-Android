@@ -33,21 +33,25 @@ public class PopAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
+        Log.d(TAG, "getCount: "+list.size());
         return list.size();
     }
 
     @Override
     public Object getItem(int position) {
+        Log.d(TAG, "getItem: ");
         return list.get(position);
     }
 
     @Override
     public long getItemId(int position) {
+        Log.d(TAG, "getItemId: ");
         return position;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        Log.d(TAG, "getView: ");
         if (map.get(position)==null){
             convertView = View.inflate(context, R.layout.ktv_pop_item, null);
             holder=new ViewHolder();
