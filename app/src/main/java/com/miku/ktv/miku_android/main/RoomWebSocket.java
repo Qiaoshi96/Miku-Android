@@ -53,14 +53,12 @@ public class RoomWebSocket {
                 webSocket.setStringCallback(new WebSocket.StringCallback() {
                     @Override
                     public void onStringAvailable(String s) {
-                        Log.e("TAG", "onStringAvailable: " + s);
                         try {
                             JSONObject object = new JSONObject(s);
                             JSONObject body = new JSONObject(object.getString("body"));
                             if (body.has("cameraDisable")) {
                                 mCallback.onUserDisableCamera(body.getString("userId"), body.getBoolean("cameraDisable"));
                             }
-                            Log.e(TAG, "onStringAvailable------" + body.getInt("type"));
                             if (body.getInt("type") == 7) {
                                 Log.e(TAG, "onStringAvailable------" + body.getInt("type"));
                                 mCallback.onUserSing(body.getString("music_link"), body.getString("music_subtitle"), body.getString("music_info"), body.getLong("start_time"));
