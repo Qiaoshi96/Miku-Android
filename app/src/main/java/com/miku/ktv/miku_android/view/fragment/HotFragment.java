@@ -396,7 +396,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
         }else {
             //排麦重复
             if (addBean.getStatus()==6){
-                showTwoDialog();
+                showSuccessDialog();
             }
             Log.d(TAG, "onSuccess: "+addBean.getMsg());
         }

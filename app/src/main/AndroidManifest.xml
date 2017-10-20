@@ -122,7 +122,7 @@
         </activity>
         <activity android:name=".view.activity.SearchActivity">
         </activity>
-        <activity android:name=".view.activity.KTVActivity"/>
+        <activity android:name=".view.activity.KTVActivity" android:launchMode="singleTask" android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

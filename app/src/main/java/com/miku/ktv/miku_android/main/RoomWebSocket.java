@@ -60,11 +60,13 @@ public class RoomWebSocket {
                                 mCallback.onUserDisableCamera(body.getString("userId"), body.getBoolean("cameraDisable"));
                             }
                             if (body.getInt("type") == 7) {
+                                Log.e(TAG, "onStringAvailable++++++");
+                                JSONObject message = new JSONObject(body.getString("message"));
+                                mCallback.onUserSing(message.getString("music_link"), message.getString("music_subtitle"), message.getString("music_info"), message.getLong("start_time"));
                                 Log.e(TAG, "onStringAvailable------" + body.getInt("type"));
-                                mCallback.onUserSing(body.getString("music_link"), body.getString("music_subtitle"), body.getString("music_info"), body.getLong("start_time"));
                             }
                         } catch (JSONException e) {
-                            e.printStackTrace();
+                           Log.e(TAG, "onStringAvailable", e);
                         }
                     }
                 });

@@ -73,7 +73,9 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -238,6 +240,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         mRoomWebSocket = new RoomWebSocket(this, mRoomName, mAccount);
         mRoomWebSocket.joinRoom();
         lrcLayout.init(mRoomWebSocket);
+
         startAVChat();
     }
 
@@ -673,12 +676,12 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
     //语音正在说话用户声音强度通知
     @Override
     public void onReportSpeaker(Map<String, Integer> speakers, int mixedEnergy) {
-        Log.e(TAG, "onReportSpeaker");
+        //Log.e(TAG, "onReportSpeaker");
         Iterator<Map.Entry<String, Integer>> it = speakers.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<String, Integer> entry = it.next();
             if (mAccount2GridMap.containsKey(entry.getKey())) {
-                Log.e(TAG, "------- valume" + entry.getValue());
+                //Log.e(TAG, "------- valume" + entry.getValue());
                 int percent = entry.getValue() / 50;
                 if (percent > 100) percent = 100;
                 mVideoGridViewList.get(mAccount2GridMap.get(entry.getKey())).setVolume(percent);
@@ -956,14 +959,14 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
 
     @Override
     public void onUserSing(final String mp3Url, final String lyricUrl, final String musicInfo, final long startTime) {
-        Log.e(TAG, "onUserSing: " + mp3Url + ", " + lyricUrl + ", " + musicInfo + ", " + startTime);
-        if (lrcLayout.check(mp3Url, lyricUrl, musicInfo, startTime)) {
-            return;
-        }
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
+                    Log.e(TAG, "onUserSing: " + mp3Url + ", " + lyricUrl + ", " + musicInfo + ", " + startTime);
+                    if (lrcLayout.check(mp3Url, lyricUrl, musicInfo, startTime)) {
+                        return;
+                    }
                     URL url = new URL(lyricUrl);
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     InputStream istream = connection.getInputStream();
@@ -980,7 +983,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
                     istream.close();
 
                     android.media.MediaMetadataRetriever mmr = new android.media.MediaMetadataRetriever();
-                    mmr.setDataSource(mp3Url, null);
+                    mmr.setDataSource(mp3Url, new HashMap<String, String>());
                     long duration = Long.parseLong(mmr.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION));
                     lrcLayout.start(false, mp3Url, lyricUrl, lyricLocation, musicInfo, startTime, duration);
                 } catch (Exception e) {

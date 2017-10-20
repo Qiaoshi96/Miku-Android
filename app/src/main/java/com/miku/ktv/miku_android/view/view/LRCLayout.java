@@ -27,6 +27,9 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 
 /**
@@ -83,6 +86,8 @@ public class LRCLayout extends RelativeLayout {
 
     private Object Lock = new Object();
 
+    private long mTimeStampDelay;
+
     public LRCLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         Log.e(TAG, "LRCLayout");
@@ -121,6 +126,8 @@ public class LRCLayout extends RelativeLayout {
         mMusicSelfSing = false;
 
         mWorkThreadRun = true;
+
+        mTimeStampDelay = 0;
         new Thread(new WorkRunnable()).start();
     }
 
@@ -138,6 +145,9 @@ public class LRCLayout extends RelativeLayout {
             mMusicLyricUrl = lrcUrl;
             mMusicInfo = musicInfo;
             mMusicStartTime = startTimestamp;
+            if (!isSelfSing) {
+                mMusicStartTime -= mTimeStampDelay;
+            }
             mMusicDuratioin = duration;
 
             mMusicLineIndex = 0;
@@ -175,6 +185,16 @@ public class LRCLayout extends RelativeLayout {
     public class WorkRunnable implements Runnable {
         @Override
         public void run() {
+            try {
+                URL url = new URL("http://www.baidu.com");
+                URLConnection uc = url.openConnection();//生成连接对象
+                uc.connect(); //发出连接
+                long ld = uc.getDate(); //取得网站日期时间
+                mTimeStampDelay = ld - System.currentTimeMillis();
+            } catch (Exception e) {
+                Log.e(TAG, "get time", e);
+            }
+
             boolean newLine = false;
             while (mWorkThreadRun) {
                 synchronized (Lock) {
@@ -453,7 +473,7 @@ public class LRCLayout extends RelativeLayout {
             body.put("music_link", mMusicMp3Url);
             body.put("music_subtitle", mMusicLyricUrl);
             body.put("music_info", mMusicInfo);
-            body.put("start_time", mMusicStartTime);
+            body.put("start_time", mMusicStartTime + mTimeStampDelay);
         }
         mWebSocket.sendLyric(body);
 
