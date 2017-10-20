@@ -43,6 +43,8 @@ import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.StringCallback;
 
 import java.io.File;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -166,192 +168,198 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
             }
             IsUtils.showShort(mContext, "点击了缓冲，位置是： " + i);
 
-            //下载歌词
-            new Thread(){
-                @Override
-                public void run() {
-                    Looper.prepare();
-                    downloadManger = DUtil.init(mContext)
-                            .url(songsListAll.get(i).getLrc())
-                            .path(Environment.getExternalStorageDirectory() + "/MiDoDownUtil/")
-                            .name(songsListAll.get(i).getName() + songsListAll.get(i).getLrc().substring(songsListAll.get(i).getLrc().lastIndexOf(".")))
-                            .childTaskCount(3)
-                            .build()
-                            .start(new DownloadCallback() {
-                                @Override
-                                public void onStart(long currentSize, long totalSize, float progress) {
-                                    Log.d(TAG, "onStart:");
+            try {
+                final MessageDigest md5 = MessageDigest.getInstance("MD5");
+                final String fileName = "" + System.currentTimeMillis();
+                //下载歌词
+                new Thread() {
+                    @Override
+                    public void run() {
+                        Looper.prepare();
+                        downloadManger = DUtil.init(mContext)
+                                .url(songsListAll.get(i).getLrc())
+                                .path(Environment.getExternalStorageDirectory() + "/MiDoDownUtil/")
+                                .name(fileName + songsListAll.get(i).getLrc().substring(songsListAll.get(i).getLrc().lastIndexOf(".")))
+                                .childTaskCount(3)
+                                .build()
+                                .start(new DownloadCallback() {
+                                    @Override
+                                    public void onStart(long currentSize, long totalSize, float progress) {
+                                        Log.d(TAG, "onStart:");
 
-                                }
+                                    }
 
-                                @Override
-                                public void onProgress(long currentSize, long totalSize, final float progress) {
-                                }
+                                    @Override
+                                    public void onProgress(long currentSize, long totalSize, final float progress) {
+                                    }
 
-                                @Override
-                                public void onPause() {
+                                    @Override
+                                    public void onPause() {
 
-                                }
+                                    }
 
-                                @Override
-                                public void onCancel() {
+                                    @Override
+                                    public void onCancel() {
 
-                                }
+                                    }
 
-                                @Override
-                                public void onFinish(File file) {
+                                    @Override
+                                    public void onFinish(File file) {
 //下载歌曲
-                                    new Thread(){
-                                        @Override
-                                        public void run() {
-                                            Looper.prepare();
-                                            downloadManger = DUtil.init(mContext)
-                                                    .url(songsListAll.get(i).getLink())
-                                                    .path(Environment.getExternalStorageDirectory() + "/MiDoDownUtil/")
-                                                    .name(songsListAll.get(i).getName() + "banzou.mp3")
-                                                    .childTaskCount(3)
-                                                    .build()
-                                                    .start(new DownloadCallback() {
-                                                        @Override
-                                                        public void onStart(long currentSize, long totalSize, float progress) {
-                                                            Log.d(TAG, "onStart:");
+                                        new Thread() {
+                                            @Override
+                                            public void run() {
+                                                Looper.prepare();
+                                                downloadManger = DUtil.init(mContext)
+                                                        .url(songsListAll.get(i).getLink())
+                                                        .path(Environment.getExternalStorageDirectory() + "/MiDoDownUtil/")
+                                                        .name(fileName + ".mp3")
+                                                        .childTaskCount(3)
+                                                        .build()
+                                                        .start(new DownloadCallback() {
+                                                            @Override
+                                                            public void onStart(long currentSize, long totalSize, float progress) {
+                                                                Log.d(TAG, "onStart:");
 
-                                                        }
+                                                            }
 
-                                                        @Override
-                                                        public void onProgress(long currentSize, long totalSize, final float progress) {
-                                                            downTV.post(new Runnable() {
-                                                                @Override
-                                                                public void run() {
-                                                                    downTV.setText("正在缓冲" + progress + "%");
+                                                            @Override
+                                                            public void onProgress(long currentSize, long totalSize, final float progress) {
+                                                                downTV.post(new Runnable() {
+                                                                    @Override
+                                                                    public void run() {
+                                                                        downTV.setText("正在缓冲" + progress + "%");
 
-                                                                }
-                                                            });
-                                                            Log.d(TAG, "onProgress:  " + progress + "%");
-
-                                                        }
-
-                                                        @Override
-                                                        public void onPause() {
-
-                                                        }
-
-                                                        @Override
-                                                        public void onCancel() {
-
-                                                        }
-
-                                                        @Override
-                                                        public void onFinish(File file) {
-                                                            downTV.post(new Runnable() {
-                                                                @Override
-                                                                public void run() {
-                                                                    downTV.setVisibility(View.GONE);
-                                                                    paimaiTV.setVisibility(View.VISIBLE);
-
-                                                                    paimaiTV.setOnClickListener(new View.OnClickListener() {
-                                                                        @Override
-                                                                        public void onClick(View v) {
-                                                                            IsUtils.showShort(mContext,"点了排麦"+i);
-                                                                            edit.putString("musicname", songsListAll.get(i).getName());
-                                                                            edit.putString("musiclink", songsListAll.get(i).getLink());
-                                                                            edit.putString("singer", songsListAll.get(i).getAuthor());
-                                                                            edit.putString("lyric", songsListAll.get(i).getLrc());
-
-                                                                            edit.putString("mp3Location",
-                                                                                    Environment.getExternalStorageDirectory() + "/MiDoDownUtil/" + songsListAll.get(i).getName() + "banzou.mp3");
-
-                                                                            edit.putString("lyricLocation",
-                                                                                    Environment.getExternalStorageDirectory() + "/MiDoDownUtil/" + songsListAll.get(i).getName()
-                                                                                            + songsListAll.get(i).getLrc().substring(songsListAll.get(i).getLrc().lastIndexOf(".")));
-                                                                            edit.commit();
-                                                                            Log.d(TAG, "歌名为："+songsListAll.get(i).getName());
-
-                                                                            HashMap<String,String> map=new HashMap<>();
-                                                                            map.put("token",sp.getString("LoginToken",""));
-                                                                            Log.d(TAG, "登录的token:  "+sp.getString("LoginToken",""));
-                                                                            map.put("sid",songsListAll.get(i).getId()+"");
-                                                                            Log.d(TAG, "歌曲ID:  "+songsListAll.get(i).getId()+"");
-                                                                            Log.d(TAG, "roomId:  "+sp.getString("roomid",""));
-                                                                            addPresenter.postAdd(sp.getString("roomid",""), map, AddBean.class);
-                                                                        }
-                                                                    });
-                                                                }
-                                                            });
-                                                            Log.d(TAG, "onFinish: ");
-
-                                                            handler.post(new Runnable() {
-                                                                @Override
-                                                                public void run() {
-                                                                    ArrayList<HistroyBean> list = new ArrayList<>();
-                                                                    HistroyBean histroyBean = new HistroyBean();
-                                                                    histroyBean.setId(songsListAll.get(i).getId());
-                                                                    histroyBean.setName(songsListAll.get(i).getName());
-                                                                    histroyBean.setAuthor(songsListAll.get(i).getAuthor());
-                                                                    histroyBean.setLrc(songsListAll.get(i).getLrc());
-                                                                    histroyBean.setOriginal(songsListAll.get(i).getOriginal());
-                                                                    histroyBean.setLink(songsListAll.get(i).getLink());
-                                                                    list.add(histroyBean);
-
-                                                                    if (mListener != null) {
-                                                                        mListener.dataTransmission(list);
                                                                     }
-                                                                }
-                                                            });
+                                                                });
+                                                                Log.d(TAG, "onProgress:  " + progress + "%");
 
-                                                        }
+                                                            }
 
-                                                        @Override
-                                                        public void onWait() {
+                                                            @Override
+                                                            public void onPause() {
 
-                                                        }
+                                                            }
 
-                                                        @Override
-                                                        public void onError(String error) {
-                                                            Log.d(TAG, "onError: ");
+                                                            @Override
+                                                            public void onCancel() {
 
-                                                        }
-                                                    });
-                                            Looper.loop();
-                                        }
+                                                            }
 
-                                    }.start();
+                                                            @Override
+                                                            public void onFinish(File file) {
+                                                                downTV.post(new Runnable() {
+                                                                    @Override
+                                                                    public void run() {
+                                                                        downTV.setVisibility(View.GONE);
+                                                                        paimaiTV.setVisibility(View.VISIBLE);
 
-                                }
+                                                                        paimaiTV.setOnClickListener(new View.OnClickListener() {
+                                                                            @Override
+                                                                            public void onClick(View v) {
+                                                                                IsUtils.showShort(mContext, "点了排麦" + i);
+                                                                                edit.putString("musicname", songsListAll.get(i).getName());
+                                                                                edit.putString("musiclink", songsListAll.get(i).getLink());
+                                                                                edit.putString("singer", songsListAll.get(i).getAuthor());
+                                                                                edit.putString("lyric", songsListAll.get(i).getLrc());
 
-                                @Override
-                                public void onWait() {
+                                                                                edit.putString("mp3Location",
+                                                                                        Environment.getExternalStorageDirectory() + "/MiDoDownUtil/" + fileName + ".mp3");
 
-                                }
+                                                                                edit.putString("lyricLocation",
+                                                                                        Environment.getExternalStorageDirectory() + "/MiDoDownUtil/" + fileName
+                                                                                                + songsListAll.get(i).getLrc().substring(songsListAll.get(i).getLrc().lastIndexOf(".")));
+                                                                                edit.commit();
+                                                                                Log.d(TAG, "歌名为：" + songsListAll.get(i).getName());
 
-                                @Override
-                                public void onError(String error) {
-                                    Log.d(TAG, "onError: ");
+                                                                                HashMap<String, String> map = new HashMap<>();
+                                                                                map.put("token", sp.getString("LoginToken", ""));
+                                                                                Log.d(TAG, "登录的token:  " + sp.getString("LoginToken", ""));
+                                                                                map.put("sid", songsListAll.get(i).getId() + "");
+                                                                                Log.d(TAG, "歌曲ID:  " + songsListAll.get(i).getId() + "");
+                                                                                Log.d(TAG, "roomId:  " + sp.getString("roomid", ""));
+                                                                                addPresenter.postAdd(sp.getString("roomid", ""), map, AddBean.class);
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                });
+                                                                Log.d(TAG, "onFinish: ");
 
-                                }
-                            });
-                    Looper.loop();
-                }
+                                                                handler.post(new Runnable() {
+                                                                    @Override
+                                                                    public void run() {
+                                                                        ArrayList<HistroyBean> list = new ArrayList<>();
+                                                                        HistroyBean histroyBean = new HistroyBean();
+                                                                        histroyBean.setId(songsListAll.get(i).getId());
+                                                                        histroyBean.setName(songsListAll.get(i).getName());
+                                                                        histroyBean.setAuthor(songsListAll.get(i).getAuthor());
+                                                                        histroyBean.setLrc(songsListAll.get(i).getLrc());
+                                                                        histroyBean.setOriginal(songsListAll.get(i).getOriginal());
+                                                                        histroyBean.setLink(songsListAll.get(i).getLink());
+                                                                        list.add(histroyBean);
 
-            }.start();
+                                                                        if (mListener != null) {
+                                                                            mListener.dataTransmission(list);
+                                                                        }
+                                                                    }
+                                                                });
 
+                                                            }
 
+                                                            @Override
+                                                            public void onWait() {
+
+                                                            }
+
+                                                            @Override
+                                                            public void onError(String error) {
+                                                                Log.d(TAG, "onError: ");
+
+                                                            }
+                                                        });
+                                                Looper.loop();
+                                            }
+
+                                        }.start();
+
+                                    }
+
+                                    @Override
+                                    public void onWait() {
+
+                                    }
+
+                                    @Override
+                                    public void onError(String error) {
+                                        Log.d(TAG, "onError: ");
+
+                                    }
+                                });
+                        Looper.loop();
+                    }
+
+                }.start();
+
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
 
         }
     };
+
     //上麦成功的回调
     @Override
     public void onSuccess(AddBean addBean) {
-        if (addBean.getStatus()==1){
+        if (addBean.getStatus() == 1) {
             //排麦成功dialog
             showSuccessDialog();
-            Log.d(TAG, "onSuccess: "+addBean.getMsg());
-        }else {
+            Log.d(TAG, "onSuccess: " + addBean.getMsg());
+        } else {
             //排麦重复
-            if (addBean.getStatus()==6){
+            if (addBean.getStatus() == 6) {
                 showSuccessDialog();
             }
-            Log.d(TAG, "onSuccess: "+addBean.getMsg());
+            Log.d(TAG, "onSuccess: " + addBean.getMsg());
         }
     }
 
@@ -376,26 +384,26 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
             public void onClick(DialogInterface dialog, int which) {
                 builder = new AlertDialog.Builder(getActivity()).create();
 
-                View dialogView=View.inflate(getActivity(), R.layout.paimai_dialog,null);
+                View dialogView = View.inflate(getActivity(), R.layout.paimai_dialog, null);
                 dialogMusicTV = (TextView) dialogView.findViewById(R.id.PaimaiDialog_TextView_Music);
                 dialogTimeTV = (TextView) dialogView.findViewById(R.id.PaimaiDialog_TextView_Time);
                 dialogGiveupTV = (TextView) dialogView.findViewById(R.id.PaimaiDialog_TextView_Giveup);
                 dialogNowTV = (TextView) dialogView.findViewById(R.id.PaimaiDialog_TextView_Now);
 
-                dialogMusicTV.setText(sp.getString("musicname",""));
-                final CountDownTimer timer=new CountDownTimer(15000, 1000) {
+                dialogMusicTV.setText(sp.getString("musicname", ""));
+                final CountDownTimer timer = new CountDownTimer(15000, 1000) {
                     @Override
                     public void onTick(long millisUntilFinished) {
-                        dialogTimeTV.setText((millisUntilFinished / 1000)+"秒后不上麦则自动放弃");
+                        dialogTimeTV.setText((millisUntilFinished / 1000) + "秒后不上麦则自动放弃");
                     }
 
                     @Override
                     public void onFinish() {
                         dialogTimeTV.setText("已自动放弃");
                         //请求下麦接口
-                        HashMap<String,String> map=new HashMap<>();
-                        map.put("token",sp.getString("LoginToken",""));
-                        addPresenter.delete(sp.getString("roomid",""), map, DeleteBean.class);
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put("token", sp.getString("LoginToken", ""));
+                        addPresenter.delete(sp.getString("roomid", ""), map, DeleteBean.class);
                     }
                 };
                 timer.start();
@@ -407,9 +415,9 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                     @Override
                     public void onClick(View v) {
                         //请求下麦接口
-                        HashMap<String,String> map=new HashMap<>();
-                        map.put("token",sp.getString("LoginToken",""));
-                        addPresenter.delete(sp.getString("roomid",""), map, DeleteBean.class);
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put("token", sp.getString("LoginToken", ""));
+                        addPresenter.delete(sp.getString("roomid", ""), map, DeleteBean.class);
                         timer.cancel();
                     }
                 });
@@ -417,21 +425,21 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                 dialogNowTV.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        IsUtils.showShort(getActivity(),"立即上麦");
+                        IsUtils.showShort(getActivity(), "立即上麦");
 
-                        Intent intent=new Intent();
+                        Intent intent = new Intent();
 
-                        intent.putExtra("mp3Url",sp.getString("musiclink",""));
-                        intent.putExtra("lyricUrl",sp.getString("lyric",""));
+                        intent.putExtra("mp3Url", sp.getString("musiclink", ""));
+                        intent.putExtra("lyricUrl", sp.getString("lyric", ""));
 
                         //本地地址
-                        intent.putExtra("mp3Location",sp.getString("mp3Location",""));
-                        intent.putExtra("lyricLocation",sp.getString("lyricLocation",""));
+                        intent.putExtra("mp3Location", sp.getString("mp3Location", ""));
+                        intent.putExtra("lyricLocation", sp.getString("lyricLocation", ""));
 
-                        intent.putExtra("musicName",sp.getString("musicname",""));
-                        intent.putExtra("singer",sp.getString("singer",""));
+                        intent.putExtra("musicName", sp.getString("musicname", ""));
+                        intent.putExtra("singer", sp.getString("singer", ""));
 
-                        getActivity().setResult(2,intent);
+                        getActivity().setResult(2, intent);
 
                         builder.dismiss();
                         timer.cancel();
@@ -451,22 +459,22 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
 
     @Override
     public void onError(Throwable t) {
-        Log.d(TAG, "onError: "+t.getMessage());
+        Log.d(TAG, "onError: " + t.getMessage());
     }
 
     @Override
     public void onDeleteSuccess(DeleteBean bean) {
-        if (bean.getStatus()==1){
+        if (bean.getStatus() == 1) {
             builder.dismiss();
-            IsUtils.showShort(getActivity(),"放弃");
-        }else {
-            IsUtils.showShort(getActivity(),"放弃失败");
+            IsUtils.showShort(getActivity(), "放弃");
+        } else {
+            IsUtils.showShort(getActivity(), "放弃失败");
         }
     }
 
     @Override
     public void onDeleteError(Throwable throwable) {
-        Log.d(TAG, "onDeleteError: "+throwable.getMessage());
+        Log.d(TAG, "onDeleteError: " + throwable.getMessage());
     }
 
     @Override
@@ -483,7 +491,9 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
     public interface OnDataTransmissionListener {
         public void dataTransmission(ArrayList<HistroyBean> list);
     }
+
     private OnDataTransmissionListener mListener;
+
     public void setOnDataTransmissionListener(OnDataTransmissionListener mListener) {
         this.mListener = mListener;
     }
@@ -491,7 +501,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
     //下拉刷新
     @Override
     public void onDownPullRefresh() {
-        new AsyncTask<Void, Void, Void>(){
+        new AsyncTask<Void, Void, Void>() {
 
             @Override
             protected Void doInBackground(Void... params) {
@@ -499,8 +509,8 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                 OkHttpUtils.get()
                         .url(REQUEST_SONGS_URL)
                         .addParams("timestamp", Constant.getTime())
-                        .addParams("sign",Constant.getSign())
-                        .addParams("page","1")
+                        .addParams("sign", Constant.getSign())
+                        .addParams("page", "1")
                         .build()
                         .execute(new StringCallback() {
                             @Override
@@ -525,11 +535,13 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
             }
         }.execute(new Void[]{});
     }
+
     //上拉加载
     @Override
     public void onLoadingMore() {
         new AsyncTask<Void, Void, Void>() {
-            final int newIndex=index+1;
+            final int newIndex = index + 1;
+
             @Override
             protected Void doInBackground(Void... params) {
                 SystemClock.sleep(1000);
@@ -537,8 +549,8 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                 OkHttpUtils.get()
                         .url(REQUEST_SONGS_URL)
                         .addParams("timestamp", Constant.getTime())
-                        .addParams("sign",Constant.getSign())
-                        .addParams("page",""+ newIndex)
+                        .addParams("sign", Constant.getSign())
+                        .addParams("page", "" + newIndex)
                         .build()
                         .execute(new StringCallback() {
                             @Override
@@ -551,8 +563,8 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                                 gson = new Gson();
                                 songsListBean = gson.fromJson(s, SongsListBean.class);
                                 songsList = songsListBean.getBody().getSong_list();
-                                index=newIndex;
-                                Log.d(TAG, "onResponse: "+songsList.get(0).getName());
+                                index = newIndex;
+                                Log.d(TAG, "onResponse: " + songsList.get(0).getName());
 
                             }
                         });
