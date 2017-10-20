@@ -356,10 +356,17 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                         IsUtils.showShort(getActivity(),"立即上麦");
 
                         Intent intent=new Intent();
-                        intent.putExtra("musicIntent",sp.getString("musicname",""));
-                        intent.putExtra("linkIntent",sp.getString("musiclink",""));
-                        intent.putExtra("singerIntent",sp.getString("singer",""));
-                        intent.putExtra("lyricIntent",sp.getString("lyric",""));
+
+                        intent.putExtra("mp3Url",sp.getString("musiclink",""));
+                        intent.putExtra("lyricUrl",sp.getString("lyric",""));
+
+                        //本地地址
+                        intent.putExtra("mp3Location",sp.getString("musiclink",""));
+                        intent.putExtra("lyricLocation",sp.getString("lyric",""));
+
+                        intent.putExtra("musicName",sp.getString("musicname",""));
+                        intent.putExtra("singer",sp.getString("singer",""));
+
                         getActivity().setResult(2,intent);
 
                         builder.dismiss();

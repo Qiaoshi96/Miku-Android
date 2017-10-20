@@ -36,17 +36,9 @@ import java.util.ArrayList;
 public class LRCLayout extends RelativeLayout {
     private static final String TAG = LRCLayout.class.getName();
 
-    private boolean isStart = false;
-
-    private long startTimestamp;
-
     private Handler handler = new Handler();
 
     private LrcParser.Lrc lrc = null;
-
-    private int lineIndex = 0;
-
-    private int sliceIndex = 0;
 
     private LRCTextView mTopLRCTextView;
 
@@ -68,22 +60,33 @@ public class LRCLayout extends RelativeLayout {
 
     private Paint mPaint;
 
-    private String mSinger;
-
-    private String mName;
-
-    private long mTotalDuration;
-
-    private boolean isRun;
-
     private RoomWebSocket mWebSocket;
 
-    private boolean isMyself;
+    /**
+     * 调用config时必须重新配置的项目
+     */
+
+    private String mMusicMp3Url;
+    private String mMusicLyricUrl;
+
+    private String mMusicInfo;
+    private long mMusicStartTime;
+    private long mMusicDuratioin;
+    private int mMusicLineIndex;
+    private int mMusicSliceIndex;
+    private boolean mMusicSinging;
+    private boolean mMusicSelfSing;
+
+    //////////////////////////////////end of config parameters ////////////////////////////////////////
+
+    private boolean mWorkThreadRun;
+
+    private Object Lock = new Object();
 
     public LRCLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        Log.e(TAG, "LRCLayout");
         mScale = context.getResources().getDisplayMetrics().density;
-        Log.v(TAG, "scale is " + mScale);
         mTopLRCTextView = new LRCTextView(context);
         mBottomLRCTextView = new LRCTextView(context);
         mTopLayout = new LayoutParams(
@@ -102,7 +105,6 @@ public class LRCLayout extends RelativeLayout {
         DisplayMetrics dm = getResources().getDisplayMetrics();
         mWidth = dm.widthPixels;
 
-
         mTipTextView = new TextView(context);
         LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         params.addRule(RelativeLayout.CENTER_IN_PARENT);
@@ -115,192 +117,165 @@ public class LRCLayout extends RelativeLayout {
 
         mUIRunnable = new UIRunnable();
 
-        isRun = true;
+        mMusicSinging = false;
+        mMusicSelfSing = false;
 
-        startTimestamp = 0;
-
-        mTotalDuration = 0;
-
+        mWorkThreadRun = true;
         new Thread(new WorkRunnable()).start();
-
     }
 
     public void init(RoomWebSocket webSocket) {
         this.mWebSocket = webSocket;
     }
-    public void loadLrcFromFile(String fileName, String singer, String name, int duration) throws Exception {
-        startTimestamp = 0;
-        if (isStart) {
-            isStart = false;
-        }
-        LrcParser parser = LrcParserFactory.createParserByFileName(fileName);
-        String content = readFile(fileName);
-        lrc = parser.parse(content);
-        mSinger = singer;
-        mName = name;
-        mTotalDuration = duration;
-    }
 
-    public void start(boolean myself) throws Exception {
-        lineIndex = 0;
-        sliceIndex = 0;
-        startTimestamp = System.currentTimeMillis();
-        isStart = true;
-        isMyself = myself;
-        if (isMyself) {
-            syncLyric(true);
+
+    public void start(boolean isSelfSing, String mp3Url, String lrcUrl, String lrcFileName, String musicInfo, long startTimestamp, long duration) throws Exception {
+        synchronized (Lock) {
+            mMusicSinging = true;
+
+            mMusicSelfSing = isSelfSing;
+            mMusicMp3Url = mp3Url;
+            mMusicLyricUrl = lrcUrl;
+            mMusicInfo = musicInfo;
+            mMusicStartTime = startTimestamp;
+            mMusicDuratioin = duration;
+
+            mMusicLineIndex = 0;
+            mMusicSliceIndex = 0;
+
+            LrcParser parser = LrcParserFactory.createParserByFileName(lrcFileName);
+            String content = readFile(lrcFileName);
+            lrc = parser.parse(content);
+
+            if (mMusicSelfSing) {
+                syncLyric();
+            }
         }
     }
 
     public void stop() {
-        isStart = false;
+        synchronized (Lock) {
+            mMusicSinging = false;
+        }
     }
 
     public void destroy() {
-        isRun = false;
+        synchronized (Lock) {
+            mWorkThreadRun = false;
+        }
     }
 
-    /**
-     * 判断文件的编码格式,并读取文件
-     *
-     * @throws Exception
-     */
-    public String readFile(String fileName) throws Exception {
-        FileInputStream inputStream = new FileInputStream(fileName);
-        BufferedInputStream in = new BufferedInputStream(inputStream);
-        BufferedReader reader;
-        in.mark(4);
-        byte[] first3bytes = new byte[3];
-        in.read(first3bytes);//找到文档的前三个字节并自动判断文档类型。
-        in.reset();
-        if (first3bytes[0] == (byte) 0xEF && first3bytes[1] == (byte) 0xBB && first3bytes[2] == (byte) 0xBF) {// utf-8
-            reader = new BufferedReader(new InputStreamReader(in, "utf-8"));
-        } else if (first3bytes[0] == (byte) 0xFF && first3bytes[1] == (byte) 0xFE) {
-            reader = new BufferedReader(new InputStreamReader(in, "unicode"));
-        } else if (first3bytes[0] == (byte) 0xFE && first3bytes[1] == (byte) 0xFF) {
-            reader = new BufferedReader(new InputStreamReader(in, "utf-16be"));
-        } else if (first3bytes[0] == (byte) 0xFF && first3bytes[1] == (byte) 0xFF) {
-            reader = new BufferedReader(new InputStreamReader(in, "utf-16le"));
-        } else {
-            reader = new BufferedReader(new InputStreamReader(in, "GBK"));
+    public boolean check(String mp3Url, String lyricUrl, String musicInfo, long startTime) {
+        if (lyricUrl == mMusicLyricUrl && startTime == mMusicStartTime) {
+            return true;
         }
-        StringBuilder sb = new StringBuilder();
-        String str = reader.readLine();
-        while (str != null) {
-            sb.append(str);
-            str = reader.readLine();
-        }
-        reader.close();
-        return sb.toString();
-    }
-
-    public void setSingerView(TextView singerView) {
-        this.mSingerView = singerView;
+        return false;
     }
 
     public class WorkRunnable implements Runnable {
-
         @Override
         public void run() {
             boolean newLine = false;
-            while (isRun) {
-                if (isStart) {
-                    long currentTimestamp = System.currentTimeMillis() - startTimestamp;
-                    // 歌词播放完毕
-                    if (lineIndex < lrc.sentences.size()) {
-                        LrcParser.Sentence sentence = lrc.sentences.get(lineIndex);
-                        if (currentTimestamp >= sentence.timestamp + sentence.duration) {
-                            Log.v(TAG, "sentence finished");
-                            lineIndex++;
-                            newLine = true;
-                            continue;
-                        }
-
-                        // 寻找当前片段
-                        sliceIndex = -1;
-                        for (int i = 0; i < sentence.slices.size(); i++) {
-                            if (sentence.slices.get(i).timestamp + sentence.slices.get(i).duration > currentTimestamp) {
-                                sliceIndex = i;
-                                break;
+            while (mWorkThreadRun) {
+                synchronized (Lock) {
+                    if (mMusicSinging) {
+                        long currentTimestamp = System.currentTimeMillis() - mMusicStartTime;
+                        // 歌词播放完毕
+                        if (mMusicLineIndex < lrc.sentences.size()) {
+                            LrcParser.Sentence sentence = lrc.sentences.get(mMusicLineIndex);
+                            if (currentTimestamp >= sentence.timestamp + sentence.duration) {
+                                Log.v(TAG, "sentence finished");
+                                mMusicLineIndex++;
+                                newLine = true;
+                                continue;
                             }
-                        }
-                        if (sliceIndex == -1) {
-                            Log.v(TAG, "slice finished");
-                            lineIndex++;
-                            newLine = true;
-                            continue;
-                        }
-                        if (newLine) {
-                            if (lineIndex < lrc.sentences.size() && isMyself) {
-                                try {
-                                    syncLyric(false);
-                                } catch (JSONException e) {
-                                    Log.e(TAG, "sync lyric failed", e);
+
+                            // 寻找当前片段
+                            mMusicSliceIndex = -1;
+                            for (int i = 0; i < sentence.slices.size(); i++) {
+                                if (sentence.slices.get(i).timestamp + sentence.slices.get(i).duration > currentTimestamp) {
+                                    mMusicSliceIndex = i;
+                                    break;
                                 }
                             }
-                        }
-                        newLine = false;
-
-                        // 整句歌词
-                        StringBuilder sb = new StringBuilder();
-                        for (int i = 0; i < sentence.slices.size(); i++) {
-                            sb.append(lrc.sentences.get(lineIndex).slices.get(i).word);
-                        }
-                        String lyric = sb.toString();
-
-                        // 已唱歌词
-                        sb = new StringBuilder();
-                        for (int i = 0; i < sliceIndex; i++) {
-                            sb.append(lrc.sentences.get(lineIndex).slices.get(i).word);
-                        }
-                        String previous = sb.toString();
-
-                        // 计算 margin percent
-                        float previousWidth = mPaint.measureText(previous);
-                        LrcParser.Slice slice = lrc.sentences.get(lineIndex).slices.get(sliceIndex);
-                        float currentWidth = mPaint.measureText(slice.word);
-                        float totalWidth = mPaint.measureText(lyric);
-                        float percent = (previousWidth + currentWidth * (currentTimestamp - slice.timestamp) / slice.duration) / totalWidth;
-                        if (sliceIndex == lrc.sentences.get(lineIndex).slices.size() - 1) {
-                            if (currentTimestamp + 50 > slice.timestamp + slice.duration) {
-                                percent = 1;
+                            if (mMusicSliceIndex == -1) {
+                                Log.v(TAG, "slice finished");
+                                mMusicLineIndex++;
+                                newLine = true;
+                                continue;
                             }
-                        }
-                        int margin = (int) (mWidth / 3 - totalWidth * mScale / 2);
-                        if (margin < 0) {
-                            margin = 0;
-                        }
+                            if (newLine) {
+                                if (mMusicLineIndex < lrc.sentences.size() && mMusicSelfSing) {
+                                    try {
+                                        syncLyric();
+                                    } catch (JSONException e) {
+                                        Log.e(TAG, "sync lyric failed", e);
+                                    }
+                                }
+                            }
+                            newLine = false;
 
-                        // 计算下语句歌词
-                        String nextLyric = "";
-                        int nextMargin = 0;
-                        if (lineIndex < lrc.sentences.size() - 1) {
-                            LrcParser.Sentence nextSentence = lrc.sentences.get(lineIndex + 1);
-                            for (int i = 0; i < nextSentence.slices.size(); i++) {
-                                nextLyric += nextSentence.slices.get(i).word;
+                            // 整句歌词
+                            StringBuilder sb = new StringBuilder();
+                            for (int i = 0; i < sentence.slices.size(); i++) {
+                                sb.append(lrc.sentences.get(mMusicLineIndex).slices.get(i).word);
                             }
-                            float nextWidth = mPaint.measureText(nextLyric);
-                            nextMargin = (int) (mWidth / 3 - nextWidth * mScale / 2);
-                            if (nextMargin < 0) {
-                                nextMargin = 0;
+                            String lyric = sb.toString();
+
+                            // 已唱歌词
+                            sb = new StringBuilder();
+                            for (int i = 0; i < mMusicSliceIndex; i++) {
+                                sb.append(lrc.sentences.get(mMusicLineIndex).slices.get(i).word);
                             }
+                            String previous = sb.toString();
+
+                            // 计算 margin percent
+                            float previousWidth = mPaint.measureText(previous);
+                            LrcParser.Slice slice = lrc.sentences.get(mMusicLineIndex).slices.get(mMusicSliceIndex);
+                            float currentWidth = mPaint.measureText(slice.word);
+                            float totalWidth = mPaint.measureText(lyric);
+                            float percent = (previousWidth + currentWidth * (currentTimestamp - slice.timestamp) / slice.duration) / totalWidth;
+                            if (mMusicSliceIndex == lrc.sentences.get(mMusicLineIndex).slices.size() - 1) {
+                                if (currentTimestamp + 50 > slice.timestamp + slice.duration) {
+                                    percent = 1;
+                                }
+                            }
+                            int margin = (int) (mWidth / 3 - totalWidth * mScale / 2);
+                            if (margin < 0) {
+                                margin = 0;
+                            }
+
+                            // 计算下语句歌词
+                            String nextLyric = "";
+                            int nextMargin = 0;
+                            if (mMusicLineIndex < lrc.sentences.size() - 1) {
+                                LrcParser.Sentence nextSentence = lrc.sentences.get(mMusicLineIndex + 1);
+                                for (int i = 0; i < nextSentence.slices.size(); i++) {
+                                    nextLyric += nextSentence.slices.get(i).word;
+                                }
+                                float nextWidth = mPaint.measureText(nextLyric);
+                                nextMargin = (int) (mWidth / 3 - nextWidth * mScale / 2);
+                                if (nextMargin < 0) {
+                                    nextMargin = 0;
+                                }
+                            }
+                            mUIRunnable.set(true, mMusicLineIndex % 2 == 0, lyric, percent, margin, nextLyric, nextMargin);
+                            handler.post(mUIRunnable);
+                        } else if (currentTimestamp < mMusicDuratioin) {
+                            mUIRunnable.set(false, mMusicLineIndex % 2 == 0, "", 0, 0, "", 0);
+                            handler.post(mUIRunnable);
+                        } else {
+                            mMusicSinging = false;
                         }
-                        mUIRunnable.set(true, lineIndex % 2 == 0, lyric, percent, margin, nextLyric, nextMargin);
-                        handler.post(mUIRunnable);
-                    } else if (currentTimestamp < mTotalDuration) {
-                        mUIRunnable.set(false, lineIndex % 2 == 0, "", 0, 0, "", 0);
-                        handler.post(mUIRunnable);
                     } else {
-                        isStart = false;
+                        mUIRunnable.set(true, mMusicLineIndex % 2 == 0, "", 0, 0, "", 0);
+                        handler.post(mUIRunnable);
                     }
-                } else {
-                    mUIRunnable.set(true, lineIndex % 2 == 0, "", 0, 0, "", 0);
-                    handler.post(mUIRunnable);
-                }
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        Log.e(TAG, "workthread", e);
+                    }
                 }
             }
         }
@@ -357,12 +332,12 @@ public class LRCLayout extends RelativeLayout {
                 }
             }
 
-            int remainTime = (int) (mTotalDuration - System.currentTimeMillis() + startTimestamp) / 1000;
+            int remainTime = (int) (mMusicDuratioin - System.currentTimeMillis() + mMusicStartTime) / 1000;
             Log.e(TAG, "11111111:" + remainTime);
             if (remainTime > 0) {
                 int sec = remainTime % 60;
                 int min = remainTime / 60;
-                String text = mName + "-" + mSinger + " ";
+                String text = mMusicInfo + " ";
                 if (min < 10) {
                     text += "0" + min + ":";
                 } else {
@@ -395,45 +370,41 @@ public class LRCLayout extends RelativeLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        isRun = false;
+        mWorkThreadRun = false;
     }
 
-    private void syncLyric(boolean isStart) throws JSONException {
+    private void syncLyric() throws JSONException {
         Lyric lyric = new Lyric();
-        if (isStart) {
-            lyric.index = -1;
-        } else {
-            lyric.index = lineIndex;
-        }
+        lyric.index = mMusicLineIndex;
 
         JSONObject body = new JSONObject();
         body.put("index", lyric.index);
 
-        LrcParser.Sentence cur = lrc.sentences.get(lineIndex);
+        LrcParser.Sentence cur = lrc.sentences.get(mMusicLineIndex);
         lyric.currentStartTime = cur.timestamp;
 
         float curTotal = 0;
-        lyric.currentPositions.add(0, (float)0);
+        lyric.currentPositions.add(0, (float) 0);
         for (int i = 0; i < cur.slices.size(); i++) {
             lyric.currentSentence += cur.slices.get(i).word;
             curTotal += mPaint.measureText(cur.slices.get(i).word);
             lyric.currentPositions.add(i + 1, curTotal);
-            lyric.currentTimestamps.add(i, (float)(cur.slices.get(i).timestamp - cur.timestamp) / 1000);
+            lyric.currentTimestamps.add(i, (float) (cur.slices.get(i).timestamp - cur.timestamp) / 1000);
         }
-        lyric.currentTimestamps.add(cur.slices.size(), (float)(cur.slices.get(cur.slices.size() - 1).timestamp  + cur.slices.get(cur.slices.size() - 1).duration- cur.timestamp) / 1000);
+        lyric.currentTimestamps.add(cur.slices.size(), (float) (cur.slices.get(cur.slices.size() - 1).timestamp + cur.slices.get(cur.slices.size() - 1).duration - cur.timestamp) / 1000);
 
         for (int i = 0; i < lyric.currentPositions.size(); i++) {
-            lyric.currentPositions.set(i, lyric.currentPositions.get(i)/curTotal);
+            lyric.currentPositions.set(i, lyric.currentPositions.get(i) / curTotal);
         }
 
         // current
         JSONObject currentTitle = new JSONObject();
         JSONArray currentPositions = new JSONArray();
-        for (int i = 0; i  < lyric.currentPositions.size(); i++) {
+        for (int i = 0; i < lyric.currentPositions.size(); i++) {
             currentPositions.put(i, lyric.currentPositions.get(i));
         }
         JSONArray currentTimestamps = new JSONArray();
-        for (int i = 0; i  < lyric.currentTimestamps.size(); i++) {
+        for (int i = 0; i < lyric.currentTimestamps.size(); i++) {
             currentTimestamps.put(i, lyric.currentTimestamps.get(i));
         }
         currentTitle.put("start_time", lyric.currentStartTime);
@@ -443,33 +414,33 @@ public class LRCLayout extends RelativeLayout {
 
         body.put("current_subtitle", currentTitle);
 
-        if (lineIndex < lrc.sentences.size() - 1) {
-            LrcParser.Sentence next = lrc.sentences.get(lineIndex + 1);
+        if (mMusicLineIndex < lrc.sentences.size() - 1) {
+            LrcParser.Sentence next = lrc.sentences.get(mMusicLineIndex + 1);
             lyric.nextStatTime = next.timestamp;
 
-            lyric.nextPositions.add(0, (float)0);
+            lyric.nextPositions.add(0, (float) 0);
             float nextTotal = 0;
             for (int i = 0; i < next.slices.size(); i++) {
                 lyric.nextSentence += next.slices.get(i).word;
                 nextTotal += mPaint.measureText(next.slices.get(i).word);
-                lyric.nextPositions.add(i+1, nextTotal);
-                lyric.nextTimestamps.add(i, (float)(next.slices.get(i).timestamp - next.timestamp) / 1000);
+                lyric.nextPositions.add(i + 1, nextTotal);
+                lyric.nextTimestamps.add(i, (float) (next.slices.get(i).timestamp - next.timestamp) / 1000);
             }
-            lyric.nextTimestamps.add(next.slices.size(), (float)(next.slices.get(next.slices.size() - 1).timestamp  + next.slices.get(next.slices.size() - 1).duration- next.timestamp) / 1000);
+            lyric.nextTimestamps.add(next.slices.size(), (float) (next.slices.get(next.slices.size() - 1).timestamp + next.slices.get(next.slices.size() - 1).duration - next.timestamp) / 1000);
 
             for (int i = 0; i < lyric.nextPositions.size(); i++) {
-                lyric.nextPositions.set(i, lyric.nextPositions.get(i)/nextTotal);
+                lyric.nextPositions.set(i, lyric.nextPositions.get(i) / nextTotal);
             }
 
 
             // current
             JSONObject nextTitle = new JSONObject();
             JSONArray nextPositions = new JSONArray();
-            for (int i = 0; i  < lyric.nextPositions.size(); i++) {
+            for (int i = 0; i < lyric.nextPositions.size(); i++) {
                 nextPositions.put(i, lyric.nextPositions.get(i));
             }
             JSONArray nextTimeStamps = new JSONArray();
-            for (int i = 0; i  < lyric.nextTimestamps.size(); i++) {
+            for (int i = 0; i < lyric.nextTimestamps.size(); i++) {
                 nextTimeStamps.put(i, lyric.nextTimestamps.get(i));
             }
             nextTitle.put("start_time", lyric.nextStatTime);
@@ -478,9 +449,12 @@ public class LRCLayout extends RelativeLayout {
             nextTitle.put("locationArray", nextPositions);
 
             body.put("next_subtitle", nextTitle);
-        }
 
-        Log.e(TAG, "########" + body.toString());
+            body.put("music_link", mMusicMp3Url);
+            body.put("music_subtitle", mMusicLyricUrl);
+            body.put("music_info", mMusicInfo);
+            body.put("start_time", mMusicStartTime);
+        }
         mWebSocket.sendLyric(body);
 
     }
@@ -508,5 +482,45 @@ public class LRCLayout extends RelativeLayout {
             nextPositions = new ArrayList<>();
             nextTimestamps = new ArrayList<>();
         }
+    }
+
+
+    /**
+     * 判断文件的编码格式,并读取文件
+     *
+     * @throws Exception
+     */
+    public String readFile(String fileName) throws Exception {
+        FileInputStream inputStream = new FileInputStream(fileName);
+        BufferedInputStream in = new BufferedInputStream(inputStream);
+        BufferedReader reader;
+        in.mark(4);
+        byte[] first3bytes = new byte[3];
+        in.read(first3bytes);//找到文档的前三个字节并自动判断文档类型。
+        in.reset();
+        if (first3bytes[0] == (byte) 0xEF && first3bytes[1] == (byte) 0xBB && first3bytes[2] == (byte) 0xBF) {// utf-8
+            reader = new BufferedReader(new InputStreamReader(in, "utf-8"));
+        } else if (first3bytes[0] == (byte) 0xFF && first3bytes[1] == (byte) 0xFE) {
+            reader = new BufferedReader(new InputStreamReader(in, "unicode"));
+        } else if (first3bytes[0] == (byte) 0xFE && first3bytes[1] == (byte) 0xFF) {
+            reader = new BufferedReader(new InputStreamReader(in, "utf-16be"));
+        } else if (first3bytes[0] == (byte) 0xFF && first3bytes[1] == (byte) 0xFF) {
+            reader = new BufferedReader(new InputStreamReader(in, "utf-16le"));
+        } else {
+            reader = new BufferedReader(new InputStreamReader(in, "GBK"));
+        }
+        StringBuilder sb = new StringBuilder();
+        String str = reader.readLine();
+        while (str != null) {
+            sb.append(str);
+            str = reader.readLine();
+        }
+        reader.close();
+        return sb.toString();
+    }
+
+
+    public void setSingerView(TextView singerView) {
+        this.mSingerView = singerView;
     }
 }

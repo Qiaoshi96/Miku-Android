@@ -63,7 +63,7 @@ public class RoomWebSocket {
                             Log.e(TAG, "onStringAvailable------" + body.getInt("type"));
                             if (body.getInt("type") == 7) {
                                 Log.e(TAG, "onStringAvailable------" + body.getInt("type"));
-                                mCallback.onUserSing(body.getString("music_subtitle"), body.getString("music_info"), body.getLong("start_time"));
+                                mCallback.onUserSing(body.getString("music_link"), body.getString("music_subtitle"), body.getString("music_info"), body.getLong("start_time"));
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -109,12 +109,13 @@ public class RoomWebSocket {
         data.put("room", mRoomName);
         data.put("body", body.toString());
         mWebSocket.send(data.toString());
+
     }
 
     public interface RoomWebSocketMsgInterface {
         void onUserDisableCamera(String user, boolean disable);
 
-        void onUserSing(String lyric, String musicInfo, long startTime);
+        void onUserSing(final String mp3url, final String lyricUrl, final String musicInfo, final long startTime);
 
     }
 
