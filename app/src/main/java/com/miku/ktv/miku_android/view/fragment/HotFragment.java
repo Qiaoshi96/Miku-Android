@@ -72,7 +72,6 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
     private int pressed = 1;
     private DownloadManger downloadManger;
     private Context mContext;
-
     private TextView downTV;
     private TextView paimaiTV;
 
@@ -88,9 +87,11 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                     refreshLV.hideFooterView();
                 }
             }
-//            if (msg.what == 2) {
-//
-//            }
+            if (msg.what == 2) {
+                songsListAdapter.notifyDataSetChanged();
+                // 头布局隐藏
+                refreshLV.hideHeaderView();
+            }
         }
     };
     private AddPresenter addPresenter;
@@ -178,7 +179,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                     MessageDigest md5 = null;
                     try {
                         md5 = MessageDigest.getInstance("MD5");
-                        name = new String(md5.digest(songsList.get(i).getLrc().getBytes()));
+                        name = new String(md5.digest(songsListAll.get(i).getLrc().getBytes()));
                     } catch (NoSuchAlgorithmException e) {
                         e.printStackTrace();
                     }
@@ -242,7 +243,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
         MessageDigest md5 = null;
         try {
             md5 = MessageDigest.getInstance("MD5");
-            name = new String(md5.digest(songsList.get(position).getLrc().getBytes()));
+            name = new String(md5.digest(songsListAll.get(position).getLrc().getBytes()));
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
@@ -302,7 +303,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                                         MessageDigest md5 = null;
                                         try {
                                             md5 = MessageDigest.getInstance("MD5");
-                                            name = new String(md5.digest(songsList.get(position).getLrc().getBytes()));
+                                            name = new String(md5.digest(songsListAll.get(position).getLrc().getBytes()));
                                         } catch (NoSuchAlgorithmException e) {
                                             e.printStackTrace();
                                         }
@@ -497,7 +498,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
 
     }
 
-
+    //接口回调到historyFragment
     public interface OnDataTransmissionListener {
         void dataTransmission(ArrayList<HistroyBean> list);
     }
@@ -531,6 +532,8 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                                 gson = new Gson();
                                 songsListBean = gson.fromJson(s, SongsListBean.class);
                                 songsList = songsListBean.getBody().getSong_list();
+                                handler.sendEmptyMessage(2);
+                                Log.d(TAG, "下拉---执行onResponse: ");
                             }
                         });
                 return null;
@@ -538,8 +541,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
 
             @Override
             protected void onPostExecute(Void aVoid) {
-                songsListAdapter.notifyDataSetChanged();
-                refreshLV.hideHeaderView();
+                Log.d(TAG, "下拉---执行onPostExecute: ");
             }
         }.execute(new Void[]{});
     }
@@ -570,7 +572,9 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                                 songsListBean = gson.fromJson(s, SongsListBean.class);
                                 songsList = songsListBean.getBody().getSong_list();
                                 index=newIndex;
+                                handler.sendEmptyMessage(1);
                                 Log.d(TAG, "onResponse: "+songsList.get(0).getName());
+                                Log.d(TAG, "上拉---执行onResponse: ");
 
                             }
                         });
@@ -579,7 +583,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
 
             @Override
             protected void onPostExecute(Void result) {
-                handler.sendEmptyMessage(1);
+                Log.d(TAG, "上拉---执行onPostExecute: ");
             }
 
         }.execute(new Void[]{});

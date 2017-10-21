@@ -6,51 +6,50 @@
     android:layout_height="match_parent"
     android:background="@color/background"
     tools:context="com.miku.ktv.miku_android.view.activity.PersonalActivity">
-<RelativeLayout
-    android:id="@+id/Personal_Relative1"
-    android:layout_width="match_parent"
-    android:layout_height="65dp"
-    >
-    <LinearLayout
-        android:id="@+id/Personal_LinearLayout_Back"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+
+    <RelativeLayout
+        android:id="@+id/Personal_Relative1"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
         >
-        <ImageView
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:src="@mipmap/back_white"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="43dp"
-            />
+        <LinearLayout
+            android:id="@+id/Personal_LinearLayout_Back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_centerVertical="true"
+            >
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@mipmap/back_white"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="4dp"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="返回"
+                android:textSize="17sp"
+                android:textColor="@color/midoRed"
+                />
+        </LinearLayout>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="返回"
-            android:textSize="17sp"
-            android:textColor="@color/white"
-            android:layout_marginTop="39dp"
+            android:text="MIDO"
+            android:textSize="18sp"
+            android:textColor="@color/midoRed"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
             />
-    </LinearLayout>
-</RelativeLayout>
+    </RelativeLayout>
 
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="MIDO"
-        android:textSize="18sp"
-        android:textColor="@color/white"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="39dp"
-        />
 
     <RelativeLayout
         android:id="@+id/Personal_RelativeLayout"
         android:layout_width="match_parent"
         android:layout_height="260dp"
-        android:layout_marginTop="10dp"
         android:layout_below="@id/Personal_Relative1"
         >
 

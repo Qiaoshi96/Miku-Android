@@ -23,7 +23,6 @@ public class PopAdapter extends BaseAdapter {
     private Context context;
     private List<AddListBean.BodyBean.SingerListBean> list=new ArrayList<>();
     ViewHolder holder;
-//    HashMap<Integer,View> map=new HashMap<>();
 
 
     public PopAdapter(Context context, List<AddListBean.BodyBean.SingerListBean> list) {
@@ -33,25 +32,21 @@ public class PopAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        Log.d(TAG, "getCount: "+list.size());
         return list.size();
     }
 
     @Override
     public Object getItem(int position) {
-        Log.d(TAG, "getItem: ");
         return list.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        Log.d(TAG, "getItemId: ");
         return position;
     }
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        Log.d(TAG, "getView: ");
         if (convertView==null){
             convertView = View.inflate(context, R.layout.ktv_pop_item, null);
             holder=new ViewHolder();
@@ -78,22 +73,9 @@ public class PopAdapter extends BaseAdapter {
         Log.d(TAG, "getView: "+bean.getSong().getAuthor());
         Log.d(TAG, "getView: "+bean.getCreator().getNick());
 
-//                holder.deleteTV.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    onItemDeleteListener.onDeleteClick(position);
-//                }
-//            });
         return convertView;
     }
 
-//    public interface onItemDeleteListener {
-//        void onDeleteClick(int i);
-//    }
-//    private onItemDeleteListener onItemDeleteListener;
-//    public void setOnItemDeleteListener(onItemDeleteListener onItemDeleteListener){
-//        this.onItemDeleteListener=onItemDeleteListener;
-//    }
 
     public  interface  MyClickListener {
         void onItemDeleteClick(BaseAdapter adapter, View view, int position);

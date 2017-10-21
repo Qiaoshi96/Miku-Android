@@ -53,6 +53,7 @@ public class HistroyAdapter extends BaseAdapter {
             holder.musicTV= (TextView) convertView.findViewById(R.id.Histroy_item_TextView_Music);
             holder.singerTV= (TextView) convertView.findViewById(R.id.Histroy_item_TextView_Singer);
             holder.paimaiTV= (TextView) convertView.findViewById(R.id.Histroy_item_TextView_Paimai);
+            holder.paimaiTV.setOnClickListener(mOnClickListener);
             convertView.setTag(holder);
 
             map.put(position,convertView);
@@ -61,13 +62,36 @@ public class HistroyAdapter extends BaseAdapter {
 
             holder= (ViewHolder) convertView.getTag();
         }
-
+        holder.paimaiTV.setTag(position);
         HistroyBean bean = histroyList.get(position);
         holder.musicTV.setText(bean.getName());
         holder.singerTV.setText(bean.getAuthor());
 
+
         return convertView;
     }
+
+    public  interface  MyPaimaiClickListener {
+        void onPaimaiClick(BaseAdapter adapter, View view, int position);
+    }
+    private MyPaimaiClickListener paimaiClickListener;
+    public void setOnPaimaiClickListener(MyPaimaiClickListener listener) {
+        paimaiClickListener = listener;
+    }
+
+    private View.OnClickListener mOnClickListener=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (paimaiClickListener!=null){
+                int position = (int) v.getTag();
+                switch (v.getId()) {
+                    case R.id.Histroy_item_TextView_Paimai:
+                        paimaiClickListener.onPaimaiClick(HistroyAdapter.this, v, position);
+                        break;
+                }
+            }
+        }
+    };
 
     class ViewHolder{
         TextView musicTV;

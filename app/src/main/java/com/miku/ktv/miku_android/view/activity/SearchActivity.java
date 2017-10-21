@@ -73,7 +73,10 @@ public class SearchActivity extends Activity implements ISearchView<SearchBean>,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
         initView();
+        setTextListener();
+    }
 
+    private void setTextListener() {
         searchview.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -84,7 +87,7 @@ public class SearchActivity extends Activity implements ISearchView<SearchBean>,
             public boolean onQueryTextChange(String newText) {
                 str = newText;
                 if (TextUtils.isEmpty(newText)){
-                    refreshLVSearch.clearTextFilter();
+                    searchListAll.clear();
                 }else {
                     //请求搜索歌曲接口
                     HashMap<String,String> map=new HashMap<>();
@@ -95,7 +98,6 @@ public class SearchActivity extends Activity implements ISearchView<SearchBean>,
                 return false;
             }
         });
-
     }
 
     @Override
@@ -125,15 +127,29 @@ public class SearchActivity extends Activity implements ISearchView<SearchBean>,
 
     @Override
     public void onError(Throwable t) {
-
+        Log.d(TAG, "onError: "+t.getMessage());
     }
+
     //下拉刷新
     @Override
     public void onDownPullRefresh() {
-        SystemClock.sleep(1000);
-        refreshLVSearch.hideHeaderView();
+        new AsyncTask<Void,Void,Void>(){
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                adapter.notifyDataSetChanged();
+                refreshLVSearch.hideHeaderView();
+            }
+        }.execute(new Void[]{});
     }
-
     //上拉加载
     @Override
     public void onLoadingMore() {
@@ -160,6 +176,8 @@ public class SearchActivity extends Activity implements ISearchView<SearchBean>,
                                 gson = new Gson();
                                 searchListBean = gson.fromJson(s, SearchBean.class);
                                 searchList = searchListBean.getBody().getSong_list();
+                                newIndex=newIndex+1;
+                                handler.sendEmptyMessage(2);
                             }
                         });
 
@@ -167,12 +185,10 @@ public class SearchActivity extends Activity implements ISearchView<SearchBean>,
             }
             @Override
             protected void onPostExecute(Void aVoid) {
-                newIndex=newIndex+1;
-                handler.sendEmptyMessage(2);
+
             }
         }.execute(new Void[]{});
     }
-
 
     private void initView() {
         searchview = (SearchView) findViewById(R.id.searchView);

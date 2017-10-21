@@ -10,35 +10,35 @@
     <RelativeLayout
         android:id="@+id/Home_RelativeLayout"
         android:layout_width="match_parent"
-        android:layout_height="75dp"
+        android:layout_height="50dp"
         android:background="@color/background"
         >
         <ImageView
             android:id="@+id/Home_ImageView_Menu"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:src="@mipmap/home_white"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/menu"
             android:layout_marginLeft="15dp"
-            android:layout_marginTop="35dp"
+            android:layout_centerVertical="true"
             />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="MIDO"
-            android:textColor="@color/white"
+            android:textColor="@color/midoRed"
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="35dp"
+            android:layout_centerVertical="true"
             />
         <ImageView
             android:id="@+id/Home_ImageView_Add"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@mipmap/add_white"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/create"
             android:layout_alignParentRight="true"
             android:layout_marginRight="15dp"
-            android:layout_marginTop="35dp"
+            android:layout_centerVertical="true"
             />
     </RelativeLayout>
 

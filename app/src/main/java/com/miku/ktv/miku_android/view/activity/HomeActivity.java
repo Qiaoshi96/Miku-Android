@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.Log;
@@ -47,11 +48,14 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
     private RoomsBean roomsBean1;
 
     private String mRoomName;
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        initState();
+//        initState();
+        getWindow().setStatusBarColor(getResources().getColor(R.color.background));
+//        IsUtils.setWindowStatusBarColor(this,getResources().getColor(R.color.background));
         sp = getSharedPreferences("config",MODE_PRIVATE);
         editor = sp.edit();
         binPresenter();
@@ -146,6 +150,7 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
                 //点击得到当前房间的roomid
                 mRoomName = list.get(position).getRoom_id();
                 editor.putString("roomname",list.get(position).getRoom_id());
+                editor.putString("creatornick",list.get(position).getCreator_nick());
                 editor.commit();
                 Log.e(TAG, "onItemClick:  ---  "+mRoomName);
                 //请求加入聊天室接口

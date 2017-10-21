@@ -61,11 +61,11 @@ public class MySearchAdapter extends BaseAdapter {
             convertView=map.get(position);
 
             holder= (ViewHolder) convertView.getTag();
-
-            SearchBean.BodyBean.SongListBean bean = list.get(position);
-            holder.musicTV.setText(bean.getName());
-            holder.singerTV.setText(bean.getAuthor());
         }
+
+        SearchBean.BodyBean.SongListBean bean = list.get(position);
+        holder.musicTV.setText(bean.getName());
+        holder.singerTV.setText(bean.getAuthor());
 
         return convertView;
     }

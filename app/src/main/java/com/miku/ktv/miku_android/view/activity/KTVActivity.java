@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.ArraySet;
@@ -28,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,7 +40,6 @@ import com.miku.ktv.miku_android.model.bean.AddListBean;
 import com.miku.ktv.miku_android.model.bean.DeleteBean;
 import com.miku.ktv.miku_android.model.bean.ExitRoomBean;
 import com.miku.ktv.miku_android.model.bean.JoinRoomBean;
-import com.miku.ktv.miku_android.model.bean.RegisterInfoBean;
 import com.miku.ktv.miku_android.model.utils.Constant;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
 import com.miku.ktv.miku_android.presenter.AddPresenter;
@@ -92,16 +93,16 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
     /**
      * 返回键
      */
-    private ImageView backBtn;
+    private ImageView back;
 
     /**
-     *
+     * 麦序
      */
-    private LinearLayout paimaillistLayout;
+    private ImageView maixu;
     /**
-     * 点歌布局
+     * 点歌
      */
-    private LinearLayout diangelistLayout;
+    private ImageView diange;
 
     /**
      * 视频区域1
@@ -121,12 +122,13 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
     /**
      * 更多按钮
      */
-    private ImageView moreIv;
+    private ImageView more;
 
     /**
      * 视频开关按钮
      */
-    private ImageView videoSwitchIv;
+    private ImageView close;
+    private ImageView open;
 
     /**
      * 歌词播放视图
@@ -205,11 +207,15 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
     private AlertDialog builder;
     private TextView okTV;
     private TextView cancelTV;
+    private RelativeLayout controVideo;
+    private TextView nick;
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ktv);
+        getWindow().setStatusBarColor(getResources().getColor(R.color.ktvTop));
         sp = getSharedPreferences("config", MODE_PRIVATE);
         editor = sp.edit();
         mRoomName = sp.getString("roomname", "");
@@ -808,33 +814,30 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         }
     }
 
-    //显示头像和姓名等信息。
-    private void inithead() {
-        RegisterInfoBean registerInfoBean = new RegisterInfoBean();
-        int ID = registerInfoBean.getBody().getFullname();
-
-    }
-
     private void initListener() {
-        backBtn.setOnClickListener(this);
-        diangelistLayout.setOnClickListener(this);
-        paimaillistLayout.setOnClickListener(this);
-        moreIv.setOnClickListener(this);
-        videoSwitchIv.setOnClickListener(this);
+        back.setOnClickListener(this);
+        maixu.setOnClickListener(this);
+        diange.setOnClickListener(this);
+        more.setOnClickListener(this);
+        controVideo.setOnClickListener(this);
     }
 
     private void initView() {
         //返回键的控件
-        backBtn = (ImageView) findViewById(R.id.iv_back);
+        back = (ImageView) findViewById(R.id.iv_back);
+        //昵称
+        nick = (TextView) findViewById(R.id.TextView_nick);
         //排麦的控件
-        paimaillistLayout = (LinearLayout) findViewById(R.id.ll_paimailist);
+        maixu = (ImageView) findViewById(R.id.ImageView_maixu);
         //点歌的控件
-        diangelistLayout = (LinearLayout) findViewById(R.id.ll_diangelist);
-        paimaiCount = (TextView) findViewById(R.id.paimaiCount);
+        diange = (ImageView) findViewById(R.id.ImageView_diange);
         //更多按钮
-        moreIv = (ImageView) findViewById(R.id.iv_more);
-        //开启摄像头按钮
-        videoSwitchIv = (ImageView) findViewById(R.id.iv_video);
+        more = (ImageView) findViewById(R.id.ImageView_more);
+        //摄像头按钮
+        close = (ImageView) findViewById(R.id.ImageView_close);
+        open = (ImageView) findViewById(R.id.ImageView_open);
+        //控制摄像头
+        controVideo = (RelativeLayout) findViewById(R.id.Controller_video);
 
         line1Layout = (LinearLayout) findViewById(R.id.ll_1);
         line2Layout = (LinearLayout) findViewById(R.id.ll_2);
@@ -842,6 +845,8 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
 
         lrcLayout = (LRCLayout) findViewById(R.id.lrc_layout);
         lrcLayout.setSingerView((TextView) findViewById(R.id.tv_singer));
+        //左上角，房间创建者的昵称
+        nick.setText(sp.getString("creatornick",""));
         addPresenter = new AddPresenter();
         addPresenter.attach(this);
     }
@@ -854,24 +859,28 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
                 onBackButtonPressed();
                 break;
             //点歌的点击事件
-            case R.id.ll_diangelist:
+            case R.id.ImageView_diange:
 //                sing(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/test.mp3", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/test.bph", "wo", "hehe");
                 startActivityForResult(new Intent(this, SongsActivity.class), REQUEST_CODE);
                 break;
             //排麦的点击事件
-            case R.id.ll_paimailist:
+            case R.id.ImageView_maixu:
                 showPopupWindow();
                 break;
-            case R.id.iv_more:
+            case R.id.ImageView_more:
                 showDialog();
                 break;
             //显示摄像头的方法
-            case R.id.iv_video:
+            case R.id.Controller_video:
                 if (mVideoSwitch == false) {
                     openVideo();
+                    close.setVisibility(View.GONE);
+                    open.setVisibility(View.VISIBLE);
                     mVideoSwitch = true;
                 } else {
                     closeVideo();
+                    close.setVisibility(View.VISIBLE);
+                    open.setVisibility(View.GONE);
                     mVideoSwitch = false;
                 }
                 break;
@@ -913,7 +922,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
 
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                Intent intent = new Intent(KTVActivity.this, SuggestionsActivity.class);
+                Intent intent = new Intent(KTVActivity.this, SuggestActivity.class);
                 startActivity(intent);
             }
 

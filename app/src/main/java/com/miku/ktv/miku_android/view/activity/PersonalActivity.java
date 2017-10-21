@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
@@ -41,13 +42,15 @@ public class PersonalActivity extends Activity implements IHeartView<HeartBean>,
     private SharedPreferences.Editor edit;
     private HeartPresenter heartPresenter;
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_personal);
+        getWindow().setStatusBarColor(getResources().getColor(R.color.background));
         sp = getSharedPreferences("config", MODE_PRIVATE);
         edit = sp.edit();
-        initState();
+//        initState();
         requestWritePermission();
         initView();
         initListener();
