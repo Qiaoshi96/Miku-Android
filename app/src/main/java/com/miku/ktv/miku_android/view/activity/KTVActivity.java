@@ -958,15 +958,16 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
     }
 
     @Override
-    public void onUserSing(final String mp3Url, final String lyricUrl, final String musicInfo, final long startTime) {
+    public void onUserSing(final String mp3Url, final String lyricUrl, final String musicInfo, final long startTime, final long timeOver) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    Log.e(TAG, "onUserSing: " + mp3Url + ", " + lyricUrl + ", " + musicInfo + ", " + startTime);
+                    Log.e(TAG, "onUserSing:-- " + mp3Url + ", " + lyricUrl + ", " + musicInfo + ", " + startTime + ", " + timeOver);
                     if (lrcLayout.check(mp3Url, lyricUrl, musicInfo, startTime)) {
                         return;
                     }
+                    Log.e(TAG, "onUserSing:++ " + mp3Url + ", " + lyricUrl + ", " + musicInfo + ", " + startTime + ", " + timeOver);
                     URL url = new URL(lyricUrl);
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     InputStream istream = connection.getInputStream();
@@ -987,7 +988,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
                     android.media.MediaMetadataRetriever mmr = new android.media.MediaMetadataRetriever();
                     mmr.setDataSource(mp3Url, new HashMap<String, String>());
                     long duration = Long.parseLong(mmr.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION));
-                    lrcLayout.start(false, mp3Url, lyricUrl, lyricLocation, musicInfo, System.currentTimeMillis(), duration);
+                    lrcLayout.start(false, mp3Url, lyricUrl, lyricLocation, musicInfo, System.currentTimeMillis() - timeOver, duration);
                 } catch (Exception e) {
                     Log.e(TAG, "onUserSing", e);
                 }

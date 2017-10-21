@@ -145,6 +145,7 @@ public class LRCLayout extends RelativeLayout {
             mMusicInfo = musicInfo;
             mMusicStartTime = startTimestamp;
             mMusicDuratioin = duration;
+            checkStartTime = startTimestamp;
 
             mMusicLineIndex = 0;
             mMusicSliceIndex = 0;
@@ -154,7 +155,7 @@ public class LRCLayout extends RelativeLayout {
             lrc = parser.parse(content);
 
             if (mMusicSelfSing) {
-                syncLyric();
+                syncLyric(true);
             }
         }
     }
@@ -172,7 +173,7 @@ public class LRCLayout extends RelativeLayout {
     }
 
     public boolean check(String mp3Url, String lyricUrl, String musicInfo, long startTime) {
-        if (lyricUrl == mMusicLyricUrl && startTime == checkStartTime) {
+        if (startTime == checkStartTime) {
             return true;
         }
         checkStartTime = startTime;
@@ -182,7 +183,7 @@ public class LRCLayout extends RelativeLayout {
     public class WorkRunnable implements Runnable {
         @Override
         public void run() {
-            boolean newLine = false;
+            boolean newLine = true;
             while (mWorkThreadRun) {
                 synchronized (Lock) {
                     if (mMusicSinging) {
@@ -213,13 +214,14 @@ public class LRCLayout extends RelativeLayout {
                             }
                             if (newLine) {
                                 if (mMusicLineIndex < lrc.sentences.size() && mMusicSelfSing && currentTimestamp >= sentence.timestamp) {
+                                    Log.e(TAG, "-----: "  + mMusicLineIndex + ", "  + lrc.sentences.size() + ", " + mMusicSelfSing + ", " + currentTimestamp  + ", " + sentence.timestamp);
                                     try {
-                                        syncLyric();
+                                        syncLyric(false);
                                     } catch (JSONException e) {
                                         Log.e(TAG, "sync lyric failed", e);
                                     }
+                                    newLine = false;
                                 }
-                                newLine = false;
                             }
 
                             // 整句歌词
@@ -244,7 +246,7 @@ public class LRCLayout extends RelativeLayout {
                             float percent = (previousWidth + currentWidth * (currentTimestamp - slice.timestamp) / slice.duration) / totalWidth;
                             if (mMusicSliceIndex == lrc.sentences.get(mMusicLineIndex).slices.size() - 1) {
                                 if (currentTimestamp + 50 > slice.timestamp + slice.duration) {
-                                    //percent = 1;
+                                    percent = 1;
                                 }
                             }
                             int margin = (int) (mWidth / 3 - totalWidth * mScale / 2);
@@ -381,9 +383,13 @@ public class LRCLayout extends RelativeLayout {
         mWorkThreadRun = false;
     }
 
-    private void syncLyric() throws JSONException {
+    private void syncLyric(boolean isStart) throws JSONException {
         Lyric lyric = new Lyric();
-        lyric.index = mMusicLineIndex;
+        if (isStart) {
+            lyric.index = -1;
+        } else {
+            lyric.index = mMusicLineIndex;
+        }
 
         JSONObject body = new JSONObject();
         body.put("index", lyric.index);
@@ -461,7 +467,7 @@ public class LRCLayout extends RelativeLayout {
             body.put("music_link", mMusicMp3Url);
             body.put("music_subtitle", mMusicLyricUrl);
             body.put("music_info", mMusicInfo);
-            body.put("start_time", mMusicStartTime);
+            body.put("music_start_time", mMusicStartTime);
         }
         mWebSocket.sendLyric(body);
 

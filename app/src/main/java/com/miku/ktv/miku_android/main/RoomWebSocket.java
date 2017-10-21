@@ -62,7 +62,8 @@ public class RoomWebSocket {
                             if (body.getInt("type") == 7) {
                                 Log.e(TAG, "onStringAvailable++++++");
                                 JSONObject message = new JSONObject(body.getString("message"));
-                                mCallback.onUserSing(message.getString("music_link"), message.getString("music_subtitle"), message.getString("music_info"), message.getLong("start_time"));
+                                long timeOver = message.getJSONObject("current_subtitle").getLong("start_time");
+                                mCallback.onUserSing(message.getString("music_link"), message.getString("music_subtitle"), message.getString("music_info"), message.getLong("music_start_time"), timeOver);
                                 Log.e(TAG, "onStringAvailable------" + body.getInt("type"));
                             }
                         } catch (JSONException e) {
@@ -115,7 +116,7 @@ public class RoomWebSocket {
     public interface RoomWebSocketMsgInterface {
         void onUserDisableCamera(String user, boolean disable);
 
-        void onUserSing(final String mp3url, final String lyricUrl, final String musicInfo, final long startTime);
+        void onUserSing(final String mp3url, final String lyricUrl, final String musicInfo, final long startTime, final long timeOver);
 
     }
 
