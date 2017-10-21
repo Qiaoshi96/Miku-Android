@@ -36,10 +36,14 @@ public class KasLrcParser extends LrcParser {
                 if (word.has("offset_time")) {
                     slice.timestamp += word.getInt("offset_time");
                 }
+                if (j > 0) {
+                    sentence.slices.get(j - 1).duration = slice.timestamp - sentence.slices.get(j-1).timestamp;
+                }
                 Log.v("KasLrcParser", "slice: " + slice.word + ", " + slice.timestamp + ", " + slice.duration);
                 slice.word = word.getString("words");
-                sentence.slices.add(slice);
+                sentence.slices.add(j, slice);
             }
+            sentence.duration = sentence.slices.get(sentence.slices.size() - 1).timestamp + sentence.slices.get(sentence.slices.size() - 1).duration - sentence.timestamp;
 
             lrc.sentences.add(i, sentence);
         }

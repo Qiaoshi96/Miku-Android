@@ -49,8 +49,13 @@ class KrcLrcParser extends LrcParser {
             String[] tmp3 = tmp2[i].split(",");
             slice.timestamp = Integer.parseInt(tmp3[0]) + sentence.timestamp;
             slice.duration = Integer.parseInt(tmp3[1]);
+            if (i > 0) {
+                sentence.slices.get(i - 1).duration = slice.timestamp - sentence.slices.get(i - 1).timestamp;
+            }
             sentence.slices.add(i, slice);
         }
+
+        sentence.duration = sentence.slices.get(sentence.slices.size() - 1).timestamp + sentence.slices.get(sentence.slices.size() - 1).duration - sentence.timestamp;
 
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < sentence.slices.size(); i++) {

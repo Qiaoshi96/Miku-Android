@@ -49,7 +49,11 @@ public class BphLrcParser extends LrcParser {
             slice.timestamp = Integer.parseInt(tmp2[i].substring(tmp2[i].indexOf("(") + 1, tmp2[i].indexOf(",")));
             slice.duration = Integer.parseInt(tmp2[i].substring(tmp2[i].indexOf(",") + 1));
             sentence.slices.add(i, slice);
+            if (i > 0) {
+                sentence.slices.get(i - 1).duration = slice.timestamp - sentence.slices.get(i - 1).timestamp;
+            }
         }
+        sentence.duration = sentence.slices.get(sentence.slices.size() - 1).timestamp + sentence.slices.get(sentence.slices.size() - 1).duration - sentence.timestamp;
 
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < sentence.slices.size(); i++) {

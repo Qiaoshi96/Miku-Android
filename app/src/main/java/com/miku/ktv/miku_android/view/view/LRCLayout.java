@@ -244,7 +244,7 @@ public class LRCLayout extends RelativeLayout {
                             float percent = (previousWidth + currentWidth * (currentTimestamp - slice.timestamp) / slice.duration) / totalWidth;
                             if (mMusicSliceIndex == lrc.sentences.get(mMusicLineIndex).slices.size() - 1) {
                                 if (currentTimestamp + 50 > slice.timestamp + slice.duration) {
-                                    percent = 1;
+                                    //percent = 1;
                                 }
                             }
                             int margin = (int) (mWidth / 3 - totalWidth * mScale / 2);
@@ -278,12 +278,13 @@ public class LRCLayout extends RelativeLayout {
                         mUIRunnable.set(true, mMusicLineIndex % 2 == 0, "", 0, 0, "", 0);
                         handler.post(mUIRunnable);
                     }
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException e) {
-                        Log.e(TAG, "workthread", e);
-                    }
                 }
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "workthread", e);
+                }
+
             }
         }
     }
