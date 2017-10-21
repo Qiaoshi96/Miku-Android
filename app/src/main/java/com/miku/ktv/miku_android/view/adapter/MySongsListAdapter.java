@@ -70,13 +70,13 @@ public class MySongsListAdapter extends BaseAdapter {
             holder.downLoadTV.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mOnItemDeleteListener.onDeleteClick(position);
+                    mOnmItemListener.onmItemClick(position);
                 }
             });
             holder.paimaiTV.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mOnItemDeleteListener.onDeleteClick(position);
+                    mOnmItemListener.onmItemClick(position);
                 }
             });
         }catch (Exception e){
@@ -86,14 +86,12 @@ public class MySongsListAdapter extends BaseAdapter {
         return convertView;
     }
 
-    public interface onItemDeleteListener {
-        void onDeleteClick(int i);
+    public interface onmItemListener {
+        void onmItemClick(int i);
     }
-
-    private onItemDeleteListener mOnItemDeleteListener;
-
-    public void setOnItemDeleteClickListener(onItemDeleteListener mOnItemDeleteListener) {
-        this.mOnItemDeleteListener = mOnItemDeleteListener;
+    private onmItemListener mOnmItemListener;
+    public void setOnmItemListener(onmItemListener mOnmItemListener) {
+        this.mOnmItemListener = mOnmItemListener;
     }
 
     class ViewHolder{

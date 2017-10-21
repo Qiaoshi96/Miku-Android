@@ -176,7 +176,7 @@ public class HttpUtil {
                 .subscribe(onNext, onError);
     }
 
-    //room/room_id/singers获取排麦列表
+    //getHeart验证token
     public static void getHeart(String sign, Map<String, String> map, Consumer<String> onNext, Consumer<Throwable> onError){
         Api api = retrofit.create(Api.class);
         Observable<String> observable = api.getHeart(sign,map);

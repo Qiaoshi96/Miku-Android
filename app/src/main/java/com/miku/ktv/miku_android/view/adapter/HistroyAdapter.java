@@ -60,12 +60,12 @@ public class HistroyAdapter extends BaseAdapter {
             convertView=map.get(position);
 
             holder= (ViewHolder) convertView.getTag();
-
-            HistroyBean bean = histroyList.get(position);
-            holder.musicTV.setText(bean.getName());
-            holder.singerTV.setText(bean.getAuthor());
-
         }
+
+        HistroyBean bean = histroyList.get(position);
+        holder.musicTV.setText(bean.getName());
+        holder.singerTV.setText(bean.getAuthor());
+
         return convertView;
     }
 

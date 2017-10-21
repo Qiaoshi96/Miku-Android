@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,11 +20,17 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.miku.ktv.miku_android.R;
+import com.miku.ktv.miku_android.model.bean.HeartBean;
 import com.miku.ktv.miku_android.model.utils.Constant;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
+import com.miku.ktv.miku_android.presenter.HeartPresenter;
 import com.miku.ktv.miku_android.view.custom.CircleImage;
+import com.miku.ktv.miku_android.view.iview.IHeartView;
 
-public class EditActivity extends Activity implements View.OnClickListener {
+import java.util.HashMap;
+
+public class EditActivity extends Activity implements IHeartView<HeartBean>, View.OnClickListener {
+    public static final String TAG = "EditActivity";
 
     private ImageView edit_imageView_back;
     private CircleImage edit_circle_head;
@@ -38,6 +45,8 @@ public class EditActivity extends Activity implements View.OnClickListener {
     private Dialog bottomDialog;
     private SharedPreferences sp;
     private SharedPreferences.Editor edit;
+    private HeartPresenter heartPresenter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +56,6 @@ public class EditActivity extends Activity implements View.OnClickListener {
         initState();
         initView();
         initListener();
-        edit_textView_nick.setText(sp.getString("nickEdit",""));
     }
 
 
@@ -56,6 +64,9 @@ public class EditActivity extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.Edit_ImageView_Back:
+                Intent intentToPersonal=new Intent();
+                intentToPersonal.putExtra("newNickIntent",sp.getString("newNickToPersonal",""));
+                setResult(6,intentToPersonal);
                 finish();
                 break;
             case R.id.Edit_RelativeLayout_Head:
@@ -63,8 +74,7 @@ public class EditActivity extends Activity implements View.OnClickListener {
                 bottomDialog();
                 break;
             case R.id.Edit_RelativeLayout_Nick:
-                startActivity(new Intent(this,EditNickActivity.class));
-                finish();
+                startActivityForResult(new Intent(this,EditNickActivity.class),3);
                 break;
             case R.id.Edit_RelativeLayout_Sign:
                 startActivity(new Intent(this,EditSignActivity.class));
@@ -74,6 +84,31 @@ public class EditActivity extends Activity implements View.OnClickListener {
             default:
                 break;
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == 4) {
+            switch (requestCode) {
+                case 3:
+                    if (data == null) {
+                        Log.d("EditActivity", "data为空");
+                        return;
+                    } else {
+                        String newNick=data.getStringExtra("newNick");
+                        Log.d("EditActivity", "onActivityResult: "+newNick);
+                        edit_textView_nick.setText(newNick);
+                        edit.putString("newNickToPersonal",newNick);
+                        edit.commit();
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
     }
 
     private void bottomDialog() {
@@ -133,9 +168,16 @@ public class EditActivity extends Activity implements View.OnClickListener {
         edit_relativeLayout_nick = (RelativeLayout) findViewById(R.id.Edit_RelativeLayout_Nick);
         edit_relativeLayout_sign = (RelativeLayout) findViewById(R.id.Edit_RelativeLayout_Sign);
 
-        edit_textView_nick.setText(sp.getString("nick","null"));
-        edit_textView_id.setText(sp.getString("id","null"));
-        String s = Constant.BASE_PIC_URL + sp.getString("avatar", "");
+        heartPresenter = new HeartPresenter();
+        heartPresenter.attach(this);
+
+        HashMap<String,String> map=new HashMap<>();
+        map.put("token",sp.getString("LoginToken",""));
+        heartPresenter.getHeart(map,HeartBean.class);
+
+//        edit_textView_nick.setText(sp.getString("NickMain",""));
+        edit_textView_id.setText(sp.getString("FullnameMain",""));
+        String s = Constant.BASE_PIC_URL + sp.getString("AvatarMain", "");
         Glide.with(this)
                 .load(s)
                 .placeholder(R.mipmap.bg9)
@@ -151,5 +193,20 @@ public class EditActivity extends Activity implements View.OnClickListener {
             decorView.setSystemUiVisibility(option);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
+    }
+
+    @Override
+    public void onSuccess(HeartBean heartBean) {
+        if (heartBean.getStatus()==1){
+            IsUtils.showShort(this,TAG+"请求成功");
+            edit_textView_nick.setText(heartBean.getBody().getNick());
+        }else {
+            IsUtils.showShort(this,TAG+"请求失败");
+        }
+    }
+
+    @Override
+    public void onError(Throwable t) {
+
     }
 }

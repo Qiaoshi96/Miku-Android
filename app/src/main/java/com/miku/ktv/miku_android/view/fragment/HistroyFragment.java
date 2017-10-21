@@ -3,7 +3,6 @@ package com.miku.ktv.miku_android.view.fragment;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -55,7 +54,11 @@ public class HistroyFragment extends Fragment  {
                         new AsyncTask<Void,Void,Void>(){
                             @Override
                             protected Void doInBackground(Void... params) {
-                                SystemClock.sleep(1000);
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
                                 return null;
                             }
                             @Override
@@ -71,7 +74,11 @@ public class HistroyFragment extends Fragment  {
                         new AsyncTask<Void,Void,Void>(){
                             @Override
                             protected Void doInBackground(Void... params) {
-                                SystemClock.sleep(1000);
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
                                 return null;
                             }
                             @Override

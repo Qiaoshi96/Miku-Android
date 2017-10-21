@@ -113,13 +113,11 @@ public class RegisterSettingActivity extends Activity implements IRegisterInfoVi
                         if (rs_radioButton_man.isChecked() ==false && rs_radioButton_woMan.isChecked()==false){
                             IsUtils.showShort(this,"请选择性别~");
                         }else {
-
                             HashMap<String,String> map=new HashMap<>();
                             map.put("phone",sp.getString("phoneEdit","null"));
                             map.put("nick",rs_editText_nick.getText().toString());
                             map.put("sex",it+"");
                             infoPresenter.postInfo(map,RegisterInfoBean.class);
-
                         }
                     }
                 }
@@ -269,10 +267,6 @@ public class RegisterSettingActivity extends Activity implements IRegisterInfoVi
     public void onAvatarSuccess(AvatarBean bean) {
         Log.e(TAG,"onAvatarSuccess:"+bean.getBody().getAvatar());
         IsUtils.showShort(this,"上传成功");
-//        edit.putString("nick",bean.getBody().getNick());
-//        edit.putString("id",bean.getBody().getFullname());
-//        edit.putString("avatar",bean.getBody().getAvatar());
-//        edit.commit();
         Intent intent=new Intent(this,HomeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);

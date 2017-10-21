@@ -88,7 +88,7 @@ public class MainActivity extends Activity implements IHeartView<HeartBean>, Vie
     }
 
     @Override
-    public void onSuccess(HeartBean heartBean) {
+    public void onSuccess(final HeartBean heartBean) {
         if (heartBean.getStatus()==3 && heartBean.getMsg().equals("token 错误, 请重新登陆")){
             initView();
             initListener();
@@ -100,6 +100,13 @@ public class MainActivity extends Activity implements IHeartView<HeartBean>, Vie
                     @Override
                     public void onSuccess(LoginInfo param) {
                         Log.i(TAG, "login success");
+                        //保存名称，适配到PersonalActivity
+                        editor.putString("NickMain",heartBean.getBody().getNick());
+                        //保存ID，适配到PersonalActivity
+                        editor.putString("FullnameMain",heartBean.getBody().getFullname());
+                        //保存头像，适配到PersonalActivity
+                        editor.putString("AvatarMain",heartBean.getBody().getAvatar()+"");
+                        editor.commit();
                         Intent intent=new Intent(MainActivity.this, HomeActivity.class);
                         //关闭之前所有Activity
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);

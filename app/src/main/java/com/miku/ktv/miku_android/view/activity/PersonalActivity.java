@@ -18,9 +18,15 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.miku.ktv.miku_android.R;
+import com.miku.ktv.miku_android.model.bean.HeartBean;
 import com.miku.ktv.miku_android.model.utils.Constant;
+import com.miku.ktv.miku_android.model.utils.IsUtils;
+import com.miku.ktv.miku_android.presenter.HeartPresenter;
+import com.miku.ktv.miku_android.view.iview.IHeartView;
 
-public class PersonalActivity extends Activity implements View.OnClickListener {
+import java.util.HashMap;
+
+public class PersonalActivity extends Activity implements IHeartView<HeartBean>, View.OnClickListener {
     public static final String TAG = "PersonalActivity";
     private static final int WRITE_PERMISSION = 0x01;
     private LinearLayout personal_linearLayout_back;
@@ -33,6 +39,7 @@ public class PersonalActivity extends Activity implements View.OnClickListener {
     private RelativeLayout personal_relative_settings;
     private SharedPreferences sp;
     private SharedPreferences.Editor edit;
+    private HeartPresenter heartPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,9 +51,6 @@ public class PersonalActivity extends Activity implements View.OnClickListener {
         requestWritePermission();
         initView();
         initListener();
-        personal_textView_nick.setText(sp.getString("nickEdit",""));
-        personal_textView_sign.setText(sp.getString("signEdit",""));
-        personal_textView_nick.invalidate();
     }
 
     @Override
@@ -56,7 +60,8 @@ public class PersonalActivity extends Activity implements View.OnClickListener {
                 finish();
                 break;
             case R.id.Personal_ImageView_Edit:
-                startActivity(new Intent(this,EditActivity.class));
+                //奇数为请求码，偶数为结果码
+                startActivityForResult(new Intent(this,EditActivity.class),5);
                 break;
             case R.id.Personal_TextView_Sign:
                 startActivity(new Intent(this,EditSignActivity.class));
@@ -71,6 +76,27 @@ public class PersonalActivity extends Activity implements View.OnClickListener {
             default:
                 break;
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == 6) {
+            switch (requestCode) {
+                case 5:
+                    if (data == null) {
+                        return;
+                    } else {
+                        String newNickIntent=data.getExtras().getString("newNickIntent");
+                        personal_textView_nick.setText(newNickIntent);
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
     }
 
     private void initListener() {
@@ -91,11 +117,21 @@ public class PersonalActivity extends Activity implements View.OnClickListener {
         personal_relative_feedBack = (RelativeLayout) findViewById(R.id.Personal_Relative_FeedBack);
         personal_relative_settings = (RelativeLayout) findViewById(R.id.Personal_Relative_Settings);
 
-        personal_textView_nick.setText(sp.getString("nick","null"));
-        personal_textView_id.setText(sp.getString("id","null"));
+        heartPresenter = new HeartPresenter();
+        heartPresenter.attach(this);
 
-        Log.d(TAG, "initView: "+Constant.BASE_PIC_URL+sp.getString("avatar",""));
-        String s = Constant.BASE_PIC_URL + sp.getString("avatar", "");
+        HashMap<String,String> map=new HashMap<>();
+        map.put("token",sp.getString("LoginToken",""));
+        heartPresenter.getHeart(map,HeartBean.class);
+
+        //昵称
+//        personal_textView_nick.setText(sp.getString("NickMain",""));
+        //ID
+        personal_textView_id.setText(sp.getString("FullnameMain",""));
+
+        Log.d(TAG, "initView: "+Constant.BASE_PIC_URL+sp.getString("AvatarMain",""));
+        //头像路径
+        String s = Constant.BASE_PIC_URL + sp.getString("AvatarMain", "");
         Glide.with(this)
                 .load(s)
                 .placeholder(R.mipmap.bg9)
@@ -118,5 +154,20 @@ public class PersonalActivity extends Activity implements View.OnClickListener {
             decorView.setSystemUiVisibility(option);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
+    }
+
+    @Override
+    public void onSuccess(HeartBean heartBean) {
+        if (heartBean.getStatus()==1){
+            IsUtils.showShort(this,TAG+"请求成功");
+            personal_textView_nick.setText(heartBean.getBody().getNick());
+        }else {
+            IsUtils.showShort(this,TAG+"请求失败");
+        }
+    }
+
+    @Override
+    public void onError(Throwable t) {
+
     }
 }

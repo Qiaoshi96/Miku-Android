@@ -48,7 +48,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 
 import okhttp3.Call;
 
@@ -149,8 +148,9 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                         if (songsListAll != null) {
                             //设置适配器
                             songsListAdapter = new MySongsListAdapter(mContext, songsListAll);
-                            songsListAdapter.setOnItemDeleteClickListener(listener);
                             refreshLV.setAdapter(songsListAdapter);
+                            //item的子控件
+                            songsListAdapter.setOnmItemListener(itemListener);
                         } else {
                             Log.d(TAG, "songsListAll是空的");
                         }
@@ -159,26 +159,15 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                 });
     }
 
-    MySongsListAdapter.onItemDeleteListener listener = new MySongsListAdapter.onItemDeleteListener() {
+    MySongsListAdapter.onmItemListener itemListener = new MySongsListAdapter.onmItemListener() {
         @Override
-        public void onDeleteClick(final int i) {
+        public void onmItemClick(final int i) {
             for (int x = 0; x < refreshLV.getChildCount(); x++) {
                 RelativeLayout itemLayout = (RelativeLayout) refreshLV.getChildAt(i - refreshLV.getFirstVisiblePosition() + 1);
                 downTV = (TextView) itemLayout.findViewById(R.id.HotFragment_item_TextView_DownLoad);
                 paimaiTV = (TextView) itemLayout.findViewById(R.id.HotFragment_item_TextView_Paimai);
             }
             IsUtils.showShort(mContext, "点击了缓冲，位置是： " + i);
-//            //下载Mp3
-//            new Thread(){
-//                @Override
-//                public void run() {
-//                    Looper.prepare();
-//                    //下载Mp3
-//                    downLoadMp3(i);
-//                    Looper.loop();
-//                }
-//
-//            }.start();
 
             //下载歌词　　　　　
             new Thread(){
@@ -208,13 +197,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
 
                                 @Override
                                 public void onProgress(long currentSize, long totalSize, final float progress) {
-                                    downTV.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            downTV.setText("正在缓冲" + progress + "%");
-                                        }
-                                    });
-                                    Log.d(TAG, "downLoadLrc---onProgress:  " + progress + "%");
+                                    Log.d(TAG, "downLoadLrc---onProgress:  " + (int) progress + "%");
 
                                 }
 
@@ -230,17 +213,8 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
 
                                 @Override
                                 public void onFinish(File file) {
-                                    downTV.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            downTV.setVisibility(View.GONE);
-                                            paimaiTV.setVisibility(View.VISIBLE);
-                                        }
-                                    });
-
                                     //下载MP3
                                     downLoadMp3(i);
-
                                     Log.d(TAG, "downLoadLrc---onFinish: ");
 
                                 }
@@ -291,8 +265,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                         downTV.post(new Runnable() {
                             @Override
                             public void run() {
-                                downTV.setText("正在缓冲" + progress + "%");
-
+                                downTV.setText("正在缓冲" + (int) progress + "%");
                             }
                         });
                         Log.d(TAG, "downLoadMp3---onProgress:  " + progress + "%");
@@ -344,8 +317,8 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                                         map.put("sid",songsListAll.get(position).getId()+"");
                                         Log.d(TAG, "歌曲ID:  "+songsListAll.get(position).getId()+"");
                                         Log.d(TAG, "登录的token:  "+sp.getString("LoginToken",""));
-                                        Log.d(TAG, "roomId:  "+sp.getString("roomid",""));
-                                        addPresenter.postAdd(sp.getString("roomid",""), map, AddBean.class);
+                                        Log.d(TAG, "roomId:  "+sp.getString("JFmRoomName",""));
+                                        addPresenter.postAdd(sp.getString("JFmRoomName",""), map, AddBean.class);
                                     }
                                 });
                             }
@@ -396,7 +369,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
         }else {
             //排麦重复
             if (addBean.getStatus()==6){
-                showSuccessDialog();
+                showTwoDialog();
             }
             Log.d(TAG, "onSuccess: "+addBean.getMsg());
         }
@@ -442,7 +415,8 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                         //请求下麦接口
                         HashMap<String,String> map=new HashMap<>();
                         map.put("token",sp.getString("LoginToken",""));
-                        addPresenter.delete(sp.getString("roomid",""), map, DeleteBean.class);
+                        Log.d(TAG, "自动放弃"+sp.getString("JFmRoomName",""));
+                        addPresenter.delete(sp.getString("JFmRoomName",""), map, DeleteBean.class);
                     }
                 };
                 timer.start();
@@ -456,7 +430,8 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                         //请求下麦接口
                         HashMap<String,String> map=new HashMap<>();
                         map.put("token",sp.getString("LoginToken",""));
-                        addPresenter.delete(sp.getString("roomid",""), map, DeleteBean.class);
+                        Log.d(TAG, "手动放弃"+sp.getString("JFmRoomName",""));
+                        addPresenter.delete(sp.getString("JFmRoomName",""), map, DeleteBean.class);
                         timer.cancel();
                     }
                 });
@@ -524,7 +499,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
 
 
     public interface OnDataTransmissionListener {
-        public void dataTransmission(ArrayList<HistroyBean> list);
+        void dataTransmission(ArrayList<HistroyBean> list);
     }
     private OnDataTransmissionListener mListener;
     public void setOnDataTransmissionListener(OnDataTransmissionListener mListener) {

@@ -11,7 +11,6 @@ import com.miku.ktv.miku_android.R;
 import com.miku.ktv.miku_android.model.bean.AddListBean;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -23,8 +22,9 @@ public class PopAdapter extends BaseAdapter {
 
     private Context context;
     private List<AddListBean.BodyBean.SingerListBean> list=new ArrayList<>();
-    ViewHolder holder=null;
-    HashMap<Integer,View> map=new HashMap<>();
+    ViewHolder holder;
+//    HashMap<Integer,View> map=new HashMap<>();
+
 
     public PopAdapter(Context context, List<AddListBean.BodyBean.SingerListBean> list) {
         this.context = context;
@@ -50,33 +50,57 @@ public class PopAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         Log.d(TAG, "getView: ");
-        if (map.get(position)==null){
+        if (convertView==null){
             convertView = View.inflate(context, R.layout.ktv_pop_item, null);
             holder=new ViewHolder();
             holder.musicTV= (TextView) convertView.findViewById(R.id.Pop_item_TextView_Music);
             holder.singerTV= (TextView) convertView.findViewById(R.id.Pop_item_TextView_Singer);
             holder.nickTV= (TextView) convertView.findViewById(R.id.Pop_item_TextView_Nick);
             holder.deleteTV= (TextView) convertView.findViewById(R.id.Pop_item_TextView_Delete);
+            holder.deleteTV.setOnClickListener(mOnClickListener);
             convertView.setTag(holder);
 
-            map.put(position,convertView);
         }else {
-            convertView=map.get(position);
 
             holder= (ViewHolder) convertView.getTag();
-
-            AddListBean.BodyBean.SingerListBean bean = list.get(position);
-            holder.musicTV.setText(bean.getSong().getName());
-            holder.singerTV.setText(bean.getSong().getAuthor());
-            holder.nickTV.setText(bean.getCreator().getNick());
-
-            Log.d(TAG, "getView: "+bean.getSong().getName());
-            Log.d(TAG, "getView: "+bean.getSong().getAuthor());
-            Log.d(TAG, "getView: "+bean.getCreator().getNick());
         }
+
+        holder.deleteTV.setTag(position);
+
+        AddListBean.BodyBean.SingerListBean bean = list.get(position);
+        holder.musicTV.setText(bean.getSong().getName());
+        holder.singerTV.setText(bean.getSong().getAuthor());
+        holder.nickTV.setText(bean.getCreator().getNick());
+
+        Log.d(TAG, "getView: "+bean.getSong().getName());
+        Log.d(TAG, "getView: "+bean.getSong().getAuthor());
+        Log.d(TAG, "getView: "+bean.getCreator().getNick());
+
+//                holder.deleteTV.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    onItemDeleteListener.onDeleteClick(position);
+//                }
+//            });
         return convertView;
+    }
+
+//    public interface onItemDeleteListener {
+//        void onDeleteClick(int i);
+//    }
+//    private onItemDeleteListener onItemDeleteListener;
+//    public void setOnItemDeleteListener(onItemDeleteListener onItemDeleteListener){
+//        this.onItemDeleteListener=onItemDeleteListener;
+//    }
+
+    public  interface  MyClickListener {
+        void onItemDeleteClick(BaseAdapter adapter, View view, int position);
+    }
+    private MyClickListener mListener;
+    public void setOnItemDeleteClickListener(MyClickListener listener) {
+        mListener = listener;
     }
 
     class ViewHolder{
@@ -85,4 +109,22 @@ public class PopAdapter extends BaseAdapter {
         TextView nickTV;
         TextView deleteTV;
     }
+
+    private View.OnClickListener mOnClickListener=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mListener!=null){
+                int position = (int) v.getTag();
+                switch (v.getId()) {
+                    case R.id.Pop_item_TextView_Delete:
+                        mListener.onItemDeleteClick(PopAdapter.this, v, position);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
 }

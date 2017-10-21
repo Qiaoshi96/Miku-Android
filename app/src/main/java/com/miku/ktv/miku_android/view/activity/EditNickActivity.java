@@ -57,9 +57,9 @@ public class EditNickActivity extends Activity implements IRegisterView<NickBean
                 }else {
                     //请求接口
                     HashMap<String,String> map=new HashMap<>();
-                    map.put("token",sp.getString("LoginToken","null"));
+                    map.put("token",sp.getString("LoginToken",""));
                     map.put("nick",en_editText_nick.getText().toString());
-                    map.put("fullname",sp.getString("id","null"));
+                    map.put("fullname",sp.getString("FullnameMain",""));
                     editPresenter.postNick(map,NickBean.class);
                 }
                 break;
@@ -72,11 +72,9 @@ public class EditNickActivity extends Activity implements IRegisterView<NickBean
     @Override
     public void onSuccess(NickBean nickBean) {
         if (nickBean.getStatus()==1){
-            Intent intent=new Intent(this,EditActivity.class);
-//            intent.putExtra("nickIntent",nickBean.getBody().getNick());
-            edit.putString("nickEdit",nickBean.getBody().getNick());
-            edit.commit();
-            startActivity(intent);
+            Intent intentToEdit=new Intent();
+            intentToEdit.putExtra("newNick",nickBean.getBody().getNick());
+            setResult(4,intentToEdit);
             finish();
             IsUtils.showShort(this,"昵称修改成功");
         }else {

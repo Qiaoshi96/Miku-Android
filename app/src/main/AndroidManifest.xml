@@ -103,7 +103,7 @@
             android:name=".view.activity.RegisterCheckActivity"
             android:windowSoftInputMode="stateVisible|adjustResize"/>
         <activity android:name=".view.activity.RegisterSettingActivity"/>
-        <activity android:name=".view.activity.HomeActivity"/>
+        <activity android:name=".view.activity.SongsActivity"/>
         <activity android:name=".view.activity.SettingsActivity"/>
         <activity android:name=".view.activity.EditActivity"/>
         <activity android:name=".view.activity.PersonalActivity"/>
@@ -118,7 +118,7 @@
             android:windowSoftInputMode="stateVisible|adjustResize"/>
         <activity android:name=".view.activity.WebActivity">
         </activity>
-        <activity android:name=".view.activity.SongsActivity">
+        <activity android:name=".view.activity.HomeActivity">
         </activity>
         <activity android:name=".view.activity.SearchActivity">
         </activity>

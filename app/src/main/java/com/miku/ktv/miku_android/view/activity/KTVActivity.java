@@ -23,6 +23,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -73,9 +74,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -203,6 +202,9 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
     private AddListBean addListBean1;
     private ListView refreshLVPop;
     private PopAdapter popAdapter;
+    private AlertDialog builder;
+    private TextView okTV;
+    private TextView cancelTV;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -901,22 +903,6 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         }
     }
 
-    private void showPopupWindow() {
-        View view = View.inflate(this, R.layout.ktv_pop, null);
-        popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, 695, true);
-        //点击外部区域popwindow消失
-        popupWindow.setBackgroundDrawable(new BitmapDrawable());
-        popupWindow.setFocusable(true);
-        popupWindow.setAnimationStyle(R.style.Anim_Bottom_Pop);
-        //显示(从底部)
-        popupWindow.showAtLocation(view, Gravity.BOTTOM, 0, 0);
-
-        refreshLVPop = (ListView) view.findViewById(R.id.refreshLVPop);
-
-        HashMap<String, String> map = new HashMap<>();
-        map.put("page", "1");
-        addPresenter.getAddList(sp.getString("roomname", ""), map, AddListBean.class);
-    }
 
     private void showDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(KTVActivity.this);
@@ -997,14 +983,21 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
 
     }
 
-    @Override
-    public void onDeleteSuccess(DeleteBean t) {
+    private void showPopupWindow() {
+        View view = View.inflate(this, R.layout.ktv_pop, null);
+        popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, 695, true);
+        //点击外部区域popwindow消失
+        popupWindow.setBackgroundDrawable(new BitmapDrawable());
+        popupWindow.setFocusable(true);
+        popupWindow.setAnimationStyle(R.style.Anim_Bottom_Pop);
+        //显示(从底部)
+        popupWindow.showAtLocation(view, Gravity.BOTTOM, 0, 0);
 
-    }
+        refreshLVPop = (ListView) view.findViewById(R.id.refreshLVPop);
 
-    @Override
-    public void onDeleteError(Throwable throwable) {
-
+        HashMap<String, String> map = new HashMap<>();
+        map.put("page", "1");
+        addPresenter.getAddList(sp.getString("JFmRoomName",""), map, AddListBean.class);
     }
 
     @Override
@@ -1023,16 +1016,69 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         }
     }
 
+    @Override
+    public void onAddListError(Throwable throwable) {
+        Log.d(TAG, "onAddListError: " + throwable.getMessage());
+    }
+
     private void initData() {
         popAdapter = new PopAdapter(this, addList);
         refreshLVPop.setAdapter(popAdapter);
         //当前列表内的歌曲数量
         paimaiCount.setText(refreshLVPop.getCount() + "");
+        //item的子控件
+        popAdapter.setOnItemDeleteClickListener(new PopAdapter.MyClickListener() {
+            @Override
+            public void onItemDeleteClick(BaseAdapter adapter, View view, final int position) {
+                IsUtils.showShort(KTVActivity.this,"点击了删除 "+position);
+
+                builder = new AlertDialog.Builder(KTVActivity.this).create();
+                View dialogView=View.inflate(KTVActivity.this, R.layout.paimai_delete_dialog,null);
+                okTV = (TextView) dialogView.findViewById(R.id.DeleteDialog_TextView_Ok);
+                cancelTV = (TextView) dialogView.findViewById(R.id.DeleteDialog_TextView_Cancel);
+                builder.setView(dialogView);
+                builder.show();
+
+                okTV.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //请求下麦接口
+                        HashMap<String,String> map=new HashMap<>();
+                        map.put("token",sp.getString("LoginToken",""));
+                        addPresenter.delete(sp.getString("JFmRoomName",""), map, DeleteBean.class);
+
+                        addList.remove(position);
+                        builder.dismiss();
+                    }
+                });
+                cancelTV.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        builder.dismiss();
+                    }
+                });
+
+            }
+
+        });
 
     }
 
     @Override
-    public void onAddListError(Throwable throwable) {
-        Log.d(TAG, "onAddListError: " + throwable.getMessage());
+    public void onDeleteSuccess(DeleteBean bean) {
+        if (bean.getStatus()==1){
+            IsUtils.showShort(this,"放弃");
+            popAdapter.notifyDataSetChanged();
+        }else {
+            refreshLVPop.setAdapter(popAdapter);
+            popAdapter.notifyDataSetChanged();
+            IsUtils.showShort(this,"放弃失败");
+        }
     }
+
+    @Override
+    public void onDeleteError(Throwable throwable) {
+        Log.d(TAG, "onDeleteError: " + throwable.getMessage());
+    }
+
 }

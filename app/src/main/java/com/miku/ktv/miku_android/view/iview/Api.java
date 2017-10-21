@@ -71,6 +71,7 @@ public interface Api {
     //排麦列表
     @GET("room/{room_id}/singers/{sign}")
     Observable<String> getAddList(@Path("room_id") String room_id, @Path("sign") String sign, @QueryMap Map<String, String> map);
+    //验证token
     @GET("heart/{sign}")
     Observable<String> getHeart(@Path("sign") String sign, @QueryMap Map<String, String> map);
 }
