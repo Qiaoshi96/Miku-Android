@@ -74,4 +74,9 @@ public interface Api {
     //验证token
     @GET("heart/{sign}")
     Observable<String> getHeart(@Path("sign") String sign, @QueryMap Map<String, String> map);
+    //创建房间
+    @FormUrlEncoded
+    @POST("room/{sign}")
+    Observable<String> postCreate(@Path("sign") String sign, @FieldMap Map<String, String> map);
+
 }

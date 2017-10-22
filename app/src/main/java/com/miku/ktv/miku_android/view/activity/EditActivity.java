@@ -4,9 +4,14 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -20,13 +25,18 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.miku.ktv.miku_android.R;
+import com.miku.ktv.miku_android.model.bean.AvatarBean;
 import com.miku.ktv.miku_android.model.bean.HeartBean;
 import com.miku.ktv.miku_android.model.utils.Constant;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
+import com.miku.ktv.miku_android.model.utils.ZipImageUtil;
 import com.miku.ktv.miku_android.presenter.HeartPresenter;
+import com.miku.ktv.miku_android.presenter.UpdateAvatarPresenter;
 import com.miku.ktv.miku_android.view.custom.CircleImage;
 import com.miku.ktv.miku_android.view.iview.IHeartView;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 
 public class EditActivity extends Activity implements IHeartView<HeartBean>, View.OnClickListener {
@@ -46,6 +56,14 @@ public class EditActivity extends Activity implements IHeartView<HeartBean>, Vie
     private SharedPreferences sp;
     private SharedPreferences.Editor edit;
     private HeartPresenter heartPresenter;
+
+    private File file;//存储拍摄图片的文件
+    private static final int PICTURE_FROM_CAMERA = 0X32;
+    private static final int PICTURE_FROM_GALLERY = 0X34;
+    private static final int CROP_SMALL_PICTURE = 2;
+
+    private Bitmap mBitmap;
+    private UpdateAvatarPresenter updatePresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,8 +125,77 @@ public class EditActivity extends Activity implements IHeartView<HeartBean>, Vie
                 default:
                     break;
             }
+        } else if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                //相机
+                case PICTURE_FROM_CAMERA:
+                    //对图片进行压缩
+                    ZipImageUtil.zipImage(Uri.fromFile(file).getPath());
+                    //将图片设置到ImageView中
+                    edit_circle_head.setImageURI(Uri.fromFile(file));
+
+                    if (file!=null){
+                        updatePresenter.postAvatar(sp.getString("LoginToken",""),file, AvatarBean.class);
+                    }
+//                    cutImage(file);
+
+                    Log.d(TAG, "onActivityResult: +相机");
+                    break;
+                //相册
+                case PICTURE_FROM_GALLERY:
+                    //通过返回的data数据，获取图片的路径信息，但是这个路径是Uri的
+                    Uri uri = data.getData();
+                    //进行压缩，首先要将Uri地址转换为真实路径
+                    File file2 = getFilePath(uri);
+                    this.file = file2;
+                    //压缩图片
+                    ZipImageUtil.zipImage(file2.getAbsolutePath());
+                    edit_circle_head.setImageURI(Uri.fromFile(file2));
+
+                    if (file!=null){
+                        updatePresenter.postAvatar(sp.getString("LoginToken",""),file, AvatarBean.class);
+                    }
+//                    cutImage(file3);
+
+                    Log.d(TAG, "onActivityResult: +相册");
+                    break;
+
+
+//                case CROP_SMALL_PICTURE:
+//                    if (data != null) {
+//                        setImageToView(data); // 让刚才选择裁剪得到的图片显示在界面上
+//
+//                        if (file!=null){
+//                            updatePresenter.postAvatar(sp.getString("LoginToken",""),file, AvatarBean.class);
+//                        }
+//                    }
+//                    break;
+
+            }
         }
 
+    }
+
+
+    @Override
+    public void onError(Throwable t) {
+
+    }
+
+    @Override
+    public void onAvatarSuccess(AvatarBean bean) {
+        if (bean.getStatus()==1){
+            Log.d(TAG, "onAvatarSuccess: "+bean.getBody().getAvatar());
+            IsUtils.showShort(this,"上传成功");
+        }else {
+            IsUtils.showShort(this,"上传失败");
+        }
+    }
+
+
+    @Override
+    public void onAvatarError(Throwable t) {
+        Log.d(TAG, "onAvatarError: "+t.getMessage());
     }
 
     private void bottomDialog() {
@@ -137,10 +224,39 @@ public class EditActivity extends Activity implements IHeartView<HeartBean>, Vie
                     //拍照
                 case R.id.Dialog_TextView_Camera:
                     IsUtils.showShort(EditActivity.this,"拍照");
+                    bottomDialog.dismiss();
+                    Intent intent = new Intent();
+                    //启动相机的Action
+                    intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+                    //文件的保存位置
+                    file = new File(Environment.getExternalStorageDirectory(),
+                            System.currentTimeMillis() + ".jpg");
+                    if (!file.exists()) {
+                        try {
+                            file.createNewFile();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    //设置图片拍摄后保存的位置
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
+                    //启动相机，这里使用有返回结果的启动
+                    startActivityForResult(intent, PICTURE_FROM_CAMERA);
+
                     break;
                     //相册
                 case R.id.Dialog_TextView_Album:
                     IsUtils.showShort(EditActivity.this,"相册");
+                    bottomDialog.dismiss();
+
+                    Intent intent2 = new Intent();
+                    //设置启动相册的Action
+                    intent2.setAction(Intent.ACTION_GET_CONTENT);
+                    //设置类型
+                    intent2.setType("image/*");
+                    //启动相册，这里使用有返回结果的启动
+                    startActivityForResult(intent2, PICTURE_FROM_GALLERY);
+
                     break;
                     //取消
                 case R.id.Dialog_TextView_Cancel:
@@ -151,6 +267,51 @@ public class EditActivity extends Activity implements IHeartView<HeartBean>, Vie
             }
         }
     };
+
+
+    private File getFilePath(Uri uri) {
+        String[] proj = {MediaStore.Images.Media.DATA};
+        Cursor actualimagecursor = managedQuery(uri, proj, null, null, null);
+        int actual_image_column_index = actualimagecursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        actualimagecursor.moveToFirst();
+        String img_path = actualimagecursor.getString(actual_image_column_index);
+        return new File(img_path);
+    }
+//    /**
+//     * 裁剪图片方法实现
+//     */
+//    protected void cutImage(File file2) {
+//        if (file2 == null) {
+//            Log.i("alanjet", "The uri is not exist.");
+//        }
+//        file = file2;
+//        Intent intent = new Intent("com.android.camera.action.CROP");
+//        //com.android.camera.action.CROP这个action是用来裁剪图片用的
+//        intent.setDataAndType(Uri.fromFile(file2), "image/*");
+//        // 设置裁剪
+//        intent.putExtra("crop", "true");
+//        // aspectX aspectY 是宽高的比例
+//        intent.putExtra("aspectX", 1);
+//        intent.putExtra("aspectY", 1);
+//        // outputX outputY 是裁剪图片宽高
+//        intent.putExtra("outputX", 150);
+//        intent.putExtra("outputY", 150);
+//        intent.putExtra("return-data", true);
+//        startActivityForResult(intent, CROP_SMALL_PICTURE);
+//    }
+//
+//    /**
+//     * 保存裁剪之后的图片数据
+//     */
+//    protected void setImageToView(Intent data) {
+//        Bundle extras = data.getExtras();
+//        if (extras != null) {
+//            mBitmap = (Bitmap) extras.get("data");
+//            //显示图片
+//            edit_circle_head.setImageBitmap(mBitmap);
+//        }
+//    }
+
 
     private void initListener() {
         edit_imageView_back.setOnClickListener(this);
@@ -171,12 +332,14 @@ public class EditActivity extends Activity implements IHeartView<HeartBean>, Vie
         heartPresenter = new HeartPresenter();
         heartPresenter.attach(this);
 
+        updatePresenter = new UpdateAvatarPresenter();
+        updatePresenter.attach(this);
+
         HashMap<String,String> map=new HashMap<>();
         map.put("token",sp.getString("LoginToken",""));
         heartPresenter.getHeart(map,HeartBean.class);
 
-//        edit_textView_nick.setText(sp.getString("NickMain",""));
-        edit_textView_id.setText(sp.getString("FullnameMain",""));
+
         String s = Constant.BASE_PIC_URL + sp.getString("AvatarMain", "");
         Glide.with(this)
                 .load(s)
@@ -200,13 +363,10 @@ public class EditActivity extends Activity implements IHeartView<HeartBean>, Vie
         if (heartBean.getStatus()==1){
             IsUtils.showShort(this,TAG+"请求成功");
             edit_textView_nick.setText(heartBean.getBody().getNick());
+            edit_textView_id.setText(heartBean.getBody().getFullname());
         }else {
             IsUtils.showShort(this,TAG+"请求失败");
         }
     }
 
-    @Override
-    public void onError(Throwable t) {
-
-    }
 }

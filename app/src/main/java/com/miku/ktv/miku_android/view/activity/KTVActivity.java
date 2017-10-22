@@ -24,6 +24,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -84,6 +85,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.miku.ktv.miku_android.model.utils.Constant.gson;
+import static com.miku.ktv.miku_android.view.activity.HomeActivity.CREATEORJOIN;
 
 
 public class KTVActivity extends AppCompatActivity implements IAddView<Object, DeleteBean, AddListBean>, IExitRoomView<Object, ExitRoomBean>, IFetchRoomInfoView<Object, JoinRoomBean>, View.OnClickListener, AVChatStateObserver, AvatarImageFetchRunnable.FetchAvatarImageCallBack, RoomWebSocket.RoomWebSocketMsgInterface {
@@ -209,6 +211,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
     private TextView cancelTV;
     private RelativeLayout controVideo;
     private TextView nick;
+
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -827,6 +830,8 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         back = (ImageView) findViewById(R.id.iv_back);
         //昵称
         nick = (TextView) findViewById(R.id.TextView_nick);
+        //排麦列表中歌曲的数量
+        paimaiCount = (TextView) findViewById(R.id.KTV_paimaiCount);
         //排麦的控件
         maixu = (ImageView) findViewById(R.id.ImageView_maixu);
         //点歌的控件
@@ -846,7 +851,12 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         lrcLayout = (LRCLayout) findViewById(R.id.lrc_layout);
         lrcLayout.setSingerView((TextView) findViewById(R.id.tv_singer));
         //左上角，房间创建者的昵称
-        nick.setText(sp.getString("creatornick",""));
+        if (CREATEORJOIN==true){
+            nick.setText(sp.getString("myselfRoomNick",""));
+        }else {
+            nick.setText(sp.getString("creatornick",""));
+        }
+
         addPresenter = new AddPresenter();
         addPresenter.attach(this);
     }
@@ -994,7 +1004,11 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
 
     private void showPopupWindow() {
         View view = View.inflate(this, R.layout.ktv_pop, null);
-        popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, 695, true);
+
+        WindowManager wm = this.getWindowManager();
+        int height = wm.getDefaultDisplay().getHeight();
+
+        popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, height / 2, true);
         //点击外部区域popwindow消失
         popupWindow.setBackgroundDrawable(new BitmapDrawable());
         popupWindow.setFocusable(true);
@@ -1034,7 +1048,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         popAdapter = new PopAdapter(this, addList);
         refreshLVPop.setAdapter(popAdapter);
         //当前列表内的歌曲数量
-//        paimaiCount.setText(refreshLVPop.getCount() + "");
+//        paimaiCount.setText(refreshLVPop.getCount()+"");
         //item的子控件
         popAdapter.setOnItemDeleteClickListener(new PopAdapter.MyClickListener() {
             @Override

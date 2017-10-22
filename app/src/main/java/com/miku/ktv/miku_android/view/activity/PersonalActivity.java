@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.miku.ktv.miku_android.R;
+import com.miku.ktv.miku_android.model.bean.AvatarBean;
 import com.miku.ktv.miku_android.model.bean.HeartBean;
 import com.miku.ktv.miku_android.model.utils.Constant;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
@@ -127,8 +128,6 @@ public class PersonalActivity extends Activity implements IHeartView<HeartBean>,
         map.put("token",sp.getString("LoginToken",""));
         heartPresenter.getHeart(map,HeartBean.class);
 
-        //昵称
-//        personal_textView_nick.setText(sp.getString("NickMain",""));
         //ID
         personal_textView_id.setText(sp.getString("FullnameMain",""));
 
@@ -171,6 +170,16 @@ public class PersonalActivity extends Activity implements IHeartView<HeartBean>,
 
     @Override
     public void onError(Throwable t) {
+
+    }
+
+    @Override
+    public void onAvatarSuccess(AvatarBean bean) {
+
+    }
+
+    @Override
+    public void onAvatarError(Throwable t) {
 
     }
 }

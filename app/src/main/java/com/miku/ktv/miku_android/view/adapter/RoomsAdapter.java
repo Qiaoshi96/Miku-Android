@@ -58,7 +58,7 @@ public class RoomsAdapter extends BaseAdapter {
         }
 
         Glide.with(context)
-                .load(list.get(position).getParticipants().get(0).getAvatar())
+                .load(list.get(position).getCover())
                 .error(R.mipmap.bg9)
                 .placeholder(R.mipmap.bg9)
                 .centerCrop()

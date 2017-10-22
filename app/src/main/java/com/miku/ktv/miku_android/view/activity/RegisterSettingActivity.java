@@ -265,12 +265,18 @@ public class RegisterSettingActivity extends Activity implements IRegisterInfoVi
 
     @Override
     public void onAvatarSuccess(AvatarBean bean) {
-        Log.e(TAG,"onAvatarSuccess:"+bean.getBody().getAvatar());
-        IsUtils.showShort(this,"上传成功");
-        Intent intent=new Intent(this,HomeActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        finish();
+        if (bean.getStatus()==1){
+            Log.e(TAG,"onAvatarSuccess:"+bean.getBody().getAvatar());
+            IsUtils.showShort(this,"上传成功");
+            Intent intent=new Intent(this,HomeActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+        }else {
+            Log.d(TAG, "onAvatarSuccess: "+bean.getMsg());
+            IsUtils.showShort(this,"上传失败");
+        }
+
     }
 
     @Override

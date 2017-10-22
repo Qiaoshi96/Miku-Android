@@ -60,4 +60,24 @@ public class CreateRoomPresenter<T extends IJoinRoomView> extends BasePresenter<
             }
         });
     }
+
+    //post创建房间请求
+    public <T> void postCreate(Map<String, String> map, final Class<T> cla){
+        final String sign = "?timestamp="+ Constant.getTime()+"&sign="+ Constant.getSign();
+        HttpUtil.postCreate(sign, map, new Consumer<String>() {
+            @Override
+            public void accept(String s) throws Exception {
+                Log.e(TAG, "postCreate   "+s);
+                T t =Constant.GsonToBean(s, cla);
+                getIBaseView().onCreateSuccess(t);
+            }
+        }, new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                getIBaseView().onCreateError(throwable);
+                Log.e(TAG, "postCreate-throwable:  "+throwable.toString());
+            }
+        });
+    }
+
 }

@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.miku.ktv.miku_android.R;
+import com.miku.ktv.miku_android.model.bean.AvatarBean;
 import com.miku.ktv.miku_android.model.bean.HeartBean;
 import com.miku.ktv.miku_android.model.utils.Constant;
 import com.miku.ktv.miku_android.presenter.HeartPresenter;
@@ -133,6 +134,16 @@ public class MainActivity extends Activity implements IHeartView<HeartBean>, Vie
 
     @Override
     public void onError(Throwable t) {
+
+    }
+
+    @Override
+    public void onAvatarSuccess(AvatarBean bean) {
+
+    }
+
+    @Override
+    public void onAvatarError(Throwable t) {
 
     }
 }

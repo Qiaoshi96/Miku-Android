@@ -18,6 +18,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.miku.ktv.miku_android.R;
+import com.miku.ktv.miku_android.model.bean.CreateBean;
 import com.miku.ktv.miku_android.model.bean.JoinRoomBean;
 import com.miku.ktv.miku_android.model.bean.RoomsBean;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
@@ -31,7 +32,7 @@ import java.util.List;
 
 import static com.miku.ktv.miku_android.model.utils.Constant.gson;
 
-public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,JoinRoomBean>,View.OnClickListener {
+public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,JoinRoomBean,CreateBean>,View.OnClickListener {
     public static final String TAG="HomeActivity";
 
     private ListView home_lv;
@@ -46,6 +47,8 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
     private List<RoomsBean.BodyBean.RoomListBean> list=new ArrayList<>();
     private RoomsAdapter roomsAdapter;
     private RoomsBean roomsBean1;
+    //true代表进的房间是自己创建的房间，false代表进的房间是别人的房间
+    public static boolean CREATEORJOIN = false;
 
     private String mRoomName;
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -53,9 +56,7 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-//        initState();
         getWindow().setStatusBarColor(getResources().getColor(R.color.background));
-//        IsUtils.setWindowStatusBarColor(this,getResources().getColor(R.color.background));
         sp = getSharedPreferences("config",MODE_PRIVATE);
         editor = sp.edit();
         binPresenter();
@@ -117,13 +118,41 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
                     IsUtils.showShort(HomeActivity.this,"请输入房间名");
                 }else {
                     //创建房间
-
+                    HashMap<String,String> map=new HashMap<>();
+                    map.put("token",sp.getString("LoginToken",""));
+                    map.put("name",dialog_editText.getText().toString());
+                    roomPresenter.postCreate(map,CreateBean.class);
 
                     builder.dismiss();
-                    IsUtils.showShort(HomeActivity.this,"创建房间成功");
+
                 }
             }
         });
+    }
+
+    //创建房间成功
+    @Override
+    public void onCreateSuccess(CreateBean bean) {
+        if (bean.getStatus()==1){
+            CREATEORJOIN=true;
+            editor.putString("myselfRoomNick",bean.getBody().getCreator_nick());
+            editor.commit();
+            IsUtils.showShort(HomeActivity.this,"创建房间成功");
+            startActivity(new Intent(this,KTVActivity.class));
+
+            HashMap<String,String> map=new HashMap<>();
+            map.put("token",sp.getString("LoginToken",""));
+            map.put("page","1");
+            roomPresenter.getRooms(map,RoomsBean.class);
+        }else {
+            Log.d(TAG, "onCreateSuccess: "+bean.getMsg());
+        }
+
+    }
+
+    @Override
+    public void onCreateError(Throwable t) {
+
     }
 
     @Override
@@ -180,7 +209,7 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
             @Override
             public void run() {
                 HashMap<String,String> map=new HashMap<>();
-                map.put("token",sp.getString("tokenKey",""));
+                map.put("token",sp.getString("LoginToken",""));
                 map.put("page","1");
                 roomPresenter.getRooms(map,RoomsBean.class);
             }
@@ -191,6 +220,7 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
     @Override
     public void onJoinSuccess(JoinRoomBean bean) {
         if (bean.getStatus()==1){
+            CREATEORJOIN=false;
             Log.e(TAG,"onJoinSuccess: "+"nick: "+bean.getBody().getParticipants().get(0).getNick()+"roomid: "+mRoomName);
             editor.putString("JFmRoomName",mRoomName);
             editor.commit();
@@ -207,4 +237,5 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
     public void onJoinError(Throwable t) {
 
     }
+
 }

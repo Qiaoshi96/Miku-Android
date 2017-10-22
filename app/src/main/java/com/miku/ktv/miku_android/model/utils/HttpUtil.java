@@ -87,7 +87,7 @@ public class HttpUtil {
         //构建body
         RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
                 .addFormDataPart("token", token)
-                .addFormDataPart("avatar", avatar.getName(), RequestBody.create(MediaType.parse("image/*"), avatar))
+                .addFormDataPart("avatar", avatar.getName(), RequestBody.create(MediaType.parse("image/*"),avatar))
                 .build();
         Observable<String> observable = api.postAvatar(sign,requestBody);
         observable.observeOn(AndroidSchedulers.mainThread())
@@ -180,6 +180,15 @@ public class HttpUtil {
     public static void getHeart(String sign, Map<String, String> map, Consumer<String> onNext, Consumer<Throwable> onError){
         Api api = retrofit.create(Api.class);
         Observable<String> observable = api.getHeart(sign,map);
+        observable.observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(onNext, onError);
+    }
+
+    //postCreate创建房间
+    public static void postCreate(String sign, Map<String, String> map,Consumer<String> onNext, Consumer<Throwable> onError) {
+        Api api = retrofit.create(Api.class);
+        Observable<String> observable = api.postCreate(sign,map);
         observable.observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(onNext, onError);

@@ -50,7 +50,7 @@
                 android:id="@+id/Edit_Circle_Head"
                 android:layout_width="45dp"
                 android:layout_height="45dp"
-                android:src="@mipmap/bg9"
+                android:scaleType="fitXY"
                 android:layout_alignParentRight="true"
                 />
 
