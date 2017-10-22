@@ -1034,7 +1034,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         popAdapter = new PopAdapter(this, addList);
         refreshLVPop.setAdapter(popAdapter);
         //当前列表内的歌曲数量
-        paimaiCount.setText(refreshLVPop.getCount() + "");
+//        paimaiCount.setText(refreshLVPop.getCount() + "");
         //item的子控件
         popAdapter.setOnItemDeleteClickListener(new PopAdapter.MyClickListener() {
             @Override
@@ -1072,18 +1072,19 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         });
 
     }
-
+    //删除歌曲
     @Override
     public void onDeleteSuccess(DeleteBean bean) {
         if (bean.getStatus()==1){
-            IsUtils.showShort(this,"放弃");
+            IsUtils.showShort(this,"删除");
             popAdapter.notifyDataSetChanged();
+            //停止播放
             AVChatManager.getInstance().stopAudioMixing();
             lrcLayout.stop();
         }else {
             refreshLVPop.setAdapter(popAdapter);
             popAdapter.notifyDataSetChanged();
-            IsUtils.showShort(this,"放弃失败");
+            IsUtils.showShort(this,"删除失败");
         }
     }
 
