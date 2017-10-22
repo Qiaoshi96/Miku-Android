@@ -163,6 +163,7 @@ public class LRCLayout extends RelativeLayout {
     public void stop() {
         synchronized (Lock) {
             mMusicSinging = false;
+            mMusicStartTime = 0;
         }
     }
 

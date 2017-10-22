@@ -1078,6 +1078,8 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         if (bean.getStatus()==1){
             IsUtils.showShort(this,"放弃");
             popAdapter.notifyDataSetChanged();
+            AVChatManager.getInstance().stopAudioMixing();
+            lrcLayout.stop();
         }else {
             refreshLVPop.setAdapter(popAdapter);
             popAdapter.notifyDataSetChanged();
