@@ -6,12 +6,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -35,6 +39,7 @@ import com.miku.ktv.miku_android.presenter.UpdateAvatarPresenter;
 import com.miku.ktv.miku_android.view.custom.CircleImage;
 import com.miku.ktv.miku_android.view.iview.IHeartView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -82,7 +87,17 @@ public class EditActivity extends Activity implements IHeartView<HeartBean>, Vie
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.Edit_ImageView_Back:
+
+                Bitmap bmp=drawableToBitamp(edit_circle_head.getDrawable());
                 Intent intentToPersonal=new Intent();
+                ByteArrayOutputStream baos=new ByteArrayOutputStream();
+                bmp.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                byte [] bitmapByte =baos.toByteArray();
+                intentToPersonal.putExtra("bitmapintentToPersonal", bitmapByte);
+
+                String imageString=new String(Base64.encode(bitmapByte, 0));
+                edit.putString("bitmapByte", imageString).commit();
+
                 intentToPersonal.putExtra("newNickIntent",sp.getString("newNickToPersonal",""));
                 setResult(6,intentToPersonal);
                 finish();
@@ -117,7 +132,7 @@ public class EditActivity extends Activity implements IHeartView<HeartBean>, Vie
                         String newNick=data.getStringExtra("newNick");
                         Log.d("EditActivity", "onActivityResult: "+newNick);
                         edit_textView_nick.setText(newNick);
-                        edit.putString("newNickToPersonal",newNick);
+                        edit.putString("newNickToPersonal",edit_textView_nick.getText().toString());
                         edit.commit();
                     }
                     break;
@@ -134,10 +149,13 @@ public class EditActivity extends Activity implements IHeartView<HeartBean>, Vie
                     //将图片设置到ImageView中
                     edit_circle_head.setImageURI(Uri.fromFile(file));
 
+                    edit_circle_head.setDrawingCacheEnabled(true);
+
+
+                    //头像上传服务器
                     if (file!=null){
                         updatePresenter.postAvatar(sp.getString("LoginToken",""),file, AvatarBean.class);
                     }
-//                    cutImage(file);
 
                     Log.d(TAG, "onActivityResult: +相机");
                     break;
@@ -155,27 +173,25 @@ public class EditActivity extends Activity implements IHeartView<HeartBean>, Vie
                     if (file!=null){
                         updatePresenter.postAvatar(sp.getString("LoginToken",""),file, AvatarBean.class);
                     }
-//                    cutImage(file3);
 
                     Log.d(TAG, "onActivityResult: +相册");
                     break;
-
-
-//                case CROP_SMALL_PICTURE:
-//                    if (data != null) {
-//                        setImageToView(data); // 让刚才选择裁剪得到的图片显示在界面上
-//
-//                        if (file!=null){
-//                            updatePresenter.postAvatar(sp.getString("LoginToken",""),file, AvatarBean.class);
-//                        }
-//                    }
-//                    break;
-
             }
         }
 
     }
 
+    private Bitmap drawableToBitamp(Drawable drawable) {
+        int w = drawable.getIntrinsicWidth();
+        int h = drawable.getIntrinsicHeight();
+        // 取drawable的颜色格式
+        Bitmap.Config config = drawable.getOpacity() != PixelFormat.OPAQUE ?Bitmap.Config.ARGB_8888:Bitmap.Config.RGB_565;
+        Bitmap bitmap = Bitmap.createBitmap(w,h,config);
+        Canvas canvas = new Canvas(bitmap);// 建立对应bitmap的画布
+        drawable.setBounds(0, 0, w, h);
+        drawable.draw(canvas);// 把drawable内容画到画布中
+        return bitmap;
+    }
 
     @Override
     public void onError(Throwable t) {
@@ -277,40 +293,6 @@ public class EditActivity extends Activity implements IHeartView<HeartBean>, Vie
         String img_path = actualimagecursor.getString(actual_image_column_index);
         return new File(img_path);
     }
-//    /**
-//     * 裁剪图片方法实现
-//     */
-//    protected void cutImage(File file2) {
-//        if (file2 == null) {
-//            Log.i("alanjet", "The uri is not exist.");
-//        }
-//        file = file2;
-//        Intent intent = new Intent("com.android.camera.action.CROP");
-//        //com.android.camera.action.CROP这个action是用来裁剪图片用的
-//        intent.setDataAndType(Uri.fromFile(file2), "image/*");
-//        // 设置裁剪
-//        intent.putExtra("crop", "true");
-//        // aspectX aspectY 是宽高的比例
-//        intent.putExtra("aspectX", 1);
-//        intent.putExtra("aspectY", 1);
-//        // outputX outputY 是裁剪图片宽高
-//        intent.putExtra("outputX", 150);
-//        intent.putExtra("outputY", 150);
-//        intent.putExtra("return-data", true);
-//        startActivityForResult(intent, CROP_SMALL_PICTURE);
-//    }
-//
-//    /**
-//     * 保存裁剪之后的图片数据
-//     */
-//    protected void setImageToView(Intent data) {
-//        Bundle extras = data.getExtras();
-//        if (extras != null) {
-//            mBitmap = (Bitmap) extras.get("data");
-//            //显示图片
-//            edit_circle_head.setImageBitmap(mBitmap);
-//        }
-//    }
 
 
     private void initListener() {
@@ -339,6 +321,7 @@ public class EditActivity extends Activity implements IHeartView<HeartBean>, Vie
         map.put("token",sp.getString("LoginToken",""));
         heartPresenter.getHeart(map,HeartBean.class);
 
+        edit_textView_id.setText(sp.getString("FullnameMain",""));
 
         String s = Constant.BASE_PIC_URL + sp.getString("AvatarMain", "");
         Glide.with(this)
@@ -363,7 +346,13 @@ public class EditActivity extends Activity implements IHeartView<HeartBean>, Vie
         if (heartBean.getStatus()==1){
             IsUtils.showShort(this,TAG+"请求成功");
             edit_textView_nick.setText(heartBean.getBody().getNick());
-            edit_textView_id.setText(heartBean.getBody().getFullname());
+            String s2 = Constant.BASE_PIC_URL + heartBean.getBody().getAvatar()+"";
+            Glide.with(this)
+                    .load(s2)
+                    .placeholder(R.mipmap.bg9)
+                    .error(R.mipmap.bg9)
+                    .into(edit_circle_head);
+
         }else {
             IsUtils.showShort(this,TAG+"请求失败");
         }

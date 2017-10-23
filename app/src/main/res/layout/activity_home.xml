@@ -42,13 +42,13 @@
             />
     </RelativeLayout>
 
-    <ListView
+    <com.miku.ktv.miku_android.view.custom.RefreshListView
         android:id="@+id/Home_lv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/Home_RelativeLayout"
         android:minHeight="100dp"
         >
-    </ListView>
+    </com.miku.ktv.miku_android.view.custom.RefreshListView>
 
 </RelativeLayout>

@@ -104,12 +104,12 @@ public class RegisterCheckActivity extends Activity implements IRegisterCheckVie
             }
         }
         if (TextUtils.isEmpty(rc_edit1.getText().toString())
-          &&TextUtils.isEmpty(rc_edit2.getText().toString())
-          &&TextUtils.isEmpty(rc_edit3.getText().toString())
-          &&TextUtils.isEmpty(rc_edit4.getText().toString())
-          &&TextUtils.isEmpty(rc_edit5.getText().toString())
-          &&TextUtils.isEmpty(rc_edit6.getText().toString())
-          ){
+                &&TextUtils.isEmpty(rc_edit2.getText().toString())
+                &&TextUtils.isEmpty(rc_edit3.getText().toString())
+                &&TextUtils.isEmpty(rc_edit4.getText().toString())
+                &&TextUtils.isEmpty(rc_edit5.getText().toString())
+                &&TextUtils.isEmpty(rc_edit6.getText().toString())
+                ){
             rc_codeError.setVisibility(View.GONE);
         }
     }

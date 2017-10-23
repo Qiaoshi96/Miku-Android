@@ -38,7 +38,7 @@ public class Constant {
     public static String getSign() {
 
         //得到sign
-        String sign = MD5Util.getStringMD5(getTime()+Constant.SECRET);
+        String sign = Md5Util.getStringMD5(getTime()+Constant.SECRET);
 
         Log.d(TAG, "sign是: "+sign);
         return sign;

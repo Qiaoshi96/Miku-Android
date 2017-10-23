@@ -3,11 +3,10 @@ package com.miku.ktv.miku_android.model.bean;
 import java.util.List;
 
 /**
- * Created by 焦帆 on 2017/10/9.
+ * Created by 焦帆 on 2017/10/23.
  */
 
 public class JoinRoomBean {
-
     /**
      * body : {"count":2,"participants":[{"phone":"13888888888","headline":"123","sex":1,"nick":"test-1","create_time":1502986423,"room_id":343,"modify_time":1507222862,"online":true,"fullname":"1000","id":124,"friend":4,"avatar":"/s/image/upload/150302693999avatar.jpg"},{"phone":"13888888885","headline":"test","sex":2,"nick":"test-5","create_time":1506075640,"room_id":343,"modify_time":1507551598,"online":true,"fullname":"425029","id":148,"friend":4,"avatar":"/s/image/upload/150607673745avatar.jpg"}]}
      * status : 1

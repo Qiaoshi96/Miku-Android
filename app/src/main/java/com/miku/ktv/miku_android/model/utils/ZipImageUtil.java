@@ -7,7 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
- * Created by 焦帆 on 2017/9/26.
+ * Created by 焦帆 on 2017/10/23.
  */
 
 public class ZipImageUtil {

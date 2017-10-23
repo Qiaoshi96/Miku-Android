@@ -3,10 +3,11 @@ package com.miku.ktv.miku_android.model.utils;
 import java.security.MessageDigest;
 
 /**
- * Created by 焦帆 on 2017/9/22.
+ * Created by 焦帆 on 2017/10/23.
  */
 
-class MD5Util {
+public class Md5Util {
+
     private static char hexDigits[] = { '0', '1', '2', '3', '4', '5', '6', '7',
             '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
     public static String getBytesMD5(byte[] bytes) {
@@ -45,4 +46,5 @@ class MD5Util {
     public final static String getStringMD5(String s) {
         return getBytesMD5(s.getBytes());
     }
+
 }

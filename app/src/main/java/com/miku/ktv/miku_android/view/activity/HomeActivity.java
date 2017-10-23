@@ -3,7 +3,6 @@ package com.miku.ktv.miku_android.view.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -14,7 +13,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.miku.ktv.miku_android.R;
@@ -24,7 +22,9 @@ import com.miku.ktv.miku_android.model.bean.RoomsBean;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
 import com.miku.ktv.miku_android.presenter.CreateRoomPresenter;
 import com.miku.ktv.miku_android.view.adapter.RoomsAdapter;
+import com.miku.ktv.miku_android.view.custom.RefreshListView;
 import com.miku.ktv.miku_android.view.iview.IJoinRoomView;
+import com.miku.ktv.miku_android.view.iview.OnRefreshListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,10 +32,10 @@ import java.util.List;
 
 import static com.miku.ktv.miku_android.model.utils.Constant.gson;
 
-public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,JoinRoomBean,CreateBean>,View.OnClickListener {
+public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,JoinRoomBean,CreateBean>,View.OnClickListener, OnRefreshListener {
     public static final String TAG="HomeActivity";
 
-    private ListView home_lv;
+    private RefreshListView home_lv;
     private ImageView home_imageView_menu;
     private ImageView home_imageView_add;
     private TextView dialog_textView_cancel;
@@ -70,15 +70,6 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
         roomPresenter.attach(this);
     }
 
-    private void initState() {
-        if (Build.VERSION.SDK_INT >= 21) {
-            View decorView = getWindow().getDecorView();
-            int option = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
-            decorView.setSystemUiVisibility(option);
-            getWindow().setStatusBarColor(Color.TRANSPARENT);
-        }
-    }
 
     @Override
     public void onClick(View v) {
@@ -172,7 +163,7 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
     private void initData() {
         roomsAdapter = new RoomsAdapter(HomeActivity.this,list);
         home_lv.setAdapter(roomsAdapter);
-
+        home_lv.setOnRefreshListener(HomeActivity.this);
         home_lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -202,7 +193,7 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
 
 
     private void initView() {
-        home_lv = (ListView) findViewById(R.id.Home_lv);
+        home_lv = (RefreshListView) findViewById(R.id.Home_lv);
         home_imageView_menu = (ImageView) findViewById(R.id.Home_ImageView_Menu);
         home_imageView_add = (ImageView) findViewById(R.id.Home_ImageView_Add);
         Thread thread=new Thread(new Runnable() {
@@ -237,5 +228,23 @@ public class HomeActivity extends Activity implements IJoinRoomView<RoomsBean,Jo
     public void onJoinError(Throwable t) {
 
     }
+    //下拉刷新
+    @Override
+    public void onDownPullRefresh() {
+        HashMap<String,String> map=new HashMap<>();
+        map.put("token",sp.getString("LoginToken",""));
+        map.put("page","1");
+        roomPresenter.getRooms(map,RoomsBean.class);
+        home_lv.hideHeaderView();
+    }
 
+    @Override
+    public void onLoadingMore() {
+        try {
+            Thread.sleep(1000);
+            home_lv.hideFooterView();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }
