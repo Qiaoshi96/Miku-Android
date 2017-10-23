@@ -572,6 +572,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         mAccount2GridMap.remove(mAccount);
         mVideoEnabledUsers.remove(mAccount);
         AVChatManager.getInstance().setupLocalVideoRender(null, false, AVChatVideoScalingType.SCALE_ASPECT_BALANCED);
+
     }
 
     //版本协议不兼容回调
@@ -732,6 +733,11 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
     @Override
     public void onExitRoomSuccess(ExitRoomBean bean) {
         if (bean.getStatus() == 1) {
+            if (lrcLayout.isSelfSinging()) {
+                //TODO... 下麦
+                mRoomWebSocket.updateList();
+                mRoomWebSocket.stopSing();
+            }
             finish();
             IsUtils.showShort(this, "退出房间成功");
         } else {
@@ -1011,7 +1017,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
 
     @Override
     public void onUpdateList() {
-
+        //TODO...刷新歌单
     }
 
     private void showPopupWindow() {

@@ -184,6 +184,10 @@ public class LRCLayout extends RelativeLayout {
         return false;
     }
 
+    public boolean isSelfSinging() {
+        return mMusicSelfSing && mMusicSinging;
+    }
+
     public class WorkRunnable implements Runnable {
         @Override
         public void run() {
