@@ -1112,10 +1112,11 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
             popAdapter.notifyDataSetChanged();
 
             //停止播放, 需要判断是否当前歌曲
-            AVChatManager.getInstance().stopAudioMixing();
-            lrcLayout.stop();
-            mRoomWebSocket.stopSing();
-
+            if (lrcLayout.isSelfSinging()) {
+                AVChatManager.getInstance().stopAudioMixing();
+                lrcLayout.stop();
+                mRoomWebSocket.stopSing();
+            }
             // 让别人更新歌单
             mRoomWebSocket.updateList();
         }else {
