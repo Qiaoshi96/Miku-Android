@@ -72,6 +72,9 @@ public class RoomWebSocket {
                                 mCallback.onStopSing();
                             }
 
+                            if (body.getInt("type") == 5) {
+                                mCallback.onUpdateList();
+                            }
 
                         } catch (JSONException e) {
                            Log.e(TAG, "onStringAvailable", e);
@@ -134,7 +137,17 @@ public class RoomWebSocket {
     }
 
     public void updateList() {
-
+        try {
+            JSONObject body = new JSONObject();
+            body.put("type", 5);
+            body.put("userId", mAccount);
+            JSONObject data = new JSONObject();
+            data.put("room", mRoomName);
+            data.put("body", body.toString());
+            mWebSocket.send(data.toString());
+        }catch (Exception e) {
+            Log.e(TAG, "stopSing", e);
+        }
     }
 
     public interface RoomWebSocketMsgInterface {
