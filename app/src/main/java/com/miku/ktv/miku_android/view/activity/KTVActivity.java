@@ -385,6 +385,8 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         mFetchRoomInfoPresenter.fetchRoomInfo(mRoomName, map, JoinRoomBean.class);
     }
 
+
+
     /**
      * 点歌
      */
@@ -705,7 +707,6 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
     public void onAudioMixingEvent(int event) {
         //Log.e(TAG, "onAudioMixingEvent: " + event);
     }
-
 
     //实时统计信息汇报
     @Override

@@ -1,7 +1,6 @@
 package com.miku.ktv.miku_android.main;
 
 import android.util.Log;
-import android.widget.Toast;
 
 import com.koushikdutta.async.http.AsyncHttpClient;
 import com.koushikdutta.async.http.WebSocket;
@@ -110,7 +109,6 @@ public class RoomWebSocket {
         data.put("room", mRoomName);
         data.put("body", body.toString());
         mWebSocket.send(data.toString());
-
     }
 
     public interface RoomWebSocketMsgInterface {
