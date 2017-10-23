@@ -145,7 +145,9 @@ public class LRCLayout extends RelativeLayout {
             mMusicInfo = musicInfo;
             mMusicStartTime = startTimestamp;
             mMusicDuratioin = duration;
-            checkStartTime = startTimestamp;
+            if (isSelfSing) {
+                checkStartTime = startTimestamp;
+            }
 
             mMusicLineIndex = 0;
             mMusicSliceIndex = 0;
@@ -177,6 +179,7 @@ public class LRCLayout extends RelativeLayout {
         if (startTime == checkStartTime) {
             return true;
         }
+        Log.e(TAG, "check++" + startTime + ", " + checkStartTime);
         checkStartTime = startTime;
         return false;
     }
@@ -344,7 +347,6 @@ public class LRCLayout extends RelativeLayout {
             }
 
             int remainTime = (int) (mMusicDuratioin - System.currentTimeMillis() + mMusicStartTime) / 1000;
-            Log.e(TAG, "11111111:" + remainTime);
             if (remainTime > 0) {
                 int sec = remainTime % 60;
                 int min = remainTime / 60;

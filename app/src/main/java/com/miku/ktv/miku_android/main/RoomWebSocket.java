@@ -59,12 +59,20 @@ public class RoomWebSocket {
                                 mCallback.onUserDisableCamera(body.getString("userId"), body.getBoolean("cameraDisable"));
                             }
                             if (body.getInt("type") == 7) {
-                                Log.e(TAG, "onStringAvailable++++++");
                                 JSONObject message = new JSONObject(body.getString("message"));
                                 long timeOver = message.getJSONObject("current_subtitle").getLong("start_time");
+                                if (message.getInt("index") == -1) {
+                                    timeOver = 0;
+                                }
                                 mCallback.onUserSing(message.getString("music_link"), message.getString("music_subtitle"), message.getString("music_info"), message.getLong("music_start_time"), timeOver);
-                                Log.e(TAG, "onStringAvailable------" + body.getInt("type"));
                             }
+
+                            Log.e(TAG, "onStringAvailable------" + body.getInt("type"));
+                            if (body.getInt("type") == 6) {
+                                mCallback.onStopSing();
+                            }
+
+
                         } catch (JSONException e) {
                            Log.e(TAG, "onStringAvailable", e);
                         }
@@ -111,11 +119,24 @@ public class RoomWebSocket {
         mWebSocket.send(data.toString());
     }
 
+    public void stopSing() {
+        try {
+            JSONObject body = new JSONObject();
+            body.put("type", 6);
+            body.put("userId", mAccount);
+            JSONObject data = new JSONObject();
+            data.put("room", mRoomName);
+            data.put("body", body.toString());
+            mWebSocket.send(data.toString());
+        }catch (Exception e) {
+            Log.e(TAG, "stopSing", e);
+        }
+    }
+
     public interface RoomWebSocketMsgInterface {
         void onUserDisableCamera(String user, boolean disable);
-
         void onUserSing(final String mp3url, final String lyricUrl, final String musicInfo, final long startTime, final long timeOver);
-
+        void onStopSing();
     }
 
 }

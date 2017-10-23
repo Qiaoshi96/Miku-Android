@@ -1003,6 +1003,12 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
 
     }
 
+    @Override
+    public void onStopSing() {
+        Log.e(TAG, "onStopSing");
+        lrcLayout.stop();
+    }
+
     private void showPopupWindow() {
         View view = View.inflate(this, R.layout.ktv_pop, null);
 
@@ -1096,6 +1102,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
             //停止播放
             AVChatManager.getInstance().stopAudioMixing();
             lrcLayout.stop();
+            mRoomWebSocket.stopSing();
         }else {
             refreshLVPop.setAdapter(popAdapter);
             popAdapter.notifyDataSetChanged();
