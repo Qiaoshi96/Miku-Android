@@ -733,9 +733,9 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
     @Override
     public void onExitRoomSuccess(ExitRoomBean bean) {
         if (bean.getStatus() == 1) {
+            //TODO... 下麦
+            mRoomWebSocket.updateList();
             if (lrcLayout.isSelfSinging()) {
-                //TODO... 下麦
-                mRoomWebSocket.updateList();
                 mRoomWebSocket.stopSing();
             }
             finish();
