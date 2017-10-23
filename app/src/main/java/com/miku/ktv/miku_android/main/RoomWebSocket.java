@@ -133,10 +133,15 @@ public class RoomWebSocket {
         }
     }
 
+    public void updateList() {
+
+    }
+
     public interface RoomWebSocketMsgInterface {
         void onUserDisableCamera(String user, boolean disable);
         void onUserSing(final String mp3url, final String lyricUrl, final String musicInfo, final long startTime, final long timeOver);
         void onStopSing();
+        void onUpdateList();
     }
 
 }
