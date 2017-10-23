@@ -1009,6 +1009,11 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         lrcLayout.stop();
     }
 
+    @Override
+    public void onUpdateList() {
+
+    }
+
     private void showPopupWindow() {
         View view = View.inflate(this, R.layout.ktv_pop, null);
 
