@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -24,6 +25,7 @@ import com.miku.ktv.miku_android.model.bean.AddListBean;
 import com.miku.ktv.miku_android.model.bean.DeleteBean;
 import com.miku.ktv.miku_android.model.bean.HistroyBean;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
+import com.miku.ktv.miku_android.model.utils.MyHelper;
 import com.miku.ktv.miku_android.presenter.AddPresenter;
 import com.miku.ktv.miku_android.view.adapter.HistroyAdapter;
 import com.miku.ktv.miku_android.view.custom.RefreshListView;
@@ -57,6 +59,8 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
     private TextView dialogGiveupTV;
     private TextView dialogNowTV;
     private AlertDialog builder;
+    private MyHelper myHelper;
+    private SQLiteDatabase db;
 
     @Nullable
     @Override
@@ -64,6 +68,8 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
         mContext=getActivity();
         sp = getActivity().getSharedPreferences("config", MODE_PRIVATE);
         edit = sp.edit();
+        myHelper = new MyHelper(getActivity());
+        db = myHelper.getWritableDatabase();
         addPresenter=new AddPresenter();
         addPresenter.attach(HistroyFragment.this);
         initView();
@@ -76,6 +82,9 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
                 Log.d(TAG, "setData: "+list.get(x).getName());
                 Log.d(TAG, "setData: "+list.get(x).getLink());
                 listAll.addAll(list);
+
+//                Cursor cursor=db.query("");
+
                 adapter = new HistroyAdapter(mContext,listAll);
                 refreshLVHistroy.setAdapter(adapter);
                 refreshLVHistroy.setOnRefreshListener(this);

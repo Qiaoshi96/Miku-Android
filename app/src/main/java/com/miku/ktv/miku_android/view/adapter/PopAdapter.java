@@ -1,6 +1,7 @@
 package com.miku.ktv.miku_android.view.adapter;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,8 @@ import java.util.List;
 
 public class PopAdapter extends BaseAdapter {
     public static final String TAG="PopAdapter";
+    private SharedPreferences sp;
+    private SharedPreferences.Editor editor;
 
     private Context context;
     private List<AddListBean.BodyBean.SingerListBean> list=new ArrayList<>();
@@ -26,6 +29,10 @@ public class PopAdapter extends BaseAdapter {
 
 
     public PopAdapter(Context context, List<AddListBean.BodyBean.SingerListBean> list) {
+
+        sp = context.getSharedPreferences("config", context.MODE_PRIVATE);
+        editor = sp.edit();
+
         this.context = context;
         this.list = list;
     }
@@ -68,6 +75,12 @@ public class PopAdapter extends BaseAdapter {
         holder.musicTV.setText(bean.getSong().getName());
         holder.singerTV.setText(bean.getSong().getAuthor());
         holder.nickTV.setText(bean.getCreator().getNick());
+        String fullnameMain = sp.getString("FullnameMain", "");
+        if (bean.getCreator().getFullname().equals(fullnameMain)) {
+            holder.deleteTV.setText("删除");
+        }else {
+            holder.deleteTV.setVisibility(View.GONE);
+        }
 
         Log.d(TAG, "getView: "+bean.getSong().getName());
         Log.d(TAG, "getView: "+bean.getSong().getAuthor());
@@ -77,7 +90,7 @@ public class PopAdapter extends BaseAdapter {
     }
 
 
-    public  interface  MyClickListener {
+    public interface MyClickListener {
         void onItemDeleteClick(BaseAdapter adapter, View view, int position);
     }
     private MyClickListener mListener;

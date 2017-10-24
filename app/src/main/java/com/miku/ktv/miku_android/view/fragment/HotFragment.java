@@ -1,9 +1,11 @@
 package com.miku.ktv.miku_android.view.fragment;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -31,6 +33,7 @@ import com.miku.ktv.miku_android.model.bean.HistroyBean;
 import com.miku.ktv.miku_android.model.bean.SongsListBean;
 import com.miku.ktv.miku_android.model.utils.Constant;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
+import com.miku.ktv.miku_android.model.utils.MyHelper;
 import com.miku.ktv.miku_android.presenter.AddPresenter;
 import com.miku.ktv.miku_android.view.adapter.MySongsListAdapter;
 import com.miku.ktv.miku_android.view.custom.RefreshListView;
@@ -102,6 +105,10 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
     private TextView dialogGiveupTV;
     private TextView dialogNowTV;
     private AlertDialog builder;
+    //true表示已经排麦，false表示缓冲
+    public static boolean ISPAIMAI=false;
+    private MyHelper myHelper;
+    private SQLiteDatabase db;
 
     @Nullable
     @Override
@@ -109,6 +116,8 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
         mContext = getActivity();
         sp = mContext.getSharedPreferences("config", MODE_PRIVATE);
         edit = sp.edit();
+        myHelper = new MyHelper(getActivity());
+        db = myHelper.getWritableDatabase();
         //视图初始化
         initView();
         return inflateView;
@@ -285,66 +294,77 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
 
                     @Override
                     public void onFinish(File file) {
-                        downTV.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                downTV.setVisibility(View.GONE);
-                                paimaiTV.setVisibility(View.VISIBLE);
+                            downTV.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    downTV.setVisibility(View.GONE);
+                                    paimaiTV.setVisibility(View.VISIBLE);
+                                    //添加到数据库中
+                                    ContentValues cv=new ContentValues();
+                                    cv.put("_id", songsListAll.get(position).getId());
+                                    cv.put("songname", songsListAll.get(position).getName());
+                                    cv.put("author", songsListAll.get(position).getAuthor());
+                                    cv.put("link", songsListAll.get(position).getLink());
+                                    cv.put("lrc", songsListAll.get(position).getLrc());
+                                    cv.put("mode", 1);
+                                    db.insert("songs_table", null, cv);
+                                    db.close();
+                                    Log.i(TAG, "ContentValues: "+cv.toString());
 
-                                paimaiTV.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        IsUtils.showShort(mContext,"点了排麦"+ position);
-                                        edit.putString("musicname", songsListAll.get(position).getName());
-                                        edit.putString("musiclink", songsListAll.get(position).getLink());
-                                        edit.putString("singer", songsListAll.get(position).getAuthor());
-                                        edit.putString("lyric", songsListAll.get(position).getLrc());
-                                        String name = System.currentTimeMillis() + "";
-                                        MessageDigest md5 = null;
-                                        try {
-                                            md5 = MessageDigest.getInstance("MD5");
-                                            name = new String(md5.digest(songsListAll.get(position).getLrc().getBytes()));
-                                        } catch (NoSuchAlgorithmException e) {
-                                            e.printStackTrace();
+                                    paimaiTV.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+
+                                            IsUtils.showShort(mContext,"点了排麦"+ position);
+                                            edit.putString("musicname", songsListAll.get(position).getName());
+                                            edit.putString("musiclink", songsListAll.get(position).getLink());
+                                            edit.putString("singer", songsListAll.get(position).getAuthor());
+                                            edit.putString("lyric", songsListAll.get(position).getLrc());
+                                            String name = System.currentTimeMillis() + "";
+                                            MessageDigest md5 = null;
+                                            try {
+                                                md5 = MessageDigest.getInstance("MD5");
+                                                name = new String(md5.digest(songsListAll.get(position).getLrc().getBytes()));
+                                            } catch (NoSuchAlgorithmException e) {
+                                                e.printStackTrace();
+                                            }
+
+                                            edit.putString("mp3Location", Environment.getExternalStorageDirectory() + "/MiDoDownUtil/" +  name + ".mp3");
+                                            edit.putString("lyricLocation", Environment.getExternalStorageDirectory() + "/MiDoDownUtil/" + name + songsListAll.get(position).getLrc().substring(songsListAll.get(position).getLrc().lastIndexOf(".")));
+                                            edit.commit();
+                                            Log.d(TAG, "歌名为："+songsListAll.get(position).getName());
+
+                                            HashMap<String,String> map=new HashMap<>();
+                                            map.put("token",sp.getString("LoginToken",""));
+                                            map.put("sid",songsListAll.get(position).getId()+"");
+                                            Log.d(TAG, "歌曲ID:  "+songsListAll.get(position).getId()+"");
+                                            Log.d(TAG, "登录的token:  "+sp.getString("LoginToken",""));
+                                            Log.d(TAG, "roomId:  "+sp.getString("JFmRoomName",""));
+                                            addPresenter.postAdd(sp.getString("JFmRoomName",""), map, AddBean.class);
                                         }
-
-                                        edit.putString("mp3Location", Environment.getExternalStorageDirectory() + "/MiDoDownUtil/" +  name + ".mp3");
-                                        edit.putString("lyricLocation", Environment.getExternalStorageDirectory() + "/MiDoDownUtil/" + name + songsListAll.get(position).getLrc().substring(songsListAll.get(position).getLrc().lastIndexOf(".")));
-                                        edit.commit();
-                                        Log.d(TAG, "歌名为："+songsListAll.get(position).getName());
-
-                                        HashMap<String,String> map=new HashMap<>();
-                                        map.put("token",sp.getString("LoginToken",""));
-                                        map.put("sid",songsListAll.get(position).getId()+"");
-                                        Log.d(TAG, "歌曲ID:  "+songsListAll.get(position).getId()+"");
-                                        Log.d(TAG, "登录的token:  "+sp.getString("LoginToken",""));
-                                        Log.d(TAG, "roomId:  "+sp.getString("JFmRoomName",""));
-                                        addPresenter.postAdd(sp.getString("JFmRoomName",""), map, AddBean.class);
-                                    }
-                                });
-                            }
-                        });
-                        Log.d(TAG, "downLoadMp3---onFinish: ");
-
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                ArrayList<HistroyBean> list = new ArrayList<>();
-                                HistroyBean histroyBean = new HistroyBean();
-                                histroyBean.setId(songsListAll.get(position).getId());
-                                histroyBean.setName(songsListAll.get(position).getName());
-                                histroyBean.setAuthor(songsListAll.get(position).getAuthor());
-                                histroyBean.setLrc(songsListAll.get(position).getLrc());
-                                histroyBean.setOriginal(songsListAll.get(position).getOriginal());
-                                histroyBean.setLink(songsListAll.get(position).getLink());
-                                list.add(histroyBean);
-
-                                if (mListener != null) {
-                                    mListener.dataTransmission(list);
+                                    });
                                 }
-                            }
-                        });
+                            });
+                            Log.d(TAG, "downLoadMp3---onFinish: ");
 
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ArrayList<HistroyBean> list = new ArrayList<>();
+                                    HistroyBean histroyBean = new HistroyBean();
+                                    histroyBean.setId(songsListAll.get(position).getId());
+                                    histroyBean.setName(songsListAll.get(position).getName());
+                                    histroyBean.setAuthor(songsListAll.get(position).getAuthor());
+                                    histroyBean.setLrc(songsListAll.get(position).getLrc());
+                                    histroyBean.setOriginal(songsListAll.get(position).getOriginal());
+                                    histroyBean.setLink(songsListAll.get(position).getLink());
+                                    list.add(histroyBean);
+
+                                    if (mListener != null) {
+                                        mListener.dataTransmission(list);
+                                    }
+                                }
+                            });
                     }
 
                     @Override

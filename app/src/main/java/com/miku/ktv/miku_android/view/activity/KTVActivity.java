@@ -211,6 +211,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
     private TextView cancelTV;
     private RelativeLayout controVideo;
     private TextView nick;
+    private TextView deleteTV;
 
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -734,6 +735,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
     public void onExitRoomSuccess(ExitRoomBean bean) {
         if (bean.getStatus() == 1) {
             //TODO... 下麦
+
             mRoomWebSocket.updateList();
             if (lrcLayout.isSelfSinging()) {
                 mRoomWebSocket.stopSing();
@@ -1018,6 +1020,10 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
     @Override
     public void onUpdateList() {
         //TODO...刷新歌单
+        Log.i(TAG, "onUpdateList: ");
+        HashMap<String, String> map = new HashMap<>();
+        map.put("page", "1");
+        addPresenter.getAddList(sp.getString("JFmRoomName",""), map, AddListBean.class);
     }
 
     private void showPopupWindow() {
@@ -1041,33 +1047,26 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         addPresenter.getAddList(sp.getString("JFmRoomName",""), map, AddListBean.class);
     }
 
-    @Override
-    public void onAddListSuccess(AddListBean bean) {
-        if (bean.getStatus() == 1) {
-            String addListJson = gson.toJson(bean);
-            addListBean1 = gson.fromJson(addListJson, AddListBean.class);
-            addList = addListBean1.getBody().getSinger_list();
-            if (addList == null) {
-                Log.d(TAG, "addList为空，size为: " + addList.size());
-            } else {
-                Log.d(TAG, "onAddListSuccess: " + addList.size());
-                initData();
+        @Override
+        public void onAddListSuccess(AddListBean bean) {
+            if (bean.getStatus() == 1) {
+                String addListJson = gson.toJson(bean);
+                addListBean1 = gson.fromJson(addListJson, AddListBean.class);
+                addList = addListBean1.getBody().getSinger_list();
+                if (addList == null) {
+                    Log.d(TAG, "addList为空，size为: " + addList.size());
+                } else {
+                    Log.d(TAG, "onAddListSuccess: " + addList.size());
+                    //设置适配器
+                    initData();
+                }
+                Log.d(TAG, "onAddListSuccess: " + bean.getMsg());
             }
-            Log.d(TAG, "onAddListSuccess: " + bean.getMsg());
-        }
-    }
-
-    @Override
-    public void onAddListError(Throwable throwable) {
-        Log.d(TAG, "onAddListError: " + throwable.getMessage());
     }
 
     private void initData() {
         popAdapter = new PopAdapter(this, addList);
         refreshLVPop.setAdapter(popAdapter);
-        //当前列表内的歌曲数量
-//        paimaiCount.setText(refreshLVPop.getCount()+"");
-        //item的子控件
         popAdapter.setOnItemDeleteClickListener(new PopAdapter.MyClickListener() {
             @Override
             public void onItemDeleteClick(BaseAdapter adapter, View view, final int position) {
@@ -1102,8 +1101,13 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
             }
 
         });
-
     }
+
+    @Override
+    public void onAddListError(Throwable throwable) {
+        Log.d(TAG, "onAddListError: " + throwable.getMessage());
+    }
+
     //删除歌曲
     @Override
     public void onDeleteSuccess(DeleteBean bean) {
@@ -1121,7 +1125,6 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
             mRoomWebSocket.updateList();
         }else {
             refreshLVPop.setAdapter(popAdapter);
-            popAdapter.notifyDataSetChanged();
             IsUtils.showShort(this,"删除失败");
         }
     }

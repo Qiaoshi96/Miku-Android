@@ -14,7 +14,7 @@ public class BasePresenter<T> {
         this.t=t;
     }
 
-//    public IBaseView getIBaseView() {
+    //    public IBaseView getIBaseView() {
     public T getIBaseView() {
         return t;
     }

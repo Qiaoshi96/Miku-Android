@@ -122,8 +122,16 @@ public class SearchActivity extends Activity implements ISearchView<SearchBean>,
     private void setMySearchAdapter() {
         adapter = new MySearchAdapter(this,searchListAll);
         refreshLVSearch.setAdapter(adapter);
+        adapter.setOnSearchItemListener(itemListener);
         refreshLVSearch.setOnRefreshListener(this);
     }
+    //缓冲和排麦点击事件
+    MySearchAdapter.onSearchItemListener itemListener=new MySearchAdapter.onSearchItemListener() {
+        @Override
+        public void onSearchItemClick(int i) {
+
+        }
+    };
 
     @Override
     public void onError(Throwable t) {

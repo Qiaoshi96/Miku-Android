@@ -46,7 +46,7 @@ public class MySearchAdapter extends BaseAdapter {
 
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         if (map.get(position)==null){
             convertView = View.inflate(context, R.layout.activity_search_item, null);
             holder=new ViewHolder();
@@ -67,7 +67,29 @@ public class MySearchAdapter extends BaseAdapter {
         holder.musicTV.setText(bean.getName());
         holder.singerTV.setText(bean.getAuthor());
 
+        //设置按钮点击事件
+        holder.downTV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mOnSearchItemListener.onSearchItemClick(position);
+            }
+        });
+        holder.paimaiTV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mOnSearchItemListener.onSearchItemClick(position);
+            }
+        });
+
         return convertView;
+    }
+
+    public interface onSearchItemListener {
+        void onSearchItemClick(int i);
+    }
+    private onSearchItemListener mOnSearchItemListener;
+    public void setOnSearchItemListener(onSearchItemListener mOnSearchItemListener) {
+        this.mOnSearchItemListener = mOnSearchItemListener;
     }
 
     class ViewHolder{
