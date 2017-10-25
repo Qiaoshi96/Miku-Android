@@ -36,6 +36,7 @@ import android.widget.Toast;
 
 import com.miku.ktv.miku_android.R;
 import com.miku.ktv.miku_android.main.AvatarImageFetchRunnable;
+import com.miku.ktv.miku_android.main.GlobalInstance;
 import com.miku.ktv.miku_android.main.RoomWebSocket;
 import com.miku.ktv.miku_android.model.bean.AddListBean;
 import com.miku.ktv.miku_android.model.bean.DeleteBean;
@@ -253,6 +254,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         mRoomWebSocket.joinRoom();
         lrcLayout.init(mRoomWebSocket);
 
+        GlobalInstance.getInstance().setKTVActivity(this);
         startAVChat();
     }
 
@@ -725,6 +727,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        GlobalInstance.getInstance().setKTVActivity(null);
         stopAVChat();
         mRoomWebSocket.leaveRoom();
         lrcLayout.destroy();
