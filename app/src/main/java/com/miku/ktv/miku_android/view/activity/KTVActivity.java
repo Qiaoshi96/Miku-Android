@@ -1134,4 +1134,8 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         Log.d(TAG, "onDeleteError: " + throwable.getMessage());
     }
 
+
+    private boolean isSomeOneSing() {
+        return lrcLayout.isSing();
+    }
 }

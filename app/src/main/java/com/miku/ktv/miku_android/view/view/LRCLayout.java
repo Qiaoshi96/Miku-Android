@@ -188,6 +188,11 @@ public class LRCLayout extends RelativeLayout {
         return mMusicSelfSing && mMusicSinging;
     }
 
+    public boolean isSing() {
+        int remainTime = (int) (mMusicDuratioin - System.currentTimeMillis() + mMusicStartTime) / 1000;
+        return remainTime > -30;
+    }
+
     public class WorkRunnable implements Runnable {
         @Override
         public void run() {
