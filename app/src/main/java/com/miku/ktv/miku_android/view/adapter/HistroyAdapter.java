@@ -7,7 +7,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.miku.ktv.miku_android.R;
-import com.miku.ktv.miku_android.model.bean.HistroyBean;
+import com.miku.ktv.miku_android.model.bean.HistorySQLBean;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,23 +21,23 @@ public class HistroyAdapter extends BaseAdapter {
     public static final String TAG="HistroyAdapter";
 
     private Context context;
-    private List<HistroyBean> histroyList=new ArrayList<>();
+    private List<HistorySQLBean> histroySQLList=new ArrayList<>();
     ViewHolder holder=null;
     HashMap<Integer,View> map=new HashMap<>();
 
-    public HistroyAdapter(Context context, List<HistroyBean> histroyList) {
+    public HistroyAdapter(Context context, List<HistorySQLBean> histroySQLList) {
         this.context = context;
-        this.histroyList = histroyList;
+        this.histroySQLList = histroySQLList;
     }
 
     @Override
     public int getCount() {
-        return histroyList.size();
+        return histroySQLList.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return histroyList.get(position);
+        return histroySQLList.get(position);
     }
 
     @Override
@@ -62,11 +62,11 @@ public class HistroyAdapter extends BaseAdapter {
 
             holder= (ViewHolder) convertView.getTag();
         }
+        
         holder.paimaiTV.setTag(position);
-        HistroyBean bean = histroyList.get(position);
-        holder.musicTV.setText(bean.getName());
-        holder.singerTV.setText(bean.getAuthor());
-
+        HistorySQLBean sqlBean = histroySQLList.get(position);
+        holder.musicTV.setText(sqlBean.getSongname());
+        holder.singerTV.setText(sqlBean.getAuthor());
 
         return convertView;
     }

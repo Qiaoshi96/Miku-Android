@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -20,10 +21,12 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.miku.ktv.miku_android.R;
+import com.miku.ktv.miku_android.main.GlobalInstance;
 import com.miku.ktv.miku_android.model.bean.AddBean;
 import com.miku.ktv.miku_android.model.bean.AddListBean;
 import com.miku.ktv.miku_android.model.bean.DeleteBean;
-import com.miku.ktv.miku_android.model.bean.HistroyBean;
+import com.miku.ktv.miku_android.model.bean.HistorySQLBean;
+import com.miku.ktv.miku_android.model.utils.DbManager;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
 import com.miku.ktv.miku_android.model.utils.MyHelper;
 import com.miku.ktv.miku_android.presenter.AddPresenter;
@@ -50,7 +53,7 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
     private RefreshListView refreshLVHistroy;
     private Context mContext;
     private HistroyAdapter adapter;
-    private ArrayList<HistroyBean> listAll=new ArrayList<>();
+    private ArrayList<HistorySQLBean> sqlList=new ArrayList<>();
     private SharedPreferences sp;
     private SharedPreferences.Editor edit;
     private AddPresenter addPresenter;
@@ -61,6 +64,13 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
     private AlertDialog builder;
     private MyHelper myHelper;
     private SQLiteDatabase db;
+    //Fragment的View加载完毕的标记
+    private boolean isViewCreated;
+
+    //Fragment对用户可见的标记
+    private boolean isUIVisible;
+    private Cursor cursor;
+    private boolean isSomeOneSing;
 
     @Nullable
     @Override
@@ -68,65 +78,102 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
         mContext=getActivity();
         sp = getActivity().getSharedPreferences("config", MODE_PRIVATE);
         edit = sp.edit();
-        myHelper = new MyHelper(getActivity());
-        db = myHelper.getWritableDatabase();
+        db = DbManager.getInstance().openDatabase();
         addPresenter=new AddPresenter();
         addPresenter.attach(HistroyFragment.this);
         initView();
         return inflateView;
     }
 
-    public void setData(ArrayList<HistroyBean> list) {
-        for(int x=0; x< list.size(); x++){
-            if (list.size() >0 && list != null) {
-                Log.d(TAG, "setData: "+list.get(x).getName());
-                Log.d(TAG, "setData: "+list.get(x).getLink());
-                listAll.addAll(list);
-
-//                Cursor cursor=db.query("");
-
-                adapter = new HistroyAdapter(mContext,listAll);
-                refreshLVHistroy.setAdapter(adapter);
-                refreshLVHistroy.setOnRefreshListener(this);
-                adapter.setOnPaimaiClickListener(new HistroyAdapter.MyPaimaiClickListener() {
-                    @Override
-                    public void onPaimaiClick(BaseAdapter adapter, View view, int position) {
-                        IsUtils.showShort(getActivity(),"点了排麦");
-
-                        edit.putString("musicname",listAll.get(position).getName());
-                        edit.putString("musiclink", listAll.get(position).getLink());
-                        edit.putString("singer", listAll.get(position).getAuthor());
-                        edit.putString("lyric", listAll.get(position).getLrc());
-                        edit.commit();
-
-                        String name = System.currentTimeMillis() + "";
-                        MessageDigest md5 = null;
-                        try {
-                            md5 = MessageDigest.getInstance("MD5");
-                            name = new String(md5.digest(listAll.get(position).getLrc().getBytes()));
-                        } catch (NoSuchAlgorithmException e) {
-                            e.printStackTrace();
-                        }
-
-                        edit.putString("mp3Location", Environment.getExternalStorageDirectory() + "/MiDoDownUtil/" +  name + ".mp3");
-                        edit.putString("lyricLocation", Environment.getExternalStorageDirectory() + "/MiDoDownUtil/" + name + listAll.get(position).getLrc().substring(listAll.get(position).getLrc().lastIndexOf(".")));
-                        edit.commit();
-                        Log.d(TAG, "歌名为："+listAll.get(position).getName());
-
-                        HashMap<String,String> map=new HashMap<>();
-                        map.put("token",sp.getString("LoginToken",""));
-                        map.put("sid",listAll.get(position).getId()+"");
-                        Log.d(TAG, "歌曲ID:  "+listAll.get(position).getId()+"");
-                        Log.d(TAG, "登录的token:  "+sp.getString("LoginToken",""));
-                        Log.d(TAG, "roomId:  "+sp.getString("JFmRoomName",""));
-                        addPresenter.postAdd(sp.getString("JFmRoomName",""), map, AddBean.class);
-                    }
-                });
-            }else {
-                Log.d(TAG, "setData: + list为空");
-            }
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        isViewCreated=true;
+        lazyLoad();
+    }
+    //实现懒加载
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            isUIVisible = true;
+            lazyLoad();
+        } else {
+            isUIVisible = false;
         }
+    }
 
+    private void lazyLoad() {
+        //这里进行双重标记判断,是因为setUserVisibleHint会多次回调,并且会在onCreateView执行前回调
+        // ,必须确保onCreateView加载完毕且页面可见,才加载数据
+        if (isViewCreated && isUIVisible) {
+            loadData();
+            //数据加载完毕,恢复标记,防止重复加载
+            isViewCreated = false;
+            isUIVisible = false;
+        }
+    }
+
+    private void loadData() {
+        cursor = db.query("songs_table", null, null, null, null, null, null);
+        while (cursor.moveToNext()) {
+            int songid= cursor.getInt(cursor.getColumnIndex("songid"));
+            String songName= cursor.getString(cursor.getColumnIndex("songname"));
+            String author= cursor.getString(cursor.getColumnIndex("author"));
+            String link= cursor.getString(cursor.getColumnIndex("link"));
+            String lrc= cursor.getString(cursor.getColumnIndex("lrc"));
+            int mode= cursor.getInt(cursor.getColumnIndex("mode"));
+
+            Log.w(TAG, "initView: "+songid+"\n"+songName+"\n"+author+"\n"+link+"\n"+lrc+"\n"+mode);
+
+            HistorySQLBean sqlBean=new HistorySQLBean();
+            sqlBean.setSongid(songid);
+            sqlBean.setSongname(songName);
+            sqlBean.setAuthor(author);
+            sqlBean.setLink(link);
+            sqlBean.setLrc(lrc);
+            sqlBean.setMode(mode);
+            sqlList.add(sqlBean);
+        }
+        cursor.close();
+
+        adapter=new HistroyAdapter(mContext, sqlList);
+        refreshLVHistroy.setAdapter(adapter);
+        refreshLVHistroy.setOnRefreshListener(this);
+        adapter.setOnPaimaiClickListener(new HistroyAdapter.MyPaimaiClickListener() {
+            @Override
+            public void onPaimaiClick(BaseAdapter adapter, View view, int position) {
+                IsUtils.showShort(getActivity(),"点了排麦");
+                isSomeOneSing = GlobalInstance.getInstance().getKTVActivity().isSomeOneSing();
+                edit.putString("musicname",sqlList.get(position).getSongname());
+                edit.putString("musiclink", sqlList.get(position).getLink());
+                edit.putString("singer", sqlList.get(position).getAuthor());
+                edit.putString("lyric", sqlList.get(position).getLrc());
+                edit.commit();
+
+                String name = System.currentTimeMillis() + "";
+                MessageDigest md5 = null;
+                try {
+                    md5 = MessageDigest.getInstance("MD5");
+                    name = new String(md5.digest(sqlList.get(position).getLrc().getBytes()));
+                } catch (NoSuchAlgorithmException e) {
+                    e.printStackTrace();
+                }
+
+                edit.putString("mp3Location", Environment.getExternalStorageDirectory() + "/MiDoDownUtil/" +  name + ".mp3");
+                edit.putString("lyricLocation", Environment.getExternalStorageDirectory() + "/MiDoDownUtil/" + name + sqlList.get(position).getLrc().substring(sqlList.get(position).getLrc().lastIndexOf(".")));
+                edit.commit();
+                Log.d(TAG, "歌名为："+sqlList.get(position).getSongname());
+
+                HashMap<String,String> map=new HashMap<>();
+                map.put("token",sp.getString("LoginToken",""));
+                map.put("sid",sqlList.get(position).getSongid()+"");
+                Log.d(TAG, "歌曲ID:  "+sqlList.get(position).getSongid()+"");
+                Log.d(TAG, "登录的token:  "+sp.getString("LoginToken",""));
+                Log.d(TAG, "roomId:  "+sp.getString("JFmRoomName",""));
+                addPresenter.postAdd(sp.getString("JFmRoomName",""), map, AddBean.class);
+            }
+        });
     }
 
 
@@ -134,8 +181,12 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
     @Override
     public void onSuccess(AddBean addBean) {
         if (addBean.getStatus()==1){
-            //排麦成功dialog
-            showSuccessDialog();
+            if (isSomeOneSing==true) {
+                IsUtils.showShort(getActivity(),"排麦成功，请耐心等待~");
+            }else {
+                //排麦成功dialog
+                showSuccessDialog();
+            }
             Log.d(TAG, "onSuccess: "+addBean.getMsg());
         }else {
             //排麦重复
@@ -260,6 +311,11 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
 
     }
 
+    private void initView() {
+        inflateView = View.inflate(mContext, R.layout.fragment_histroy, null);
+        refreshLVHistroy = (RefreshListView) inflateView.findViewById(R.id.refreshLVHistroy);
+    }
+
     //下拉刷新
     @Override
     public void onDownPullRefresh() {
@@ -301,12 +357,6 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
         }.execute(new Void[]{});
     }
 
-    private void initView() {
-        inflateView = View.inflate(mContext, R.layout.fragment_histroy, null);
-        refreshLVHistroy = (RefreshListView) inflateView.findViewById(R.id.refreshLVHistroy);
-        setData(listAll);
-    }
-
     @Override
     public void onAddListSuccess(AddListBean t) {
 
@@ -317,4 +367,9 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
 
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        DbManager.getInstance().closeDatabase();
+    }
 }

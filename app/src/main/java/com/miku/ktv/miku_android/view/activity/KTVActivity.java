@@ -1138,7 +1138,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
     }
 
 
-    private boolean isSomeOneSing() {
+    public boolean isSomeOneSing() {
         return lrcLayout.isSing();
     }
 }

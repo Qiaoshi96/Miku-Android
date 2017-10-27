@@ -75,6 +75,7 @@ public class PopAdapter extends BaseAdapter {
         holder.musicTV.setText(bean.getSong().getName());
         holder.singerTV.setText(bean.getSong().getAuthor());
         holder.nickTV.setText(bean.getCreator().getNick());
+
         String fullnameMain = sp.getString("FullnameMain", "");
         if (bean.getCreator().getFullname().equals(fullnameMain)) {
             holder.deleteTV.setText("删除");

@@ -18,7 +18,7 @@ public class MyHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String createSQL="create table songs_table(_id integer primary key autoincrement, songname text, author text, link text, lrc text, mode integer)";
+        String createSQL="create table songs_table(_id integer primary key autoincrement, songid integer, songname text, author text, link text, lrc text, mode integer)";
         Log.d(TAG, "onCreate:  "+createSQL);
         db.execSQL(createSQL);
     }

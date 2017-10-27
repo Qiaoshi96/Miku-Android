@@ -16,7 +16,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.miku.ktv.miku_android.R;
-import com.miku.ktv.miku_android.model.bean.HistroyBean;
+import com.miku.ktv.miku_android.model.utils.DbManager;
+import com.miku.ktv.miku_android.model.utils.MyHelper;
 import com.miku.ktv.miku_android.view.adapter.MyFragmentPagerAdapter;
 import com.miku.ktv.miku_android.view.fragment.HistroyFragment;
 import com.miku.ktv.miku_android.view.fragment.HotFragment;
@@ -49,18 +50,12 @@ public class SongsActivity extends FragmentActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_songs);
+        DbManager.initializeInstance(new MyHelper(this));
         initView();
         InitTextView();
         InitImageView();
         InitFragment();
         InitViewPager();
-
-        hotFragment.setOnDataTransmissionListener(new HotFragment.OnDataTransmissionListener() {
-            @Override
-            public void dataTransmission(ArrayList<HistroyBean> list) {
-                histroyFragment.setData(list);
-            }
-        });
     }
 
     private void InitImageView() {
@@ -94,6 +89,7 @@ public class SongsActivity extends FragmentActivity implements View.OnClickListe
         songs_vp.setAdapter(new MyFragmentPagerAdapter(fragmentManager, fragmentList));
         //设置默认打开第一页
         songs_vp.setCurrentItem(0);
+        songs_vp.setOffscreenPageLimit(0);
         //将顶部文字恢复默认值
         resetTextViewTextColor();
 

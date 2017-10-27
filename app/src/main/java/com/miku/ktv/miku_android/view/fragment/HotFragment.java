@@ -26,14 +26,14 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.miku.ktv.miku_android.R;
+import com.miku.ktv.miku_android.main.GlobalInstance;
 import com.miku.ktv.miku_android.model.bean.AddBean;
 import com.miku.ktv.miku_android.model.bean.AddListBean;
 import com.miku.ktv.miku_android.model.bean.DeleteBean;
-import com.miku.ktv.miku_android.model.bean.HistroyBean;
 import com.miku.ktv.miku_android.model.bean.SongsListBean;
 import com.miku.ktv.miku_android.model.utils.Constant;
+import com.miku.ktv.miku_android.model.utils.DbManager;
 import com.miku.ktv.miku_android.model.utils.IsUtils;
-import com.miku.ktv.miku_android.model.utils.MyHelper;
 import com.miku.ktv.miku_android.presenter.AddPresenter;
 import com.miku.ktv.miku_android.view.adapter.MySongsListAdapter;
 import com.miku.ktv.miku_android.view.custom.RefreshListView;
@@ -72,7 +72,6 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
     private List<SongsListBean.BodyBean.SongListBean> songsListAll = new ArrayList<>();
     private MySongsListAdapter songsListAdapter;
     private int index = 1;
-    private int pressed = 1;
     private DownloadManger downloadManger;
     private Context mContext;
     private TextView downTV;
@@ -105,10 +104,11 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
     private TextView dialogGiveupTV;
     private TextView dialogNowTV;
     private AlertDialog builder;
-    //true表示已经排麦，false表示缓冲
-    public static boolean ISPAIMAI=false;
-    private MyHelper myHelper;
+
     private SQLiteDatabase db;
+    private boolean isSomeOneSing;
+    private RelativeLayout itemLayout;
+    public boolean ISPAIMAI=false;
 
     @Nullable
     @Override
@@ -116,12 +116,13 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
         mContext = getActivity();
         sp = mContext.getSharedPreferences("config", MODE_PRIVATE);
         edit = sp.edit();
-        myHelper = new MyHelper(getActivity());
-        db = myHelper.getWritableDatabase();
+        db = DbManager.getInstance().openDatabase();
         //视图初始化
         initView();
         return inflateView;
     }
+
+
 
     private void initView() {
         inflateView = View.inflate(mContext, R.layout.fragment_hot, null);
@@ -159,6 +160,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                             //设置适配器
                             songsListAdapter = new MySongsListAdapter(mContext, songsListAll);
                             refreshLV.setAdapter(songsListAdapter);
+
                             //item的子控件
                             songsListAdapter.setOnmItemListener(itemListener);
                         } else {
@@ -173,13 +175,13 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
         @Override
         public void onmItemClick(final int i) {
             for (int x = 0; x < refreshLV.getChildCount(); x++) {
-                RelativeLayout itemLayout = (RelativeLayout) refreshLV.getChildAt(i - refreshLV.getFirstVisiblePosition() + 1);
+                itemLayout = (RelativeLayout) refreshLV.getChildAt(i-refreshLV.getFirstVisiblePosition()+1);
                 downTV = (TextView) itemLayout.findViewById(R.id.HotFragment_item_TextView_DownLoad);
                 paimaiTV = (TextView) itemLayout.findViewById(R.id.HotFragment_item_TextView_Paimai);
             }
-            IsUtils.showShort(mContext, "点击了缓冲，位置是： " + i);
+            IsUtils.showShort(mContext, "点击了缓冲，position为： " + i);
 
-            //下载歌词　　　　　
+            //下载歌词
             new Thread(){
                 @Override
                 public void run() {
@@ -193,53 +195,52 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                         e.printStackTrace();
                     }
                     downloadManger = DUtil.init(mContext)
-                            .url(songsListAll.get(i).getLrc())
-                            .path(Environment.getExternalStorageDirectory() + "/MiDoDownUtil/")
-                            .name(name + songsListAll.get(i).getLrc().substring(songsListAll.get(i).getLrc().lastIndexOf(".")))
-                            .childTaskCount(3)
-                            .build()
-                            .start(new DownloadCallback() {
-                                @Override
-                                public void onStart(long currentSize, long totalSize, float progress) {
-                                    Log.d(TAG, "downLoadLrc---onStart:");
+                    .url(songsListAll.get(i).getLrc())
+                    .path(Environment.getExternalStorageDirectory() + "/MiDoDownUtil/")
+                    .name(name + songsListAll.get(i).getLrc().substring(songsListAll.get(i).getLrc().lastIndexOf(".")))
+                    .childTaskCount(3)
+                    .build()
+                    .start(new DownloadCallback() {
+                        @Override
+                        public void onStart(long currentSize, long totalSize, float progress) {
+                            Log.d(TAG, "downLoadLrc---onStart:");
 
-                                }
+                        }
 
-                                @Override
-                                public void onProgress(long currentSize, long totalSize, final float progress) {
-                                    Log.d(TAG, "downLoadLrc---onProgress:  " + (int) progress + "%");
+                        @Override
+                        public void onProgress(long currentSize, long totalSize, final float progress) {
+                            Log.d(TAG, "downLoadLrc---onProgress:  " + (int) progress + "%");
 
-                                }
+                        }
 
-                                @Override
-                                public void onPause() {
+                        @Override
+                        public void onPause() {
 
-                                }
+                        }
 
-                                @Override
-                                public void onCancel() {
+                        @Override
+                        public void onCancel() {
 
-                                }
+                        }
 
-                                @Override
-                                public void onFinish(File file) {
-                                    //下载MP3
-                                    downLoadMp3(i);
-                                    Log.d(TAG, "downLoadLrc---onFinish: ");
+                        @Override
+                        public void onFinish(File file) {
+                            //下载MP3
+                            downLoadMp3(i);
+                            Log.d(TAG, "downLoadLrc---onFinish: ");
+                        }
 
-                                }
+                        @Override
+                        public void onWait() {
 
-                                @Override
-                                public void onWait() {
+                        }
 
-                                }
+                        @Override
+                        public void onError(String error) {
+                            Log.d(TAG, "downLoadLrc---onError: ");
 
-                                @Override
-                                public void onError(String error) {
-                                    Log.d(TAG, "downLoadLrc---onError: ");
-
-                                }
-                            });
+                        }
+                    });
                     Looper.loop();
                 }
 
@@ -301,14 +302,14 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                                     paimaiTV.setVisibility(View.VISIBLE);
                                     //添加到数据库中
                                     ContentValues cv=new ContentValues();
-                                    cv.put("_id", songsListAll.get(position).getId());
+                                    cv.put("songid", songsListAll.get(position).getId());
                                     cv.put("songname", songsListAll.get(position).getName());
                                     cv.put("author", songsListAll.get(position).getAuthor());
                                     cv.put("link", songsListAll.get(position).getLink());
                                     cv.put("lrc", songsListAll.get(position).getLrc());
                                     cv.put("mode", 1);
                                     db.insert("songs_table", null, cv);
-                                    db.close();
+
                                     Log.i(TAG, "ContentValues: "+cv.toString());
 
                                     paimaiTV.setOnClickListener(new View.OnClickListener() {
@@ -334,6 +335,8 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                                             edit.commit();
                                             Log.d(TAG, "歌名为："+songsListAll.get(position).getName());
 
+                                            isSomeOneSing = GlobalInstance.getInstance().getKTVActivity().isSomeOneSing();
+
                                             HashMap<String,String> map=new HashMap<>();
                                             map.put("token",sp.getString("LoginToken",""));
                                             map.put("sid",songsListAll.get(position).getId()+"");
@@ -346,25 +349,6 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                                 }
                             });
                             Log.d(TAG, "downLoadMp3---onFinish: ");
-
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    ArrayList<HistroyBean> list = new ArrayList<>();
-                                    HistroyBean histroyBean = new HistroyBean();
-                                    histroyBean.setId(songsListAll.get(position).getId());
-                                    histroyBean.setName(songsListAll.get(position).getName());
-                                    histroyBean.setAuthor(songsListAll.get(position).getAuthor());
-                                    histroyBean.setLrc(songsListAll.get(position).getLrc());
-                                    histroyBean.setOriginal(songsListAll.get(position).getOriginal());
-                                    histroyBean.setLink(songsListAll.get(position).getLink());
-                                    list.add(histroyBean);
-
-                                    if (mListener != null) {
-                                        mListener.dataTransmission(list);
-                                    }
-                                }
-                            });
                     }
 
                     @Override
@@ -384,8 +368,13 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
     @Override
     public void onSuccess(AddBean addBean) {
         if (addBean.getStatus()==1){
-            //排麦成功dialog
-            showSuccessDialog();
+            if (isSomeOneSing==true) {
+                IsUtils.showShort(getActivity(),"排麦成功，请耐心等待~");
+            }else {
+                //排麦成功dialog
+                showSuccessDialog();
+            }
+
             Log.d(TAG, "onSuccess: "+addBean.getMsg());
         }else {
             //排麦重复
@@ -395,7 +384,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
             Log.d(TAG, "onSuccess: "+addBean.getMsg());
         }
     }
-
+    //唱完才能点歌
     private void showTwoDialog() {
         final AlertDialog.Builder builderTwo = new AlertDialog.Builder(getActivity());
         builderTwo.setMessage("唱完才能点歌哦~");
@@ -518,15 +507,6 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
 
     }
 
-    //接口回调到historyFragment
-    public interface OnDataTransmissionListener {
-        void dataTransmission(ArrayList<HistroyBean> list);
-    }
-    private OnDataTransmissionListener mListener;
-    public void setOnDataTransmissionListener(OnDataTransmissionListener mListener) {
-        this.mListener = mListener;
-    }
-
     //下拉刷新
     @Override
     public void onDownPullRefresh() {
@@ -607,5 +587,11 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
             }
 
         }.execute(new Void[]{});
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        DbManager.getInstance().closeDatabase();
     }
 }
