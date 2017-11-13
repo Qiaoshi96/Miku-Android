@@ -192,7 +192,7 @@ public class LRCLayout extends RelativeLayout {
         int remainTime = (int) (mMusicDuratioin - System.currentTimeMillis() + mMusicStartTime) / 1000;
         return remainTime > -30;
     }
-
+//  这一块是开启子线程来来设置歌词
     public class WorkRunnable implements Runnable {
         @Override
         public void run() {
@@ -205,7 +205,8 @@ public class LRCLayout extends RelativeLayout {
                         if (mMusicLineIndex < lrc.sentences.size()) {
                             LrcParser.Sentence sentence = lrc.sentences.get(mMusicLineIndex);
                             if (currentTimestamp >= sentence.timestamp + sentence.duration) {
-                                Log.v(TAG, "sentence finished");
+//                                这个设置歌词片段
+                                Log.e(TAG, "sentence finished");
                                 mMusicLineIndex++;
                                 newLine = true;
                                 continue;
@@ -248,6 +249,7 @@ public class LRCLayout extends RelativeLayout {
                             sb = new StringBuilder();
                             for (int i = 0; i < mMusicSliceIndex; i++) {
                                 sb.append(lrc.sentences.get(mMusicLineIndex).slices.get(i).word);
+
                             }
                             String previous = sb.toString();
 
@@ -354,6 +356,7 @@ public class LRCLayout extends RelativeLayout {
                     }
                 }
             }
+// 计算时间的方法
 
             int remainTime = (int) (mMusicDuratioin - System.currentTimeMillis() + mMusicStartTime) / 1000;
             if (remainTime > 0) {

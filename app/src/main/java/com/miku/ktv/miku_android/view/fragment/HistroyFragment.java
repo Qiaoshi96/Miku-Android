@@ -78,6 +78,7 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
         mContext=getActivity();
         sp = getActivity().getSharedPreferences("config", MODE_PRIVATE);
         edit = sp.edit();
+//        打开数据库
         db = DbManager.getInstance().openDatabase();
         addPresenter=new AddPresenter();
         addPresenter.attach(HistroyFragment.this);
@@ -115,6 +116,7 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
     }
 
     private void loadData() {
+//        数据库的查找
         cursor = db.query("songs_table", null, null, null, null, null, null);
         while (cursor.moveToNext()) {
             int songid= cursor.getInt(cursor.getColumnIndex("songid"));
@@ -124,7 +126,7 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
             String lrc= cursor.getString(cursor.getColumnIndex("lrc"));
             int mode= cursor.getInt(cursor.getColumnIndex("mode"));
 
-            Log.w(TAG, "initView: "+songid+"\n"+songName+"\n"+author+"\n"+link+"\n"+lrc+"\n"+mode);
+            Log.e(TAG, "initView: "+songid+"\n"+songName+"\n"+author+"\n"+link+"\n"+lrc+"\n"+mode);
 
             HistorySQLBean sqlBean=new HistorySQLBean();
             sqlBean.setSongid(songid);
@@ -143,7 +145,7 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
         adapter.setOnPaimaiClickListener(new HistroyAdapter.MyPaimaiClickListener() {
             @Override
             public void onPaimaiClick(BaseAdapter adapter, View view, int position) {
-                IsUtils.showShort(getActivity(),"点了排麦");
+                IsUtils.showShort(getActivity(),"排麦功能！");
                 isSomeOneSing = GlobalInstance.getInstance().getKTVActivity().isSomeOneSing();
                 edit.putString("musicname",sqlList.get(position).getSongname());
                 edit.putString("musiclink", sqlList.get(position).getLink());
@@ -152,7 +154,7 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
                 edit.commit();
 
                 String name = System.currentTimeMillis() + "";
-                MessageDigest md5 = null;
+                MessageDigest md5 ;
                 try {
                     md5 = MessageDigest.getInstance("MD5");
                     name = new String(md5.digest(sqlList.get(position).getLrc().getBytes()));
@@ -183,9 +185,13 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
         if (addBean.getStatus()==1){
             if (isSomeOneSing==true) {
                 IsUtils.showShort(getActivity(),"排麦成功，请耐心等待~");
-            }else {
                 //排麦成功dialog
                 showSuccessDialog();
+            }else {
+                //排麦成功dialog
+//                showSuccessDialog();
+                IsUtils.showShort(getActivity(),"排麦失败，请您重新尝试！");
+
             }
             Log.d(TAG, "onSuccess: "+addBean.getMsg());
         }else {

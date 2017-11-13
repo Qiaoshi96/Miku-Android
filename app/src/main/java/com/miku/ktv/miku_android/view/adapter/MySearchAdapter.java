@@ -18,7 +18,7 @@ import java.util.List;
  */
 
 public class MySearchAdapter extends BaseAdapter {
-
+//查找页面
     private Context context;
     private List<SearchBean.BodyBean.SongListBean> list=new ArrayList<>();
     ViewHolder holder= null;

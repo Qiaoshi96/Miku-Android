@@ -221,6 +221,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ktv);
         getWindow().setStatusBarColor(getResources().getColor(R.color.ktvTop));
+//        用sp取值
         sp = getSharedPreferences("config", MODE_PRIVATE);
         editor = sp.edit();
         mRoomName = sp.getString("roomname", "");
@@ -244,6 +245,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         mAccount2BitmapMap = new HashMap<>();
         mVideoEnabledUsers = new ArraySet<>();
         mVideoGridViewList = new ArrayList<>();
+
         Resources res = getResources();
         for (int i = 0; i < 12; i++) {
             int resIdentifier = res.getIdentifier("v" + i, "id", getPackageName());
@@ -255,6 +257,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         lrcLayout.init(mRoomWebSocket);
 
         GlobalInstance.getInstance().setKTVActivity(this);
+//        创建房间
         startAVChat();
     }
 
@@ -334,7 +337,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
             }
         });
     }
-
+// 关闭房间
     private void stopAVChat() {
         AVChatManager.getInstance().stopVideoPreview();
         AVChatManager.getInstance().disableVideo();
@@ -861,8 +864,10 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         line3Layout = (LinearLayout) findViewById(R.id.ll_3);
 
         lrcLayout = (LRCLayout) findViewById(R.id.lrc_layout);
+//        获取歌词的id
         lrcLayout.setSingerView((TextView) findViewById(R.id.tv_singer));
         //左上角，房间创建者的昵称
+//        使用SP进行存取值
         if (CREATEORJOIN==true){
             nick.setText(sp.getString("myselfRoomNick",""));
         }else {
@@ -886,6 +891,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
                 startActivityForResult(new Intent(this, SongsActivity.class), REQUEST_CODE);
                 break;
             //排麦的点击事件
+
             case R.id.ImageView_maixu:
                 showPopupWindow();
                 break;
@@ -934,7 +940,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         }
     }
 
-
+// 非详情功能提示
     private void showDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(KTVActivity.this);
         builder.setMessage("告诉我们你需要的功能，我们会使这款产品更加完善哦~");
@@ -983,9 +989,14 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
                     Log.e(TAG, "onUserSing:-- " + mp3Url + ", " + lyricUrl + ", " + musicInfo + ", " + startTime + ", " + timeOver);
                     if (lrcLayout.check(mp3Url, lyricUrl, musicInfo, startTime)) {
                         return;
+                    }else {
+                        IsUtils.showShort(KTVActivity.this,"歌单有误");
+//                        return;
                     }
+
                     Log.e(TAG, "onUserSing:++ " + mp3Url + ", " + lyricUrl + ", " + musicInfo + ", " + startTime + ", " + timeOver);
                     URL url = new URL(lyricUrl);
+//                    网络连接
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     InputStream istream = connection.getInputStream();
 
@@ -994,7 +1005,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
                     file.createNewFile();
                     OutputStream output = new FileOutputStream(file);
                     byte[] buffer = new byte[1024];
-                    int readLen = 0;
+                    int readLen;
                     while ((readLen = istream.read(buffer)) != -1) {
                         output.write(buffer, 0, readLen);
                     }
@@ -1003,6 +1014,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
                     istream.close();
 
                     android.media.MediaMetadataRetriever mmr = new android.media.MediaMetadataRetriever();
+
                     mmr.setDataSource(mp3Url, new HashMap<String, String>());
                     long duration = Long.parseLong(mmr.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION));
                     lrcLayout.start(false, mp3Url, lyricUrl, lyricLocation, musicInfo, System.currentTimeMillis() - timeOver, duration);

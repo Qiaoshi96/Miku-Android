@@ -51,7 +51,7 @@ public class PopAdapter extends BaseAdapter {
     public long getItemId(int position) {
         return position;
     }
-
+//展示排麦列表的listview
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         if (convertView==null){
@@ -75,6 +75,11 @@ public class PopAdapter extends BaseAdapter {
         holder.musicTV.setText(bean.getSong().getName());
         holder.singerTV.setText(bean.getSong().getAuthor());
         holder.nickTV.setText(bean.getCreator().getNick());
+
+//        乔石： 添加接口中的测试数据
+
+//        bean.getSong().get
+
 
         String fullnameMain = sp.getString("FullnameMain", "");
         if (bean.getCreator().getFullname().equals(fullnameMain)) {

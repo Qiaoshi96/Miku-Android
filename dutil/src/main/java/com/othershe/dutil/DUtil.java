@@ -10,7 +10,7 @@ public class DUtil {
 
     /**
      * 下载
-     *
+     *文件下载的方法
      * @param context
      * @return
      */
