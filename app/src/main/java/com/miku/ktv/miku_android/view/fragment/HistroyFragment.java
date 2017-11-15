@@ -46,6 +46,7 @@ import static android.content.Context.MODE_PRIVATE;
  * Created by 焦帆 on 2017/10/11.
  */
 
+
 public class HistroyFragment extends Fragment implements IAddView<AddBean, DeleteBean, AddListBean>, OnRefreshListener {
     public static final String TAG="HistroyFragment";
 
@@ -116,7 +117,7 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
     }
 
     private void loadData() {
-//        数据库的查找
+//        创建完数据库后对数据库查找
         cursor = db.query("songs_table", null, null, null, null, null, null);
         while (cursor.moveToNext()) {
             int songid= cursor.getInt(cursor.getColumnIndex("songid"));
@@ -125,6 +126,10 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
             String link= cursor.getString(cursor.getColumnIndex("link"));
             String lrc= cursor.getString(cursor.getColumnIndex("lrc"));
             int mode= cursor.getInt(cursor.getColumnIndex("mode"));
+
+//            创建数据库是成功的
+//
+//            IsUtils.showShort(mContext,"点了排麦"+author);
 
             Log.e(TAG, "initView: "+songid+"\n"+songName+"\n"+author+"\n"+link+"\n"+lrc+"\n"+mode);
 
@@ -139,13 +144,16 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
         }
         cursor.close();
 
+
         adapter=new HistroyAdapter(mContext, sqlList);
         refreshLVHistroy.setAdapter(adapter);
         refreshLVHistroy.setOnRefreshListener(this);
         adapter.setOnPaimaiClickListener(new HistroyAdapter.MyPaimaiClickListener() {
             @Override
             public void onPaimaiClick(BaseAdapter adapter, View view, int position) {
+//                从数据可中取出来设置值
                 IsUtils.showShort(getActivity(),"排麦功能！");
+
                 isSomeOneSing = GlobalInstance.getInstance().getKTVActivity().isSomeOneSing();
                 edit.putString("musicname",sqlList.get(position).getSongname());
                 edit.putString("musiclink", sqlList.get(position).getLink());
@@ -161,15 +169,17 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
                 } catch (NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 }
-
+//                点击某个条目之后用Shareference 把值给取出来
                 edit.putString("mp3Location", Environment.getExternalStorageDirectory() + "/MiDoDownUtil/" +  name + ".mp3");
                 edit.putString("lyricLocation", Environment.getExternalStorageDirectory() + "/MiDoDownUtil/" + name + sqlList.get(position).getLrc().substring(sqlList.get(position).getLrc().lastIndexOf(".")));
                 edit.commit();
+
                 Log.d(TAG, "歌名为："+sqlList.get(position).getSongname());
 
                 HashMap<String,String> map=new HashMap<>();
                 map.put("token",sp.getString("LoginToken",""));
                 map.put("sid",sqlList.get(position).getSongid()+"");
+
                 Log.d(TAG, "歌曲ID:  "+sqlList.get(position).getSongid()+"");
                 Log.d(TAG, "登录的token:  "+sp.getString("LoginToken",""));
                 Log.d(TAG, "roomId:  "+sp.getString("JFmRoomName",""));
@@ -263,12 +273,13 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
                         timer.cancel();
                     }
                 });
-
+// 这个页面这样传递过去时可以的
                 dialogNowTV.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        IsUtils.showShort(getActivity(),"立即上麦");
 
+                        IsUtils.showShort(getActivity(),"立即上麦");
+//                        把数据传递过去
                         Intent intent=new Intent();
 
                         intent.putExtra("mp3Url",sp.getString("musiclink",""));
@@ -280,11 +291,12 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
 
                         intent.putExtra("musicName",sp.getString("musicname",""));
                         intent.putExtra("singer",sp.getString("singer",""));
-
+//                        把值带过去
                         getActivity().setResult(2,intent);
 
                         builder.dismiss();
                         timer.cancel();
+
                         getActivity().finish();
                     }
                 });
@@ -295,6 +307,8 @@ public class HistroyFragment extends Fragment implements IAddView<AddBean, Delet
 
         builderBig.create().show();
     }
+
+
 
     @Override
     public void onError(Throwable t) {

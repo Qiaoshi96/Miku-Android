@@ -5,4 +5,5 @@ package com.miku.ktv.miku_android.view.iview;
  */
 
 public interface ISearchView<T> extends IBaseView<T>{
+
 }

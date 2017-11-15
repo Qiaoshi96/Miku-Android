@@ -15,6 +15,7 @@ public class HistorySQLBean {
      * mode : 1
      *
      */
+
     private int _id;//主键
     private int songid;
     private String songname;

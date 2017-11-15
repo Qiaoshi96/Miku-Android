@@ -245,7 +245,7 @@ public class KTVActivity extends AppCompatActivity implements IAddView<Object, D
         mAccount2BitmapMap = new HashMap<>();
         mVideoEnabledUsers = new ArraySet<>();
         mVideoGridViewList = new ArrayList<>();
-
+//  创建房间展示的区域
         Resources res = getResources();
         for (int i = 0; i < 12; i++) {
             int resIdentifier = res.getIdentifier("v" + i, "id", getPackageName());

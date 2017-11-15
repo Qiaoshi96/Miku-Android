@@ -53,6 +53,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CyclicBarrier;
 
 import okhttp3.Call;
 
@@ -60,6 +61,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by 焦帆 on 2017/10/11.
+ * 热门页面
  */
 
 public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBean, AddListBean>, OnRefreshListener {
@@ -78,6 +80,10 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
     private Context mContext;
     private TextView downTV;
     private TextView paimaiTV;
+
+
+
+
 //设置页面的刷新效果
     private Handler handler = new Handler() {
         @Override
@@ -138,7 +144,8 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
 
         refreshLV.setOnRefreshListener(this);
     }
-//OK的网络请求
+//OK的网络请求 设置网络请求
+
     private void getSongsList() {
         OkHttpUtils.get()
                 .url(REQUEST_SONGS_URL)
@@ -175,6 +182,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                     }
                 });
     }
+// 给热门里面具体的某个条目设置缓存
 
     MySongsListAdapter.onmItemListener itemListener = new MySongsListAdapter.onmItemListener() {
         @Override
@@ -186,7 +194,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
             }
             IsUtils.showShort(mContext, "点击了缓冲，position为： " + i);
 
-            //下载歌词
+            //下载歌
             new Thread(){
                 @Override
                 public void run() {
@@ -247,17 +255,21 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
 
                         }
                     });
+
+//                    downLoadMp3(i);
                     Looper.loop();
                 }
 
             }.start();
         }
     };
+
+
+
     //点击缓冲下载歌曲的方法
     private void downLoadMp3(final int position) {
 //        获取系统当前的时间
         String name = System.currentTimeMillis() + "";
-//        MessageDigest md5=null;
         MessageDigest md5;
         try {
             md5 = MessageDigest.getInstance("MD5");
@@ -266,6 +278,8 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
             e.printStackTrace();
         }
 
+
+//下载保存到数据库
         downloadManger = DUtil.init(mContext)
                 .url(songsListAll.get(position).getLink())
                 .path(Environment.getExternalStorageDirectory() + "/MiDoDownUtil/")
@@ -307,10 +321,24 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                             downTV.post(new Runnable() {
                                 @Override
                                 public void run() {
-//                                    下载完成后改变字段
+//                                    下载完成后字段变成排麦下进入还是排麦
+//                                    判断一下在数据库中是否存在这个数据
+
+
+                                    songsList.get(position).getName();
+
+
                                     downTV.setVisibility(View.GONE);
+                                    edit.putString("paimai","排麦");
+                                    edit.commit();
+
+//                                    从sp中取出来
+                                    String string = sp.getString("paimai", "缓冲");
                                     paimaiTV.setVisibility(View.VISIBLE);
+                                    paimaiTV.setText(string);
+
                                     //添加到数据库中的相关字段
+                                    songsListAll.get(position).setStatecode(1);
 
                                     ContentValues cv=new ContentValues();
                                     cv.put("songid", songsListAll.get(position).getId());
@@ -321,41 +349,44 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                                     cv.put("mode", 1);
 //                                    创建数据存数据库歌曲的表
                                     db.insert("songs_table", null, cv);
-                                    db.close();
 
-//                                    遍历一下这个数据库
+                                    Cursor  cursor = db.query("songs_table", null, null, null, null, null, null);
+                                            while (cursor.moveToNext()){
 
-//                                    Cursor cursor = db.rawQuery("select * from songs_table", null);
-//                                    while (cursor.moveToNext()){
-//                                        String name = cursor.getString(cursor.getColumnIndex("songname"));
-//                                        Toast.makeText(getActivity(),name+"GGG",Toast.LENGTH_SHORT).show();
-//                                    }
-//                                    Log.i(TAG, "ContentValues: "+cv.toString());
-//                                        点击排麦按钮从数据库中取出数据
-//                                        下载成功后点击排麦按钮要执行的逻辑
+                                                int songid= cursor.getInt(cursor.getColumnIndex("songid"));
+                                                String songName= cursor.getString(cursor.getColumnIndex("songname"));
+                                                String author= cursor.getString(cursor.getColumnIndex("author"));
+                                                String link= cursor.getString(cursor.getColumnIndex("link"));
+                                                String lrc= cursor.getString(cursor.getColumnIndex("lrc"));
+                                                int mode= cursor.getInt(cursor.getColumnIndex("mode"));
+//                                                遍历集合判断值是否符合要求
+
+
+//                                        Toast.makeText(getActivity(),songName+"GGG",Toast.LENGTH_SHORT).show();
+//                                        Log.e(TAG, "initView: "+songid+"\n"+songName+"\n"+author+"\n"+link+"\n"+lrc+"\n"+mode);
+                                            }
 
                                     paimaiTV.setOnClickListener(new View.OnClickListener() {
                                         @Override
                                         public void onClick(View v) {
-
+//                                            点击排麦向里面传值
 
                                             IsUtils.showShort(mContext,"点了排麦"+ position);
-
                                             edit.putString("musicname", songsListAll.get(position).getName());
                                             edit.putString("musiclink", songsListAll.get(position).getLink());
                                             edit.putString("singer", songsListAll.get(position).getAuthor());
                                             edit.putString("lyric", songsListAll.get(position).getLrc());
                                             String name = System.currentTimeMillis() + "";
-
                                             MessageDigest md5 ;
 
                                             try {
                                                 md5 = MessageDigest.getInstance("MD5");
+//                                                获取歌的名称
                                                 name = new String(md5.digest(songsListAll.get(position).getLrc().getBytes()));
                                             } catch (NoSuchAlgorithmException e) {
                                                 e.printStackTrace();
                                             }
-
+//                                          保存到本地的磁盘中
                                             edit.putString("mp3Location", Environment.getExternalStorageDirectory() + "/MiDoDownUtil/" +  name + ".mp3");
                                             edit.putString("lyricLocation", Environment.getExternalStorageDirectory() + "/MiDoDownUtil/" + name + songsListAll.get(position).getLrc().substring(songsListAll.get(position).getLrc().lastIndexOf(".")));
                                             edit.commit();
@@ -431,14 +462,19 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
         builderTwo.create().show();
     }
 
+
+
+
 //一个十五秒设置是否去上麦的模块
   private void showSuccessDialog() {
         AlertDialog.Builder builderBig = new AlertDialog.Builder(getActivity());
         Log.e(TAG, "showSuccessDialog: ");
         builderBig.setMessage("排麦成功");
 
+//排麦成功后点击确定后继续弹出获取条目的值选择上麦还是放弃
 
         builderBig.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 builder = new AlertDialog.Builder(getActivity()).create();
@@ -448,9 +484,18 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                 dialogTimeTV = (TextView) dialogView.findViewById(R.id.PaimaiDialog_TextView_Time);
                 dialogGiveupTV = (TextView) dialogView.findViewById(R.id.PaimaiDialog_TextView_Giveup);
                 dialogNowTV = (TextView) dialogView.findViewById(R.id.PaimaiDialog_TextView_Now);
+
+
 //                给立即上麦设置设置传过去的值
+//                从数据库里面取出数据
+//                Cursor cursor = db.rawQuery("select * from songs_table", null);
+//                                    while (cursor.moveToNext()){
+//                                        String name = cursor.getString(cursor.getColumnIndex("songname"));
+//                                        Toast.makeText(getActivity(),name+"GGG",Toast.LENGTH_SHORT).show();
+//                                    }
+
                 dialogMusicTV.setText(sp.getString("musicname",""));
-//                时间
+//                设置要显示的时间
                 final CountDownTimer timer=new CountDownTimer(15000, 1000) {
                     @Override
                     public void onTick(long millisUntilFinished) {
@@ -485,14 +530,15 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
                         timer.cancel();
                     }
                 });
-
+//上麦
                 dialogNowTV.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+
                         IsUtils.showShort(getActivity(),"立即上麦");
-
+//                        跳转到showShor Activity
                         Intent intent=new Intent();
-
+//                        传递了
                         intent.putExtra("mp3Url",sp.getString("musiclink",""));
                         intent.putExtra("lyricUrl",sp.getString("lyric",""));
 
@@ -585,7 +631,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
             }
         }.execute(new Void[]{});
     }
-    //上拉加载
+    //加载更多
     @Override
     public void onLoadingMore() {
         new AsyncTask<Void, Void, Void>() {
@@ -632,6 +678,7 @@ public class HotFragment extends Fragment implements IAddView<AddBean, DeleteBea
     @Override
     public void onDestroy() {
         super.onDestroy();
+//        关闭数据库
         DbManager.getInstance().closeDatabase();
     }
 }

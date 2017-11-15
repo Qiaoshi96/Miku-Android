@@ -18,6 +18,9 @@ public class SongsListBean {
   private int status;
   private String msg;
 
+
+
+
   public BodyBean getBody() {
     return body;
   }
@@ -181,7 +184,8 @@ public class SongsListBean {
       private boolean hidden;
       private int recommand;
       private int id;
-//            private int statecode;
+//      定义一个状态值
+      private int statecode;
 
       public boolean isCatch_lrc() {
         return catch_lrc;
@@ -295,13 +299,14 @@ public class SongsListBean {
         this.id = id;
       }
 
-//            public int getStatecode() {
-//                return statecode;
-//            }
-//
-//            public void setStatecode(int statecode) {
-//                this.statecode = statecode;
-//            }
+      public int getStatecode() {
+        return statecode;
+      }
+
+      public void setStatecode(int statecode) {
+        this.statecode = statecode;
+      }
+
     }
   }
 }

@@ -26,31 +26,31 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    testCompile 'junit:junit:4.12'
-    compile 'com.squareup.retrofit2:retrofit:2.3.0'
     // Json依赖
-    compile 'com.squareup.retrofit2:converter-gson:2.3.0'
     // 字符串依赖
-    compile 'com.squareup.retrofit2:converter-scalars:2.3.0'
     // RxJava2支持
+    //okhttp
+    //圆角的图片
+    compile fileTree(include: '*.jar', dir: 'libs')
+    // 基础模块
+    // 音视频模块(版本号必须和基础模块一样)
+    compile project(':dutil')
+
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.squareup.retrofit2:retrofit:2.3.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.3.0'
+    compile 'com.squareup.retrofit2:converter-scalars:2.3.0'
     compile 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
     compile 'io.reactivex.rxjava2:rxjava:2.0.1'
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
-    //okhttp
     compile 'com.squareup.okhttp3:okhttp:3.4.1'
     compile 'com.squareup.okhttp3:logging-interceptor:3.4.1'
-    //圆角的图片
     compile 'de.hdodenhof:circleimageview:2.1.0'
-    compile fileTree(include: '*.jar', dir: 'libs')
-    // 基础模块
     compile 'com.netease.nimlib:basesdk:4.2.0'
-    // 音视频模块(版本号必须和基础模块一样)
     compile 'com.netease.nimlib:avchat:4.2.0'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.github.xxl6097:okhttputils:2.4.1'
-    compile project(':dutil')
-
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.koushikdutta.async:androidasync:2.+'
+    testCompile 'junit:junit:4.12'
 }

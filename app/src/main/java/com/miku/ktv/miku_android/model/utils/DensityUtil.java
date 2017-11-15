@@ -5,6 +5,7 @@ import android.util.TypedValue;
 
 /**
  * Created by 焦帆 on 2017/9/30.
+ * 进制转化的一个工具类
  */
 
 public class DensityUtil {

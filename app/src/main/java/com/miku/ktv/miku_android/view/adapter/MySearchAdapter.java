@@ -55,7 +55,7 @@ public class MySearchAdapter extends BaseAdapter {
             holder.downTV= (TextView) convertView.findViewById(R.id.Search_item_TextView_DownLoad);
             holder.paimaiTV= (TextView) convertView.findViewById(R.id.Search_item_TextView_Paimai);
             convertView.setTag(holder);
-
+//            使用map集合对位置进行复用
             map.put(position,convertView);
         }else {
             convertView=map.get(position);
@@ -64,16 +64,19 @@ public class MySearchAdapter extends BaseAdapter {
         }
 
         SearchBean.BodyBean.SongListBean bean = list.get(position);
+//        设置作者和歌名
         holder.musicTV.setText(bean.getName());
         holder.singerTV.setText(bean.getAuthor());
 
-        //设置按钮点击事件
+        //设置下载的点击实现
         holder.downTV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mOnSearchItemListener.onSearchItemClick(position);
             }
         });
+
+//        设置排麦的点击事件
         holder.paimaiTV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -83,18 +86,21 @@ public class MySearchAdapter extends BaseAdapter {
 
         return convertView;
     }
-
+//定义点击事件的接口
     public interface onSearchItemListener {
         void onSearchItemClick(int i);
     }
+
     private onSearchItemListener mOnSearchItemListener;
     public void setOnSearchItemListener(onSearchItemListener mOnSearchItemListener) {
         this.mOnSearchItemListener = mOnSearchItemListener;
     }
 
     class ViewHolder{
+//        查询页面四个按钮的点击事件设置
         TextView musicTV;
         TextView singerTV;
+//        设置这两个的点击事件
         TextView downTV;
         TextView paimaiTV;
     }

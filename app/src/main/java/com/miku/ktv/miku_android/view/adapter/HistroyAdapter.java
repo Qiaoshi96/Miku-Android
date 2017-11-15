@@ -55,7 +55,6 @@ public class HistroyAdapter extends BaseAdapter {
             holder.paimaiTV= (TextView) convertView.findViewById(R.id.Histroy_item_TextView_Paimai);
             holder.paimaiTV.setOnClickListener(mOnClickListener);
             convertView.setTag(holder);
-
             map.put(position,convertView);
         }else {
             convertView=map.get(position);
@@ -67,14 +66,15 @@ public class HistroyAdapter extends BaseAdapter {
         HistorySQLBean sqlBean = histroySQLList.get(position);
         holder.musicTV.setText(sqlBean.getSongname());
         holder.singerTV.setText(sqlBean.getAuthor());
-
         return convertView;
     }
 
     public  interface  MyPaimaiClickListener {
         void onPaimaiClick(BaseAdapter adapter, View view, int position);
     }
+
     private MyPaimaiClickListener paimaiClickListener;
+
     public void setOnPaimaiClickListener(MyPaimaiClickListener listener) {
         paimaiClickListener = listener;
     }

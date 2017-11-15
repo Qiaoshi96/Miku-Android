@@ -18,6 +18,7 @@ public class MyHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+//        创建数据库的表
         String createSQL="create table songs_table(_id integer primary key autoincrement, songid integer, songname text, author text, link text, lrc text, mode integer)";
         Log.d(TAG, "onCreate:  "+createSQL);
         db.execSQL(createSQL);
